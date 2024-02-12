@@ -6,7 +6,7 @@
 //---
 // Let's set some structs to work with along the gaem
 //---
-typedef struct Entity Entity;
+typedef struct Entity Entity; // 41 bytes per entity
 struct Entity {
     int health;
     float speed;
@@ -17,13 +17,14 @@ struct Entity {
     Vector2 size;
     Vector2 velocity;
 };
-typedef struct Enviroment Enviroment;
-struct Enviroment {
+typedef struct StaticHitbox StaticHitbox; // 24 bytes per static hitbox
+struct StaticHitbox {
     Vector2 position;
     Vector2 size;
     Color color;
+    int blocking;
 };
-typedef struct Dialog Dialog;
+typedef struct Dialog Dialog; // 332 bytes per dialog
 struct Dialog {
     int id;
     char name[64];
@@ -39,6 +40,7 @@ struct Dialog {
 //------------------------------------------------------------------------------------
 void PlayerUpdate(Entity *player);
 void LoadDialog(int record, Dialog *dialog);
+//void LoadMap(int record, );
 void ParseDialog(char *line, Dialog *dialog);
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -46,26 +48,28 @@ void ParseDialog(char *line, Dialog *dialog);
 int main() {
     // Initialization
     //--------------------------------------------------------------------------------------
-    Entity player = {10, 2, 10, false, {0, 0, 0, 255}, {200, 100}, {16, 16}, {0, 0}};
-    Dialog dialog = {0,"Test", "Null", "NULL", "null", 1, "volfe"};
     const int screenWidth = 800;
     const int screenHeight = 450;
-    //Camera2D camera = {};
+
     InitWindow(screenWidth, screenHeight, "Raylib");
 
     SetExitKey(KEY_NULL);       // Disable KEY_ESCAPE to close window, X-button still works
     bool exitWindowRequested = false;   // Flag to request window to exit
     bool exitWindow = false;    // Flag to set window to exit
 
+    Entity player = {10, 2, 10, false, {0, 0, 0, 255}, {200, 100}, {16, 16}, {0, 0}};
+    StaticHitbox env[] = {
+        {{200, 400}, {500, 40}, BLACK, 0},
+        {{200,360}, {300, 40}, LIGHTGRAY, 0}
+    };
+    Dialog dialog = {0,"Test", "Null", "NULL", "null", 1, "volfe"};
+    Camera2D camera = { {screenWidth / 2, screenHeight / 2}, player.position, 0.0f, 1.0f };
     SetTargetFPS(60);           // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
-    LoadDialog(1, &dialog);
     // Main game loop
     while (!exitWindow) {
         // Update
         //---------------------------------------------------------------------------------
-        // Player stuff
-
         // Detect if X-button or KEY_ESCAPE have been pressed to close window
         if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) exitWindowRequested = true;
         if (exitWindowRequested) {
@@ -86,15 +90,18 @@ int main() {
         //----------------------------------------------------------------------------------
         BeginDrawing();
             ClearBackground(RAYWHITE);
-            DrawRectangleV(player.position, player.size, player.color);
-            DrawText(dialog.name, 160, 300, 20, BLACK);
-            DrawText(dialog.line1, 160, 320, 20, BLACK);
-            DrawText(dialog.line2, 160, 340, 20, BLACK);
-            DrawText(dialog.line3, 160, 360, 20, BLACK);
             if (exitWindowRequested) {
                 DrawText("Are you sure you want to exit program? [Y/N]", 160, 200, 20, LIGHTGRAY);
             }
-            else DrawText("Try to close the window to get confirmation message!", 120, 200, 20, LIGHTGRAY);
+            else {
+                DrawRectangleV(player.position, player.size, player.color);
+                if (dialog.id) {
+                    DrawText(dialog.name, 160, 300, 20, BLACK);
+                    DrawText(dialog.line1, 160, 320, 20, BLACK);
+                    DrawText(dialog.line2, 160, 340, 20, BLACK);
+                    DrawText(dialog.line3, 160, 360, 20, BLACK);
+                }
+            }
         EndDrawing();
         //----------------------------------------------------------------------------------
     }
@@ -106,8 +113,8 @@ int main() {
 }
 
 void PlayerUpdate(Entity *player) {
-    player->velocity.y += .1f;
-    player->position.y += player->velocity.y;
+    //player->velocity.y += .1f;
+    //player->position.y += player->velocity.y;
     if (IsKeyDown(KEY_W)) player->position.y -= 1;
     if (IsKeyDown(KEY_A)) player->position.x -= 1;
     if (IsKeyDown(KEY_S)) player->position.y += 1;
@@ -125,7 +132,6 @@ void LoadDialog(int record, Dialog *dialog) {
     }
     int i = 1;
     while (fgets(line, sizeof(line), file)) {
-        printf("%s\n", line);
         if (i == record) {
             ParseDialog(line, dialog);
             break;
@@ -139,24 +145,24 @@ void ParseDialog(char *line, Dialog *dialog) {
     char *token;
     char *saveptr;
     //Parse name
-    token = strtok_r(line, "    ", &saveptr);
+    token = strtok_r(line, "	", &saveptr);
     strcpy(dialog->name, token);
     //Parse line1
-    token = strtok_r(NULL, "    ", &saveptr);
+    token = strtok_r(NULL, "	", &saveptr);
     strcpy(dialog->line1, token);
     //Parse line2
-    token = strtok_r(NULL, "    ", &saveptr);
+    token = strtok_r(NULL, "	", &saveptr);
     strcpy(dialog->line2, token);
     //Parse line3
-    token = strtok_r(NULL, "    ", &saveptr);
+    token = strtok_r(NULL, "	", &saveptr);
     strcpy(dialog->line3, token);
     // Parse int next
-    token = strtok_r(NULL, "    ", &saveptr);
+    token = strtok_r(NULL, "	", &saveptr);
     dialog->next = atof(token);
     // Parse file to open in the next dialog
-    token = strtok_r(NULL, "    ", &saveptr);
+    token = strtok_r(NULL, "	", &saveptr);
     strcpy(dialog->file, token);
     // Parse the emotion to be displayed on the portrait
-    token = strtok_r(NULL, "    ", &saveptr);
+    token = strtok_r(NULL, "	", &saveptr);
     dialog->emotion = atof(token);
 }

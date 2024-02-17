@@ -45,7 +45,7 @@ int main() {
     bool exitWindowRequested = false;   // Flag to request window to exit
     bool exitWindow = false;    // Flag to set window to exit
 
-    Entity player = {10, {0, 0, 0, 255}, {200, 100}, {16, 16};
+    Entity player = {10, {0, 0, 0, 255}, {200, 100}, {16, 16}};
     Dialog dialog = {0,"Test", "Null", "NULL", "null", 1, "volfe"};
     Camera2D camera = { {screenWidth / 2, screenHeight / 2}, player.position, 0.0f, 1.0f };
     SetTargetFPS(60);           // Set our game to run at 60 frames-per-second
@@ -97,8 +97,6 @@ int main() {
 }
 
 void PlayerUpdate(Entity *player) {
-    //player->velocity.y += .1f;
-    //player->position.y += player->velocity.y;
     if (IsKeyDown(KEY_W)) player->position.y -= 1;
     if (IsKeyDown(KEY_A)) player->position.x -= 1;
     if (IsKeyDown(KEY_S)) player->position.y += 1;

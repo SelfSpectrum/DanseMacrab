@@ -9,9 +9,20 @@
 typedef struct Entity Entity; // 41 bytes per entity
 struct Entity {
     int health;
+    float speed;
+    float jumpForce;
+    bool canJump;
     Color color;
     Vector2 position;
     Vector2 size;
+    Vector2 velocity;
+};
+typedef struct StaticHitbox StaticHitbox; // 24 bytes per static hitbox
+struct StaticHitbox {
+    Vector2 position;
+    Vector2 size;
+    Color color;
+    int blocking;
 };
 typedef struct Dialog Dialog; // 332 bytes per dialog
 struct Dialog {
@@ -29,6 +40,7 @@ struct Dialog {
 //------------------------------------------------------------------------------------
 void PlayerUpdate(Entity *player);
 void LoadDialog(int record, Dialog *dialog);
+//void LoadMap(int record, );
 void ParseDialog(char *line, Dialog *dialog);
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -36,16 +48,20 @@ void ParseDialog(char *line, Dialog *dialog);
 int main() {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 240;
-    const int screenHeight = 160;
+    const int screenWidth = 800;
+    const int screenHeight = 450;
 
-    InitWindow(screenWidth, screenHeight, "Danse Macrab");
+    InitWindow(screenWidth, screenHeight, "Raylib");
 
     SetExitKey(KEY_NULL);       // Disable KEY_ESCAPE to close window, X-button still works
     bool exitWindowRequested = false;   // Flag to request window to exit
     bool exitWindow = false;    // Flag to set window to exit
 
-    Entity player = {10, {0, 0, 0, 255}, {200, 100}, {16, 16};
+    Entity player = {10, 2, 10, false, {0, 0, 0, 255}, {200, 100}, {16, 16}, {0, 0}};
+    StaticHitbox env[] = {
+        {{200, 400}, {500, 40}, BLACK, 0},
+        {{200,360}, {300, 40}, LIGHTGRAY, 0}
+    };
     Dialog dialog = {0,"Test", "Null", "NULL", "null", 1, "volfe"};
     Camera2D camera = { {screenWidth / 2, screenHeight / 2}, player.position, 0.0f, 1.0f };
     SetTargetFPS(60);           // Set our game to run at 60 frames-per-second

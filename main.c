@@ -27,7 +27,6 @@ struct Dialog {
 //------------------------------------------------------------------------------------
 // Function declarations
 //------------------------------------------------------------------------------------
-void PlayerUpdate(Entity *player);
 void LoadDialog(int record, Dialog *dialog);
 void ParseDialog(char *line, Dialog *dialog);
 //------------------------------------------------------------------------------------
@@ -36,8 +35,8 @@ void ParseDialog(char *line, Dialog *dialog);
 int main() {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 240;
-    const int screenHeight = 160;
+    const int screenWidth = 320;
+    const int screenHeight = 180;
 
     InitWindow(screenWidth, screenHeight, "Danse Macrab");
 
@@ -45,9 +44,13 @@ int main() {
     bool exitWindowRequested = false;   // Flag to request window to exit
     bool exitWindow = false;    // Flag to set window to exit
 
-    Entity player = {10, {0, 0, 0, 255}, {200, 100}, {16, 16}};
     Dialog dialog = {0,"Test", "Null", "NULL", "null", 1, "volfe"};
-    Camera2D camera = { {screenWidth / 2, screenHeight / 2}, player.position, 0.0f, 1.0f };
+    Camera2D camera = { {0, 0}, {0, 0}, 0.0f, 1.0f };
+
+    Texture2D texture = LoadTexture("./resources/gfx/bigSprites00.png");
+    Rectangle textureOrigin = {0, 0, 320, 180};
+    Rectangle textureDest = {0, 0, 320, 180};
+    Vector2 texturePos = {0, 0};
     SetTargetFPS(60);           // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
     // Main game loop
@@ -63,7 +66,6 @@ int main() {
             else if (IsKeyPressed(KEY_N) || IsKeyPressedRepeat(KEY_ESCAPE)) exitWindowRequested = false;
         }
         else {
-            PlayerUpdate(&player);
             if (IsKeyPressed(KEY_ENTER)) {
                 LoadDialog(dialog.next, &dialog);
                 //printf("Id: %d\tNext: %d\tFile: %s\n%s\n%s\n%s\n%s\n", dialog.id, dialog.next, dialog.file, dialog.name, dialog.line1, dialog.line2, dialog.line3);
@@ -73,17 +75,17 @@ int main() {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-            ClearBackground(RAYWHITE);
+            ClearBackground(BLACK);
             if (exitWindowRequested) {
-                DrawText("Are you sure you want to exit program? [Y/N]", 160, 200, 20, LIGHTGRAY);
+                DrawText("Are you sure you want to exit program? [Y/N]", 160, 200, 20, WHITE);
             }
             else {
-                DrawRectangleV(player.position, player.size, player.color);
+                DrawTexturePro(texture, textureOrigin, textureDest, texturePos, 0.0f, WHITE);
                 if (dialog.id) {
-                    DrawText(dialog.name, 160, 300, 20, BLACK);
-                    DrawText(dialog.line1, 160, 320, 20, BLACK);
-                    DrawText(dialog.line2, 160, 340, 20, BLACK);
-                    DrawText(dialog.line3, 160, 360, 20, BLACK);
+                    DrawText(dialog.name, 160, 300, 20, WHITE);
+                    DrawText(dialog.line1, 160, 320, 20, WHITE);
+                    DrawText(dialog.line2, 160, 340, 20, WHITE);
+                    DrawText(dialog.line3, 160, 360, 20, WHITE);
                 }
             }
         EndDrawing();
@@ -91,17 +93,12 @@ int main() {
     }
     // De-Initialization
     //--------------------------------------------------------------------------------------
+    UnloadTexture(texture);
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
     return 0;
 }
 
-void PlayerUpdate(Entity *player) {
-    if (IsKeyDown(KEY_W)) player->position.y -= 1;
-    if (IsKeyDown(KEY_A)) player->position.x -= 1;
-    if (IsKeyDown(KEY_S)) player->position.y += 1;
-    if (IsKeyDown(KEY_D)) player->position.x += 1;
-}
 void LoadDialog(int record, Dialog *dialog) {
     char line[512];
     char direction[128];

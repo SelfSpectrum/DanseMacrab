@@ -35,8 +35,13 @@ void ParseDialog(char *line, Dialog *dialog);
 int main() {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 320;
-    const int screenHeight = 180;
+    const int virtualScreenWidth = 320;
+    const int virtualScreenHeight = 180;
+
+    const int screenWidth = 960;
+    const int screenHeight = 540;
+
+    const float virtualRatio = (float)screenWidth/(float)virtualScreenWidth;
 
     InitWindow(screenWidth, screenHeight, "Danse Macrab");
 
@@ -45,7 +50,14 @@ int main() {
     bool exitWindow = false;    // Flag to set window to exit
 
     Dialog dialog = {0,"Test", "Null", "NULL", "null", 1, "volfe"};
-    Camera2D camera = { {0, 0}, {0, 0}, 0.0f, 1.0f };
+    Camera2D worldSpaceCamera = { {0, 0}, {0, 0}, 0.0f, 1.0f };
+    Camera2D screenSpaceCamera = { {0, 0}, {0, 0}, 0.0f, 1.0f};
+
+    RenderTexture2D target = LoadRenderTexture(virtualScreenWidth, virtualScreenHeight);
+    Rectangle sourceRec = { 0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height };
+    Rectangle destRec = { -virtualRatio, -virtualRatio, screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
+    Vector2 origin = { 0.0f, 0.0f };
+
 
     Texture2D texture = LoadTexture("./resources/gfx/bigSprites00.png");
     Rectangle textureOrigin = {0, 0, 320, 180};
@@ -76,24 +88,35 @@ int main() {
             }
         }
         //----------------------------------------------------------------------------------
+        //Texture
+        //----------------------------------------------------------------------------------
+        BeginTextureMode(target);
+            ClearBackground(BLACK);
+            BeginMode2D(worldSpaceCamera);
+                if (exitWindowRequested) {
+                    DrawText("Are you sure you want to exit program? [Y/N]", 40, 90, 8, WHITE);
+                }
+                else {
+                    BeginShaderMode(shader);
+                        DrawTexturePro(texture, textureOrigin, textureDest, texturePos, 0.0f, WHITE);
+                    EndShaderMode();
+                    if (dialog.id) {
+                        DrawText(dialog.name, 64, 120, 8, WHITE);
+                        DrawText(dialog.line1, 64, 140, 8, WHITE);
+                        DrawText(dialog.line2, 64, 150, 8, WHITE);
+                        DrawText(dialog.line3, 64, 160, 8, WHITE);
+                    }
+                }
+            EndMode2D();
+        EndTextureMode();
+        //----------------------------------------------------------------------------------
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-            ClearBackground(BLACK);
-            if (exitWindowRequested) {
-                DrawText("Are you sure you want to exit program? [Y/N]", 40, 90, 8, WHITE);
-            }
-            else {
-                BeginShaderMode(shader);
-                    DrawTexturePro(texture, textureOrigin, textureDest, texturePos, 0.0f, WHITE);
-                EndShaderMode();
-                if (dialog.id) {
-                    DrawText(dialog.name, 64, 120, 8, WHITE);
-                    DrawText(dialog.line1, 64, 140, 8, WHITE);
-                    DrawText(dialog.line2, 64, 150, 8, WHITE);
-                    DrawText(dialog.line3, 64, 160, 8, WHITE);
-                }
-            }
+            ClearBackground(RAYWHITE);
+            BeginMode2D(screenSpaceCamera);
+                DrawTexturePro(target.texture, sourceRec, destRec, origin, 0.0f, WHITE);
+            EndMode2D();
             DrawFPS(10, 10);
         EndDrawing();
         //----------------------------------------------------------------------------------
@@ -101,6 +124,7 @@ int main() {
     // De-Initialization
     //--------------------------------------------------------------------------------------
     UnloadShader(shader);
+    UnloadRenderTexture(target);
     UnloadTexture(texture);
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------

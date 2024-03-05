@@ -8,13 +8,18 @@ uniform sampler2D textureSampler;
 void main() {
     float alpha = texture(textureSampler, fragTexCoord).a;
     vec4 baseColor = texture(textureSampler, fragTexCoord);
-    float alphaLeft = texture(textureSampler, fragTexCoord + vec2(-1.0, 0.0)).a;
-    float alphaRight = texture(textureSampler, fragTexCoord + vec2(1.0, 0.0)).a;
-    float alphaUp = texture(textureSampler, fragTexCoord + vec2(0.0, 1.0)).a;
-    float alphaDown = texture(textureSampler, fragTexCoord + vec2(0.0, -1.0)).a;
 
-    //finalColor = (alphaLeft + alphaRight + alphaUp + alphaDown > 0.0 && alpha == 0.0) ? vec4(1.0) : baseColor;
-    finalColor = (alphaLeft + alphaUp + alphaDown + alphaRight < 4.0) ? vec4(1.0) : baseColor;
+    // Get the size of the texture
+    ivec2 texSize = textureSize(textureSampler, 0); // 0 is the mipmap level, assuming no mipmaps
+
+    // Sample surrounding texels
+    float alphaSide = ((fragTexCoord.x > 0.0) ? texture(textureSampler, fragTexCoord + vec2(-1.0 / texSize.x, 0.0)).a : 0.0)
+                    + ((fragTexCoord.x < 1.0) ? texture(textureSampler, fragTexCoord + vec2(1.0 / texSize.x, 0.0)).a : 0.0)
+                    + ((fragTexCoord.y < 1.0) ? texture(textureSampler, fragTexCoord + vec2(0.0, 1.0 / texSize.y)).a : 0.0)
+                    + ((fragTexCoord.y > 0.0) ? texture(textureSampler, fragTexCoord + vec2(0.0, -1.0 / texSize.y)).a : 0.0);
+
+    // If the center pixel is transparent and there's at least one opaque neighboring pixel, set it to white
+    finalColor = (alpha == 0.0 && alphaSide > 0.0) ? vec4(1.0) : baseColor;
 }
 
 /*

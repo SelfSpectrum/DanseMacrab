@@ -51,6 +51,10 @@ int main() {
     Rectangle textureOrigin = {0, 0, 320, 180};
     Rectangle textureDest = {0, 0, 320, 180};
     Vector2 texturePos = {0, 0};
+
+    Shader shader = LoadShader(0, "contour.fs");
+    SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture);
+
     SetTargetFPS(60);           // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
     // Main game loop
@@ -77,22 +81,26 @@ int main() {
         BeginDrawing();
             ClearBackground(BLACK);
             if (exitWindowRequested) {
-                DrawText("Are you sure you want to exit program? [Y/N]", 160, 200, 20, WHITE);
+                DrawText("Are you sure you want to exit program? [Y/N]", 40, 90, 8, WHITE);
             }
             else {
-                DrawTexturePro(texture, textureOrigin, textureDest, texturePos, 0.0f, WHITE);
+                BeginShaderMode(shader);
+                    DrawTexturePro(texture, textureOrigin, textureDest, texturePos, 0.0f, WHITE);
+                EndShaderMode();
                 if (dialog.id) {
-                    DrawText(dialog.name, 160, 300, 20, WHITE);
-                    DrawText(dialog.line1, 160, 320, 20, WHITE);
-                    DrawText(dialog.line2, 160, 340, 20, WHITE);
-                    DrawText(dialog.line3, 160, 360, 20, WHITE);
+                    DrawText(dialog.name, 64, 120, 8, WHITE);
+                    DrawText(dialog.line1, 64, 140, 8, WHITE);
+                    DrawText(dialog.line2, 64, 150, 8, WHITE);
+                    DrawText(dialog.line3, 64, 160, 8, WHITE);
                 }
             }
+            DrawFPS(10, 10);
         EndDrawing();
         //----------------------------------------------------------------------------------
     }
     // De-Initialization
     //--------------------------------------------------------------------------------------
+    UnloadShader(shader);
     UnloadTexture(texture);
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------

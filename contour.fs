@@ -4,20 +4,20 @@ in vec2 fragTexCoord;
 out vec4 finalColor;
 
 uniform sampler2D textureSampler;
-/*
+
 void main() {
     float alpha = texture(textureSampler, fragTexCoord).a;
+    vec4 baseColor = texture(textureSampler, fragTexCoord);
     float alphaLeft = texture(textureSampler, fragTexCoord + vec2(-1.0, 0.0)).a;
     float alphaRight = texture(textureSampler, fragTexCoord + vec2(1.0, 0.0)).a;
     float alphaUp = texture(textureSampler, fragTexCoord + vec2(0.0, 1.0)).a;
     float alphaDown = texture(textureSampler, fragTexCoord + vec2(0.0, -1.0)).a;
-    
-    float outline = (alphaLeft + alphaRight + alphaUp + alphaDown < 4.0 * alpha) ? 1.0 : 0.0;
-    
-    finalColor = vec4(vec3(outline), alpha);
-}
-*/
 
+    //finalColor = (alphaLeft + alphaRight + alphaUp + alphaDown > 0.0 && alpha == 0.0) ? vec4(1.0) : baseColor;
+    finalColor = (alphaLeft + alphaUp + alphaDown + alphaRight < 4.0) ? vec4(1.0) : baseColor;
+}
+
+/*
 uniform vec2 textureSize;
 
 void main()
@@ -52,3 +52,4 @@ void main()
     // If no non-transparent texels are found surrounding the center texel, keep the original color
     finalColor = centerColor;
 }
+*/

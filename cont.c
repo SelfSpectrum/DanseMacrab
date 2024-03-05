@@ -1,21 +1,22 @@
 #include "raylib.h"
+#include <stdio.h>
 
 int main(void)
 {
     // Initialization
     const int screenWidth = 800;
-    const int screenHeight = 450;
+    const int screenHeight = 600;
 
     InitWindow(screenWidth, screenHeight, "Procedural Pixel Contour with Shaders");
 
     // Load texture
     Texture2D texture = LoadTexture("./resources/gfx/cards00.png");
-    Vector2 textureSize = {texture.width, texture.height};
+    //float textureSize[2] = {texture.width, texture.height};
     // Load shader
     Shader shader = LoadShader(0, "contour.fs");
 
     SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture);
-    SetShaderValueV(shader, GetShaderLocationAttrib(shader, "textureSize"), &textureSize, 1, 2);
+    //SetShaderValue(shader, GetShaderLocationAttrib(shader, "textureSize"), textureSize, SHADER_UNIFORM_VEC2);
 
     SetTargetFPS(60);
 
@@ -23,12 +24,13 @@ int main(void)
     {
         // Draw
         BeginDrawing();
-        ClearBackground(BLACK);
+            ClearBackground(BLACK);
 
-        BeginShaderMode(shader);
-        DrawTexture(texture, 0, 0, WHITE);
-        EndShaderMode();
+            BeginShaderMode(shader);
+                DrawTexture(texture, 0, 0, WHITE);
+            EndShaderMode();
 
+            DrawFPS(10, 10);
         EndDrawing();
     }
 

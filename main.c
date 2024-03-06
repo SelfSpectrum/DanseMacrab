@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include <raylib.h>
@@ -29,6 +30,7 @@ struct Dialog {
 //------------------------------------------------------------------------------------
 void LoadDialog(int record, Dialog *dialog);
 void ParseDialog(char *line, Dialog *dialog);
+int Sign(int x);
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -63,6 +65,8 @@ int main() {
     Rectangle textureOrigin = {0, 0, 320, 180};
     Rectangle textureDest = {0, 0, 320, 180};
     Vector2 texturePos = {0, 0};
+    
+    float animStep = 1.0f;
 
     Shader shader = LoadShader(0, "contour.fs");
     SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture);
@@ -82,6 +86,8 @@ int main() {
             else if (IsKeyPressed(KEY_N) || IsKeyPressedRepeat(KEY_ESCAPE)) exitWindowRequested = false;
         }
         else {
+            textureDest.height += animStep;
+            textureDest.y -= animStep;
             if (IsKeyPressed(KEY_ENTER)) {
                 LoadDialog(dialog.next, &dialog);
                 //printf("Id: %d\tNext: %d\tFile: %s\n%s\n%s\n%s\n%s\n", dialog.id, dialog.next, dialog.file, dialog.name, dialog.line1, dialog.line2, dialog.line3);
@@ -176,4 +182,7 @@ void ParseDialog(char *line, Dialog *dialog) {
     // Parse the emotion to be displayed on the portrait
     token = strtok_r(NULL, "	", &saveptr);
     dialog->emotion = atof(token);
+}
+int Sign(int x) {
+    return (x > 0) - (x < 0);
 }

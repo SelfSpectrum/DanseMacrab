@@ -14,6 +14,18 @@ struct Entity {
     Vector2 position;
     Vector2 size;
 };
+typedef struct Animable Animable;
+struct Animable {
+    unsigned int frame;
+    unsigned int event;
+    FILE *data;
+    Texture2D texture;
+    Rectangle origin;
+    Rectangle dest;
+    Vector2 position;
+    bool lerp;
+    bool repeat;
+};
 typedef struct Dialog Dialog; // 332 bytes per dialog
 struct Dialog {
     int id;
@@ -30,7 +42,8 @@ struct Dialog {
 //------------------------------------------------------------------------------------
 void LoadDialog(int record, Dialog *dialog);
 void ParseDialog(char *line, Dialog *dialog);
-int Sign(int x);
+Animable LoadAnimable(char *file);
+void UnloadAnimable(Animable *anim);
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -59,15 +72,7 @@ int main() {
     Rectangle sourceRec = { 0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height };
     Rectangle destRec = { -virtualRatio, -virtualRatio, screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
     Vector2 origin = { 0.0f, 0.0f };
-
-
-    Texture2D texture = LoadTexture("./resources/gfx/bigSprites00.png");
-    Rectangle textureOrigin = {0, 0, 320, 180};
-    Rectangle textureDest = {0, 0, 320, 180};
-    Vector2 texturePos = {0, 0};
     
-    float animStep = 1.0f;
-
     Shader shader = LoadShader(0, "contour.fs");
     SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture);
 
@@ -86,8 +91,6 @@ int main() {
             else if (IsKeyPressed(KEY_N) || IsKeyPressedRepeat(KEY_ESCAPE)) exitWindowRequested = false;
         }
         else {
-            textureDest.height += animStep;
-            textureDest.y -= animStep;
             if (IsKeyPressed(KEY_ENTER)) {
                 LoadDialog(dialog.next, &dialog);
                 //printf("Id: %d\tNext: %d\tFile: %s\n%s\n%s\n%s\n%s\n", dialog.id, dialog.next, dialog.file, dialog.name, dialog.line1, dialog.line2, dialog.line3);
@@ -183,6 +186,20 @@ void ParseDialog(char *line, Dialog *dialog) {
     token = strtok_r(NULL, "	", &saveptr);
     dialog->emotion = atof(token);
 }
-int Sign(int x) {
-    return (x > 0) - (x < 0);
+
+Animable LoadAnimable(char *file) {
+    Animable anim;
+    char *line[512];
+    FILE *file = fopen(file, "r");
+    if (file != NULL) {
+        printf("\nError opening the animation %s!\n", file);
+        return NULL;
+    }
+    fgets(line, sizeof(line), file);
+
+    anim.texture = LoadTexture("./resources/gfx/bigSprites00.png");
+    anim.origin = {0, 0, 320, 180};
+    anim.dest = {0, 0, 320, 180};
+    anim.position = {0, 0};
+    return anim;
 }

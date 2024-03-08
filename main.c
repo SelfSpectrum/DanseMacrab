@@ -17,11 +17,12 @@ struct Entity {
 typedef struct Animable Animable;
 struct Animable {
     unsigned int frame;
-    unsigned int event;
     FILE *data;
     Texture2D texture;
-    Rectangle origin;
-    Rectangle dest;
+    Vector2 originPos;
+    Vector2 originSize;
+    Vector2 destPos;
+    Vector2 destSize;
     Vector2 position;
     bool lerp;
     bool repeat;
@@ -41,8 +42,9 @@ struct Dialog {
 // Function declarations
 //------------------------------------------------------------------------------------
 void LoadDialog(int record, Dialog *dialog);
-void ParseDialog(char *line, Dialog *dialog);
-Animable LoadAnimable(char *file);
+void ParseDialog(const char *line, Dialog *dialog);
+Animable LoadAnimable(const char *file, bool repeat);
+void UpdateAnimable(Animable *anim);
 void UnloadAnimable(Animable *anim);
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -66,7 +68,7 @@ int main() {
 
     Dialog dialog = {0,"Test", "Null", "NULL", "null", 1, "volfe"};
     Camera2D worldSpaceCamera = { {0, 0}, {0, 0}, 0.0f, 1.0f };
-    Camera2D screenSpaceCamera = { {0, 0}, {0, 0}, 0.0f, 1.0f};
+    Camera2D screenSpaceCamera = { {0, 0}, {0, 0}, 0.0f, 1.0f };
 
     RenderTexture2D target = LoadRenderTexture(virtualScreenWidth, virtualScreenHeight);
     Rectangle sourceRec = { 0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height };
@@ -187,7 +189,7 @@ void ParseDialog(char *line, Dialog *dialog) {
     dialog->emotion = atof(token);
 }
 
-Animable LoadAnimable(char *file) {
+Animable LoadAnimable(char *file, bool repeat) {
     Animable anim;
     char *line[512];
     FILE *file = fopen(file, "r");
@@ -202,4 +204,6 @@ Animable LoadAnimable(char *file) {
     anim.dest = {0, 0, 320, 180};
     anim.position = {0, 0};
     return anim;
+}
+void UpdateAnimable(Animable *anim) {
 }

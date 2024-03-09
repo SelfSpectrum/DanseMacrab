@@ -16,16 +16,16 @@ struct Entity {
 };
 typedef struct Animable Animable;
 struct Animable {
-    unsigned int frame;
-    FILE *data;
-    Texture2D texture;
-    Vector2 originPos;
-    Vector2 originSize;
-    Vector2 destPos;
-    Vector2 destSize;
-    Vector2 position;
-    bool lerp;
-    bool repeat;
+    unsigned int frame;       // Current frame of animation
+    FILE *data;               // File that contains the animation data
+    Texture2D texture;        // Texture from where the sample will come
+    Quaternion origin;        // Rectangle of origin to get the texture sample
+    Quaternion dest;          // Rectangle of destination to place the texture sample
+    Vector2 position;         // Position of the destination???
+    float rotation;           // Rotation of the texture sample
+    Quaternion color;         // Tint of the texture sample
+    bool lerp;                // Whether the rectangles, colors and position should lerp linearly
+    bool repeat;              // Upon ending, rewind animation?
 };
 typedef struct Dialog Dialog; // 332 bytes per dialog
 struct Dialog {
@@ -42,8 +42,8 @@ struct Dialog {
 // Function declarations
 //------------------------------------------------------------------------------------
 void LoadDialog(int record, Dialog *dialog);
-void ParseDialog(const char *line, Dialog *dialog);
-Animable LoadAnimable(const char *file, bool repeat);
+void ParseDialog(char *line, Dialog *dialog);
+Animable *LoadAnimable(const char *animSheet, bool repeat);
 void UpdateAnimable(Animable *anim);
 void UnloadAnimable(Animable *anim);
 //------------------------------------------------------------------------------------
@@ -74,9 +74,9 @@ int main() {
     Rectangle sourceRec = { 0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height };
     Rectangle destRec = { -virtualRatio, -virtualRatio, screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
     Vector2 origin = { 0.0f, 0.0f };
-    
-    Shader shader = LoadShader(0, "contour.fs");
-    SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture);
+
+    //Shader shader = LoadShader(0, "contour.fs");
+    //SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture);
 
     SetTargetFPS(60);           // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -108,9 +108,9 @@ int main() {
                     DrawText("Are you sure you want to exit program? [Y/N]", 40, 90, 8, WHITE);
                 }
                 else {
-                    BeginShaderMode(shader);
-                        DrawTexturePro(texture, textureOrigin, textureDest, texturePos, 0.0f, WHITE);
-                    EndShaderMode();
+                    //BeginShaderMode(shader);
+                        //DrawTexturePro(texture, textureOrigin, textureDest, texturePos, 0.0f, WHITE);
+                    //EndShaderMode();
                     if (dialog.id) {
                         DrawText(dialog.name, 64, 120, 8, WHITE);
                         DrawText(dialog.line1, 64, 140, 8, WHITE);
@@ -134,16 +134,16 @@ int main() {
     }
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    UnloadShader(shader);
+    //UnloadShader(shader);
     UnloadRenderTexture(target);
-    UnloadTexture(texture);
+    //UnloadTexture(texture);
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
     return 0;
 }
 
 void LoadDialog(int record, Dialog *dialog) {
-    char line[512];
+    char line[256];
     char direction[128];
     sprintf(direction, "./resources/dialog/%s.tsv", dialog->file);
     //printf("%s\n", direction);
@@ -189,21 +189,76 @@ void ParseDialog(char *line, Dialog *dialog) {
     dialog->emotion = atof(token);
 }
 
-Animable LoadAnimable(char *file, bool repeat) {
-    Animable anim;
-    char *line[512];
-    FILE *file = fopen(file, "r");
-    if (file != NULL) {
-        printf("\nError opening the animation %s!\n", file);
-        return NULL;
+Animable *LoadAnimable(const char *animSheet, bool repeat) {
+    Animable *anim = (Animable*) malloc(sizeof(Animable));          // Dynamic allocation since many animables might be created and destroyed in quick successions, don't forget to free later
+    if (anim != NULL) {
+        char line[256]; // Line from the file that contains all the struct data
+        char *token; // 
+        char *saveptr; // 
+        FILE *file = fopen(animSheet, "r");
+        if (file != NULL) {
+            printf("\nError opening the animation %s!\n", animSheet);
+            return NULL;
+        }
+        if (fgets(line, sizeof(line), file)) {
+            token = strtok_r(line, "	", &saveptr); // A line of animation folllow the following pattern: u4 str f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 u1 u1 u1 u1
+            anim->frame = (unsigned int) atoi(token);
+            token = strtok_r(NULL, "	", &saveptr);
+            anim->texture = LoadTexture(token);
+            token = strtok_r(NULL, "	", &saveptr);
+            anim->origin.w = atof(token);
+            token = strtok_r(NULL, "	", &saveptr);
+            anim->origin.x = atof(token);
+            token = strtok_r(NULL, "	", &saveptr);
+            anim->origin.y = atof(token);
+            token = strtok_r(NULL, "	", &saveptr);
+            anim->origin.z = atof(token);
+            token = strtok_r(NULL, "	", &saveptr);
+            anim->dest.w = atof(token);
+            token = strtok_r(NULL, "	", &saveptr);
+            anim->dest.x = atof(token);
+            token = strtok_r(NULL, "	", &saveptr);
+            anim->dest.y = atof(token);
+            token = strtok_r(NULL, "	", &saveptr);
+            anim->dest.z = atof(token);
+            token = strtok_r(NULL, "	", &saveptr);
+            anim->position.x = atof(token);
+            token = strtok_r(NULL, "	", &saveptr);
+            anim->position.y = atof(token);
+            token = strtok_r(NULL, "	", &saveptr);
+            anim->rotation = atof(token);
+            token = strtok_r(NULL, "	", &saveptr);
+            anim->color.w = atof(token);
+            token = strtok_r(NULL, "	", &saveptr);
+            anim->color.x = atof(token);
+            token = strtok_r(NULL, "	", &saveptr);
+            anim->color.y = atof(token);
+            token = strtok_r(NULL, "	", &saveptr);
+            anim->color.z = atof(token);
+            token = strtok_r(NULL, "	", &saveptr);
+            anim->lerp = (bool) atoi(token);
+            return anim;
+        }
+        else {
+            printf("File does not contains usable data!\n");
+            fclose(file);
+            return NULL;
+        }
     }
-    fgets(line, sizeof(line), file);
-
-    anim.texture = LoadTexture("./resources/gfx/bigSprites00.png");
-    anim.origin = {0, 0, 320, 180};
-    anim.dest = {0, 0, 320, 180};
-    anim.position = {0, 0};
-    return anim;
+    return NULL;
 }
 void UpdateAnimable(Animable *anim) {
+    char line[256];
+    if (fgets(line, sizeof(line), anim->data)) {
+        anim->frame++;
+    }
+    else if (anim->repeat) {
+        rewind(anim->data);
+    }
+    else UnloadAnimable(anim);
+}
+void UnloadAnimable(Animable *anim) {
+    fclose(anim->data);
+    UnloadTexture(anim->texture);
+    free(anim);
 }

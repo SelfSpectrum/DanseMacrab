@@ -77,6 +77,8 @@ int main() {
     Rectangle destRec = { -virtualRatio, -virtualRatio, screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
     Vector2 origin = { 0.0f, 0.0f };
 
+    Animable *test = LoadAnimable("./resources/anims/mainMenu/crab.tsv", true);
+
     //Shader shader = LoadShader(0, "contour.fs");
     //SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture);
 
@@ -110,6 +112,7 @@ int main() {
                     DrawText("Are you sure you want to exit program? [Y/N]", 40, 90, 8, WHITE);
                 }
                 else {
+                    UpdateAnimable(test);
                     //BeginShaderMode(shader);
                         //DrawTexturePro(texture, textureOrigin, textureDest, texturePos, 0.0f, WHITE);
                     //EndShaderMode();
@@ -138,6 +141,7 @@ int main() {
     //--------------------------------------------------------------------------------------
     //UnloadShader(shader);
     UnloadRenderTexture(target);
+    UnloadAnimable(test);
     //UnloadTexture(texture);
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
@@ -196,16 +200,19 @@ Animable *LoadAnimable(const char *animSheet, bool repeat) {
     if (anim != NULL) {
         char line[256]; // Line from the file that contains all the struct data
         FILE *file = fopen(animSheet, "r");
-        if (file != NULL) {
-            printf("\nError opening the animation %s!\n", animSheet);
+        if (file == NULL) {
+            printf("INFO: ANIMABLE: Error opening the animation file %s!\n", animSheet);
+            fclose(file);
             return NULL;
         }
         if (fgets(line, sizeof(line), file)) {
             ParseAnimable(line, anim);
+            printf("INFO: ANIMABLE: Animable loaded succesfully\n");
+            anim->data = file;
             return anim;
         }
         else {
-            printf("File does not contains usable data!\n");
+            printf("INFO: ANIMABLE: File does not contains usable data!\n");
             fclose(file);
             return NULL;
         }
@@ -216,6 +223,7 @@ void ParseAnimable(char *line, Animable *anim) {
     char *token;      // 
     char *saveptr;    // 
     token = strtok_r(line, "	", &saveptr); // A line of animation folllow the following pattern: u4 str f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 u1 u1 u1 u1
+    anim->currentFrame = 0;
     anim->frame = (unsigned int) atoi(token);
     token = strtok_r(NULL, "	", &saveptr);
     anim->texture = LoadTexture(token);
@@ -253,16 +261,34 @@ void ParseAnimable(char *line, Animable *anim) {
     anim->lerp = (bool) atoi(token);
 }
 void UpdateAnimable(Animable *anim) {
-    char line[256];
-    anim->currentFrame++;
-    if (anim->currentFrame == anim->frame) {
-        if (fgets(line, sizeof(line), anim->data)) ParseAnimable(line, anim);
-        else if (anim->repeat) rewind(anim->data);
-        else UnloadAnimable(anim);
+    if (anim != NULL) {
+        char line[256];
+        DrawTexturePro(anim->texture,
+                       (Rectangle) { anim->origin.w, anim->origin.x, anim->origin.y, anim->origin.z },
+                       (Rectangle) { anim->dest.w, anim->dest.x, anim->dest.y, anim->dest.z },
+                       anim->position,
+                       anim->rotation,
+                       (Color) { (unsigned char) anim->color.w, (unsigned char) anim->color.x, (unsigned char) anim->color.y, (unsigned char) anim->color.z });
+        anim->currentFrame++;
+        printf("%u\n", anim->currentFrame);
+        if (anim->currentFrame == anim->frame) {
+            if (fgets(line, sizeof(line), anim->data)) {
+                UnloadTexture(anim->texture);
+                ParseAnimable(line, anim);
+            }
+            else if (anim->repeat) {
+                rewind(anim->data);
+                anim->currentFrame = 0;
+            }
+            else UnloadAnimable(anim);
+        }
     }
 }
 void UnloadAnimable(Animable *anim) {
-    fclose(anim->data);
-    UnloadTexture(anim->texture);
-    free(anim);
+    if (anim != NULL) {
+        fclose(anim->data);
+        UnloadTexture(anim->texture);
+        free(anim);
+        printf("INFO: ANIMABLE: Animable unloaded succesfully\n");
+    }
 }

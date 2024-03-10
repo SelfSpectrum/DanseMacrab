@@ -16,7 +16,8 @@ struct Entity {
 };
 typedef struct Animable Animable;
 struct Animable {
-    unsigned int frame;       // Current frame of animation
+    unsigned int frame;       // Frame needed to change to the next event
+    unsigned int currentFrame;// Current frame of animation
     FILE *data;               // File that contains the animation data
     Texture2D texture;        // Texture from where the sample will come
     Quaternion origin;        // Rectangle of origin to get the texture sample
@@ -44,6 +45,7 @@ struct Dialog {
 void LoadDialog(int record, Dialog *dialog);
 void ParseDialog(char *line, Dialog *dialog);
 Animable *LoadAnimable(const char *animSheet, bool repeat);
+void ParseAnimable(char *line, Animable *anim);
 void UpdateAnimable(Animable *anim);
 void UnloadAnimable(Animable *anim);
 //------------------------------------------------------------------------------------
@@ -193,50 +195,13 @@ Animable *LoadAnimable(const char *animSheet, bool repeat) {
     Animable *anim = (Animable*) malloc(sizeof(Animable));          // Dynamic allocation since many animables might be created and destroyed in quick successions, don't forget to free later
     if (anim != NULL) {
         char line[256]; // Line from the file that contains all the struct data
-        char *token; // 
-        char *saveptr; // 
         FILE *file = fopen(animSheet, "r");
         if (file != NULL) {
             printf("\nError opening the animation %s!\n", animSheet);
             return NULL;
         }
         if (fgets(line, sizeof(line), file)) {
-            token = strtok_r(line, "	", &saveptr); // A line of animation folllow the following pattern: u4 str f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 u1 u1 u1 u1
-            anim->frame = (unsigned int) atoi(token);
-            token = strtok_r(NULL, "	", &saveptr);
-            anim->texture = LoadTexture(token);
-            token = strtok_r(NULL, "	", &saveptr);
-            anim->origin.w = atof(token);
-            token = strtok_r(NULL, "	", &saveptr);
-            anim->origin.x = atof(token);
-            token = strtok_r(NULL, "	", &saveptr);
-            anim->origin.y = atof(token);
-            token = strtok_r(NULL, "	", &saveptr);
-            anim->origin.z = atof(token);
-            token = strtok_r(NULL, "	", &saveptr);
-            anim->dest.w = atof(token);
-            token = strtok_r(NULL, "	", &saveptr);
-            anim->dest.x = atof(token);
-            token = strtok_r(NULL, "	", &saveptr);
-            anim->dest.y = atof(token);
-            token = strtok_r(NULL, "	", &saveptr);
-            anim->dest.z = atof(token);
-            token = strtok_r(NULL, "	", &saveptr);
-            anim->position.x = atof(token);
-            token = strtok_r(NULL, "	", &saveptr);
-            anim->position.y = atof(token);
-            token = strtok_r(NULL, "	", &saveptr);
-            anim->rotation = atof(token);
-            token = strtok_r(NULL, "	", &saveptr);
-            anim->color.w = atof(token);
-            token = strtok_r(NULL, "	", &saveptr);
-            anim->color.x = atof(token);
-            token = strtok_r(NULL, "	", &saveptr);
-            anim->color.y = atof(token);
-            token = strtok_r(NULL, "	", &saveptr);
-            anim->color.z = atof(token);
-            token = strtok_r(NULL, "	", &saveptr);
-            anim->lerp = (bool) atoi(token);
+            ParseAnimable(line, anim);
             return anim;
         }
         else {
@@ -247,15 +212,54 @@ Animable *LoadAnimable(const char *animSheet, bool repeat) {
     }
     return NULL;
 }
+void ParseAnimable(char *line, Animable *anim) {
+    char *token;      // 
+    char *saveptr;    // 
+    token = strtok_r(line, "	", &saveptr); // A line of animation folllow the following pattern: u4 str f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 u1 u1 u1 u1
+    anim->frame = (unsigned int) atoi(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->texture = LoadTexture(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->origin.w = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->origin.x = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->origin.y = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->origin.z = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->dest.w = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->dest.x = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->dest.y = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->dest.z = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->position.x = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->position.y = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->rotation = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->color.w = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->color.x = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->color.y = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->color.z = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->lerp = (bool) atoi(token);
+}
 void UpdateAnimable(Animable *anim) {
     char line[256];
-    if (fgets(line, sizeof(line), anim->data)) {
-        anim->frame++;
+    anim->currentFrame++;
+    if (anim->currentFrame == anim->frame) {
+        if (fgets(line, sizeof(line), anim->data)) ParseAnimable(line, anim);
+        else if (anim->repeat) rewind(anim->data);
+        else UnloadAnimable(anim);
     }
-    else if (anim->repeat) {
-        rewind(anim->data);
-    }
-    else UnloadAnimable(anim);
 }
 void UnloadAnimable(Animable *anim) {
     fclose(anim->data);

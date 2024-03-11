@@ -14,7 +14,7 @@ struct Entity {
     Vector2 position;
     Vector2 size;
 };
-typedef struct Animable Animable;
+typedef struct Animable Animable; // 132 < bytes per animable
 struct Animable {
     unsigned int frame;       // Frame needed to change to the next event
     unsigned int currentFrame;// Current frame of animation
@@ -209,6 +209,7 @@ Animable *LoadAnimable(const char *animSheet, bool repeat) {
             ParseAnimable(line, anim);
             printf("INFO: ANIMABLE: Animable loaded succesfully\n");
             anim->data = file;
+            anim->repeat = repeat;
             return anim;
         }
         else {
@@ -226,7 +227,10 @@ void ParseAnimable(char *line, Animable *anim) {
     anim->currentFrame = 0;
     anim->frame = (unsigned int) atoi(token);
     token = strtok_r(NULL, "	", &saveptr);
-    anim->texture = LoadTexture(token);
+    if (token[0] != ' ') {
+        if (anim->texture.id > 0) UnloadTexture(anim->texture);
+        anim->texture = LoadTexture(token);
+    }
     token = strtok_r(NULL, "	", &saveptr);
     anim->origin.w = atof(token);
     token = strtok_r(NULL, "	", &saveptr);
@@ -269,16 +273,18 @@ void UpdateAnimable(Animable *anim) {
                        anim->position,
                        anim->rotation,
                        (Color) { (unsigned char) anim->color.w, (unsigned char) anim->color.x, (unsigned char) anim->color.y, (unsigned char) anim->color.z });
-        anim->currentFrame++;
         printf("%u\n", anim->currentFrame);
-        if (anim->currentFrame == anim->frame) {
-            if (fgets(line, sizeof(line), anim->data)) {
-                UnloadTexture(anim->texture);
+        anim->currentFrame++;
+        if (anim->currentFrame >= anim->frame) {
+            if (anim->frame != 0) {
+                fgets(line, sizeof(line), anim->data);
                 ParseAnimable(line, anim);
             }
             else if (anim->repeat) {
-                rewind(anim->data);
                 anim->currentFrame = 0;
+                rewind(anim->data);
+                fgets(line, sizeof(line), anim->data);
+                ParseAnimable(line, anim);
             }
             else UnloadAnimable(anim);
         }

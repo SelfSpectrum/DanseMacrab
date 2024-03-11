@@ -14,7 +14,7 @@ struct Entity {
     Vector2 position;
     Vector2 size;
 };
-typedef struct Animable Animable; // 132 < bytes per animable
+typedef struct Animable Animable; // 152 < bytes per animable
 struct Animable {
     unsigned int frame;       // Frame needed to change to the next event
     unsigned int currentFrame;// Current frame of animation
@@ -25,7 +25,10 @@ struct Animable {
     Vector2 position;         // Position of the destination???
     float rotation;           // Rotation of the texture sample
     Quaternion color;         // Tint of the texture sample
-    bool lerp;                // Whether the rectangles, colors and position should lerp linearly
+    Quaternion deltaOrigin;
+    Quaternion deltaDest;
+    Vector2 deltaPos;
+    float deltaRotation;
     bool repeat;              // Upon ending, rewind animation?
 };
 typedef struct Dialog Dialog; // 332 bytes per dialog
@@ -208,6 +211,7 @@ Animable *LoadAnimable(const char *animSheet, bool repeat) {
         if (fgets(line, sizeof(line), file)) {
             ParseAnimable(line, anim);
             printf("INFO: ANIMABLE: Animable loaded succesfully\n");
+            anim->currentFrame = 0;
             anim->data = file;
             anim->repeat = repeat;
             return anim;
@@ -224,10 +228,9 @@ void ParseAnimable(char *line, Animable *anim) {
     char *token;      // 
     char *saveptr;    // 
     token = strtok_r(line, "	", &saveptr); // A line of animation folllow the following pattern: u4 str f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 u1 u1 u1 u1
-    anim->currentFrame = 0;
     anim->frame = (unsigned int) atoi(token);
     token = strtok_r(NULL, "	", &saveptr);
-    if (token[0] != ' ') {
+    if (token[0] == '.') {
         if (anim->texture.id > 0) UnloadTexture(anim->texture);
         anim->texture = LoadTexture(token);
     }
@@ -262,7 +265,27 @@ void ParseAnimable(char *line, Animable *anim) {
     token = strtok_r(NULL, "	", &saveptr);
     anim->color.z = atof(token);
     token = strtok_r(NULL, "	", &saveptr);
-    anim->lerp = (bool) atoi(token);
+    anim->deltaOrigin.w = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->deltaOrigin.x = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->deltaOrigin.y = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->deltaOrigin.z = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->deltaDest.w = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->deltaDest.x = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->deltaDest.y = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->deltaDest.z = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->deltaPos.x = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->deltaPos.y = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->deltaRotation = atof(token);
 }
 void UpdateAnimable(Animable *anim) {
     if (anim != NULL) {
@@ -274,6 +297,10 @@ void UpdateAnimable(Animable *anim) {
                        anim->rotation,
                        (Color) { (unsigned char) anim->color.w, (unsigned char) anim->color.x, (unsigned char) anim->color.y, (unsigned char) anim->color.z });
         printf("%u\n", anim->currentFrame);
+        anim->origin = QuaternionAdd(anim->origin, anim->deltaOrigin);
+        anim->dest = QuaternionAdd(anim->dest, anim->deltaDest);
+        anim->position = Vector2Add(anim->position, anim->deltaPos);
+        anim->rotation += anim->deltaRotation;
         anim->currentFrame++;
         if (anim->currentFrame >= anim->frame) {
             if (anim->frame != 0) {

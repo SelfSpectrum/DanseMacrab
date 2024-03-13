@@ -42,6 +42,8 @@ struct Dialog {
     char file[64];
     int emotion;
 };
+// TODO: Perhaps a good way to clean code is by turning the whole dual camera system into an struct and some functions
+// TODO: Need to implement the CircularBuffer along its functions
 //------------------------------------------------------------------------------------
 // Function declarations
 //------------------------------------------------------------------------------------
@@ -115,7 +117,7 @@ int main() {
                     DrawText("Are you sure you want to exit program? [Y/N]", 40, 90, 8, WHITE);
                 }
                 else {
-                    UpdateAnimable(test);
+                    //UpdateAnimable(test);
                     //BeginShaderMode(shader);
                         //DrawTexturePro(texture, textureOrigin, textureDest, texturePos, 0.0f, WHITE);
                     //EndShaderMode();
@@ -224,7 +226,7 @@ Animable *LoadAnimable(const char *animSheet, bool repeat) {
     }
     return NULL;
 }
-void ParseAnimable(char *line, Animable *anim) {
+void ParseAnimable(char *line, Animable *anim) { // TODO: There's the problem with the font, must find.
     char *token;      // 
     char *saveptr;    // 
     token = strtok_r(line, "	", &saveptr); // A line of animation folllow the following pattern: u4 str f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 u1 u1 u1 u1

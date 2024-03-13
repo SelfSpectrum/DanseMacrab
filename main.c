@@ -50,7 +50,7 @@ struct Dialog {
 void LoadDialog(int record, Dialog *dialog);
 void ParseDialog(char *line, Dialog *dialog);
 Animable *LoadAnimable(const char *animSheet, bool repeat);
-void ParseAnimable(char *line, Animable *anim);
+void ParseAnimable(char *line, Animable *anim, bool loadTexture);
 void UpdateAnimable(Animable *anim);
 void UnloadAnimable(Animable *anim);
 //------------------------------------------------------------------------------------
@@ -117,7 +117,7 @@ int main() {
                     DrawText("Are you sure you want to exit program? [Y/N]", 40, 90, 8, WHITE);
                 }
                 else {
-                    //UpdateAnimable(test);
+                    UpdateAnimable(test);
                     //BeginShaderMode(shader);
                         //DrawTexturePro(texture, textureOrigin, textureDest, texturePos, 0.0f, WHITE);
                     //EndShaderMode();
@@ -203,15 +203,15 @@ void ParseDialog(char *line, Dialog *dialog) {
 Animable *LoadAnimable(const char *animSheet, bool repeat) {
     Animable *anim = (Animable*) malloc(sizeof(Animable));          // Dynamic allocation since many animables might be created and destroyed in quick successions, don't forget to free later
     if (anim != NULL) {
-        char line[256]; // Line from the file that contains all the struct data
+        char line[256];       // Line from the file that contains all the struct data
         FILE *file = fopen(animSheet, "r");
-        if (file == NULL) {
+        if (file == NULL) {     // If the file has problems to open, lack of memory won't be a problem, I hope
             printf("INFO: ANIMABLE: Error opening the animation file %s!\n", animSheet);
             fclose(file);
             return NULL;
         }
         if (fgets(line, sizeof(line), file)) {
-            ParseAnimable(line, anim);
+            ParseAnimable(line, anim, true);
             printf("INFO: ANIMABLE: Animable loaded succesfully\n");
             anim->currentFrame = 0;
             anim->data = file;
@@ -226,14 +226,14 @@ Animable *LoadAnimable(const char *animSheet, bool repeat) {
     }
     return NULL;
 }
-void ParseAnimable(char *line, Animable *anim) { // TODO: There's the problem with the font, must find.
+void ParseAnimable(char *line, Animable *anim, bool loadTexture) {
     char *token;      // 
     char *saveptr;    // 
     token = strtok_r(line, "	", &saveptr); // A line of animation folllow the following pattern: u4 str f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 u1 u1 u1 u1
     anim->frame = (unsigned int) atoi(token);
     token = strtok_r(NULL, "	", &saveptr);
-    if (token[0] == '.') {
-        if (anim->texture.id > 0) UnloadTexture(anim->texture);
+    if (loadTexture) {
+        //if (anim->texture.id > 0) UnloadTexture(anim->texture); INFO: Used to be able to change texture during execution, but had problems
         anim->texture = LoadTexture(token);
     }
     token = strtok_r(NULL, "	", &saveptr);
@@ -307,13 +307,13 @@ void UpdateAnimable(Animable *anim) {
         if (anim->currentFrame >= anim->frame) {
             if (anim->frame != 0) {
                 fgets(line, sizeof(line), anim->data);
-                ParseAnimable(line, anim);
+                ParseAnimable(line, anim, false);
             }
             else if (anim->repeat) {
                 anim->currentFrame = 0;
                 rewind(anim->data);
                 fgets(line, sizeof(line), anim->data);
-                ParseAnimable(line, anim);
+                ParseAnimable(line, anim, false);
             }
             else UnloadAnimable(anim);
         }

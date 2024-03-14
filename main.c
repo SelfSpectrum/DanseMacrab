@@ -58,6 +58,7 @@ void ParseAnimable(char *line, Animable *anim, bool loadTexture);
 void UpdateAnimable(Animable *anim, Shader shader);
 void DrawAnimable(Animable *anim, Shader shader);
 void UnloadAnimable(Animable *anim);
+void LoadAnimation(Animable **anims);
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -78,7 +79,6 @@ int main() {
     bool exitWindowRequested = false;   // Flag to request window to exit
     bool exitWindow = false;    // Flag to set window to exit
 
-    Dialog dialog = {0,"Test", "Null", "NULL", "null", 1, "volfe"};
     Camera2D worldSpaceCamera = { {0, 0}, {0, 0}, 0.0f, 1.0f };
     Camera2D screenSpaceCamera = { {0, 0}, {0, 0}, 0.0f, 1.0f };
 
@@ -92,6 +92,8 @@ int main() {
 
     Shader shader = LoadShader(0, "contour.fs");
     //SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture); // INFO: General structure of how to load a texture
+
+    Dialog dialog = { 0, "Test", "Null", "NULL", "null", 1, "volfe" };
 
     SetTargetFPS(60);           // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------

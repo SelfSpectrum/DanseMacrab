@@ -4,6 +4,8 @@
 #include <string.h>
 #include <raylib.h>
 #include <raymath.h>
+
+#define ANIM_SIZE 32
 //---
 // Let's set some structs to work with along the gaem
 //---
@@ -29,6 +31,7 @@ struct Animable {
     Quaternion deltaDest;
     Vector2 deltaPos;
     float deltaRotation;
+    bool shader;
     bool repeat;              // Upon ending, rewind animation?
 };
 typedef struct Dialog Dialog; // 332 bytes per dialog
@@ -44,6 +47,7 @@ struct Dialog {
 };
 // TODO: Perhaps a good way to clean code is by turning the whole dual camera system into an struct and some functions
 // TODO: Need to implement the CircularBuffer along its functions
+
 //------------------------------------------------------------------------------------
 // Function declarations
 //------------------------------------------------------------------------------------
@@ -51,7 +55,8 @@ void LoadDialog(int record, Dialog *dialog);
 void ParseDialog(char *line, Dialog *dialog);
 Animable *LoadAnimable(const char *animSheet, bool repeat);
 void ParseAnimable(char *line, Animable *anim, bool loadTexture);
-void UpdateAnimable(Animable *anim);
+void UpdateAnimable(Animable *anim, Shader shader);
+void DrawAnimable(Animable *anim, Shader shader);
 void UnloadAnimable(Animable *anim);
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -83,9 +88,10 @@ int main() {
     Vector2 origin = { 0.0f, 0.0f };
 
     Animable *test = LoadAnimable("./resources/anims/mainMenu/crab.tsv", true);
+    Animable *anims[ANIM_SIZE] = { NULL };
 
-    //Shader shader = LoadShader(0, "contour.fs");
-    //SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture);
+    Shader shader = LoadShader(0, "contour.fs");
+    //SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture); // INFO: General structure of how to load a texture
 
     SetTargetFPS(60);           // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -102,6 +108,7 @@ int main() {
             else if (IsKeyPressed(KEY_N) || IsKeyPressedRepeat(KEY_ESCAPE)) exitWindowRequested = false;
         }
         else {
+            UpdateAnimable(test, shader);
             if (IsKeyPressed(KEY_ENTER)) {
                 LoadDialog(dialog.next, &dialog);
                 //printf("Id: %d\tNext: %d\tFile: %s\n%s\n%s\n%s\n%s\n", dialog.id, dialog.next, dialog.file, dialog.name, dialog.line1, dialog.line2, dialog.line3);
@@ -117,10 +124,7 @@ int main() {
                     DrawText("Are you sure you want to exit program? [Y/N]", 40, 90, 8, WHITE);
                 }
                 else {
-                    UpdateAnimable(test);
-                    //BeginShaderMode(shader);
-                        //DrawTexturePro(texture, textureOrigin, textureDest, texturePos, 0.0f, WHITE);
-                    //EndShaderMode();
+                    DrawAnimable(test, shader);
                     if (dialog.id) {
                         DrawText(dialog.name, 64, 120, 8, WHITE);
                         DrawText(dialog.line1, 64, 140, 8, WHITE);
@@ -144,10 +148,9 @@ int main() {
     }
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    //UnloadShader(shader);
+    UnloadShader(shader);
     UnloadRenderTexture(target);
     UnloadAnimable(test);
-    //UnloadTexture(texture);
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
     return 0;
@@ -229,7 +232,7 @@ Animable *LoadAnimable(const char *animSheet, bool repeat) {
 void ParseAnimable(char *line, Animable *anim, bool loadTexture) {
     char *token;      // 
     char *saveptr;    // 
-    token = strtok_r(line, "	", &saveptr); // A line of animation folllow the following pattern: u4 str f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 u1 u1 u1 u1
+    token = strtok_r(line, "	", &saveptr); // A line of animation folllow the following pattern: u4 str f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 i4
     anim->frame = (unsigned int) atoi(token);
     token = strtok_r(NULL, "	", &saveptr);
     if (loadTexture) {
@@ -288,17 +291,12 @@ void ParseAnimable(char *line, Animable *anim, bool loadTexture) {
     anim->deltaPos.y = atof(token);
     token = strtok_r(NULL, "	", &saveptr);
     anim->deltaRotation = atof(token);
+    token = strtok_r(NULL, "	", &saveptr);
+    anim->shader = (bool) atoi(token);
 }
-void UpdateAnimable(Animable *anim) {
+void UpdateAnimable(Animable *anim, Shader shader) {
     if (anim != NULL) {
         char line[256];
-        DrawTexturePro(anim->texture,
-                       (Rectangle) { anim->origin.w, anim->origin.x, anim->origin.y, anim->origin.z },
-                       (Rectangle) { anim->dest.w, anim->dest.x, anim->dest.y, anim->dest.z },
-                       anim->position,
-                       anim->rotation,
-                       (Color) { (unsigned char) anim->color.w, (unsigned char) anim->color.x, (unsigned char) anim->color.y, (unsigned char) anim->color.z });
-        printf("%u\n", anim->currentFrame);
         anim->origin = QuaternionAdd(anim->origin, anim->deltaOrigin);
         anim->dest = QuaternionAdd(anim->dest, anim->deltaDest);
         anim->position = Vector2Add(anim->position, anim->deltaPos);
@@ -317,6 +315,20 @@ void UpdateAnimable(Animable *anim) {
             }
             else UnloadAnimable(anim);
         }
+        if (anim->shader) SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), anim->texture);
+    }
+}
+void DrawAnimable(Animable *anim, Shader shader) {
+    if (anim != NULL) {
+        //printf("%u\n", anim->currentFrame);   // TODO: A good way of view the frame count as debug inside game
+        if (anim->shader) BeginShaderMode(shader);
+            DrawTexturePro(anim->texture,
+                           (Rectangle) { anim->origin.w, anim->origin.x, anim->origin.y, anim->origin.z },
+                           (Rectangle) { anim->dest.w, anim->dest.x, anim->dest.y, anim->dest.z },
+                           anim->position,
+                           anim->rotation,
+                           (Color) { (unsigned char) anim->color.w, (unsigned char) anim->color.x, (unsigned char) anim->color.y, (unsigned char) anim->color.z });
+        if (anim->shader) EndShaderMode();
     }
 }
 void UnloadAnimable(Animable *anim) {

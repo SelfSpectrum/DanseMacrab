@@ -9,14 +9,14 @@
 //---
 // Let's set some structs to work with along the gaem
 //---
-typedef struct Entity Entity; // 41 bytes per entity
+typedef struct Entity Entity;
 struct Entity {
     int health;
-    Color color;
     Vector2 position;
     Vector2 size;
+    //Animable *anim;           // Might be useful? Is this even the correct way? No idea
 };
-typedef struct Animable Animable; // 152 < bytes per animable
+typedef struct Animable Animable;
 struct Animable {
     unsigned int frame;       // Frame needed to change to the next event
     unsigned int currentFrame;// Current frame of animation
@@ -31,10 +31,10 @@ struct Animable {
     Quaternion deltaDest;
     Vector2 deltaPos;
     float deltaRotation;
-    bool shader;
-    bool repeat;              // Upon ending, rewind animation?
+    bool shader;              // Draw inside shader mode?
+    bool repeat;              // Upon finishing, rewind animation?
 };
-typedef struct Dialog Dialog; // 332 bytes per dialog
+typedef struct Dialog Dialog;
 struct Dialog {
     int id;
     char name[64];
@@ -45,6 +45,13 @@ struct Dialog {
     char file[64];
     int emotion;
 };
+
+typedef enum GameState GameState;
+enum GameState {
+    TITLE = 0,
+    MAINMENU = 1
+};
+
 // TODO: Perhaps a good way to clean code is by turning the whole dual camera system into an struct and some functions
 // TODO: Need to implement the CircularBuffer along its functions
 
@@ -56,12 +63,15 @@ void ParseDialog(char *line, Dialog *dialog);
 Animable *LoadAnimable(const char *animSheet, bool repeat);
 void ParseAnimable(char *line, Animable *anim, bool loadTexture);
 void UpdateAnimable(Animable *anim, Shader shader);
-void DrawAnimable(Animable *anim, Shader shader);
+void DrawAnimable(Animable *anim, Shader shader, Vector2 offset);
 void UnloadAnimable(Animable *anim);
 void LoadAnimation(Animable **anims);
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
+
+GameState state = TITLE;
+
 int main() {
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -87,11 +97,11 @@ int main() {
     Rectangle destRec = { -virtualRatio, -virtualRatio, screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
     Vector2 origin = { 0.0f, 0.0f };
 
-    Animable *test = LoadAnimable("./resources/anims/mainMenu/crab.tsv", true);
+    Animable *test = LoadAnimable("./resources/anims/mainMenu/crab.tsv", true);                   // TODO: Delete test and load a whole anim with anims
     Animable *anims[ANIM_SIZE] = { NULL };
 
     Shader shader = LoadShader(0, "contour.fs");
-    //SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture); // INFO: General structure of how to load a texture
+    //SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture);  // INFO: General structure of how to load a texture
 
     Dialog dialog = { 0, "Test", "Null", "NULL", "null", 1, "volfe" };
 
@@ -99,7 +109,8 @@ int main() {
     //--------------------------------------------------------------------------------------
     // Main game loop
     while (!exitWindow) {
-        // Update
+        //---------------------------------------------------------------------------------
+        // Update: This is for calculations and events which do not affect Texture or Drawing in a direct way
         //---------------------------------------------------------------------------------
         // Detect if X-button or KEY_ESCAPE have been pressed to close window
         if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) exitWindowRequested = true;
@@ -117,7 +128,7 @@ int main() {
             }
         }
         //----------------------------------------------------------------------------------
-        //Texture
+        // Texture: In this texture mode I create an smaller version of the game which is later rescaled in the draw mode
         //----------------------------------------------------------------------------------
         BeginTextureMode(target);
             ClearBackground(BLACK);
@@ -126,7 +137,7 @@ int main() {
                     DrawText("Are you sure you want to exit program? [Y/N]", 40, 90, 8, WHITE);
                 }
                 else {
-                    DrawAnimable(test, shader);
+                    DrawAnimable(test, shader);     // TODO: A way to give offset to every anim in a smart way, useful when abilities
                     if (dialog.id) {
                         DrawText(dialog.name, 64, 120, 8, WHITE);
                         DrawText(dialog.line1, 64, 140, 8, WHITE);
@@ -137,7 +148,7 @@ int main() {
             EndMode2D();
         EndTextureMode();
         //----------------------------------------------------------------------------------
-        // Draw
+        // Draw: Take the texture in lower resolution and rescale it to a bigger res, all this while preserving pixel perfect
         //----------------------------------------------------------------------------------
         BeginDrawing();
             ClearBackground(RAYWHITE);
@@ -163,7 +174,7 @@ void LoadDialog(int record, Dialog *dialog) {
     char direction[128];
     sprintf(direction, "./resources/dialog/%s.tsv", dialog->file);
     //printf("%s\n", direction);
-    FILE *file = fopen(direction, "r");
+    FILE *file = fopen(direction, "r");                       // TODO: Load and unload files is not a good idea, find a way to don't
     if (file == NULL) {
         printf("Error opening the file!\n");
         return;
@@ -238,7 +249,7 @@ void ParseAnimable(char *line, Animable *anim, bool loadTexture) {
     anim->frame = (unsigned int) atoi(token);
     token = strtok_r(NULL, "	", &saveptr);
     if (loadTexture) {
-        //if (anim->texture.id > 0) UnloadTexture(anim->texture); INFO: Used to be able to change texture during execution, but had problems
+        //if (anim->texture.id > 0) UnloadTexture(anim->texture);     // INFO: Used to be able to change texture during execution, but had problems
         anim->texture = LoadTexture(token);
     }
     token = strtok_r(NULL, "	", &saveptr);
@@ -320,14 +331,14 @@ void UpdateAnimable(Animable *anim, Shader shader) {
         if (anim->shader) SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), anim->texture);
     }
 }
-void DrawAnimable(Animable *anim, Shader shader) {
+void DrawAnimable(Animable *anim, Shader shader, Vector2 offset) {
     if (anim != NULL) {
         //printf("%u\n", anim->currentFrame);   // TODO: A good way of view the frame count as debug inside game
         if (anim->shader) BeginShaderMode(shader);
             DrawTexturePro(anim->texture,
                            (Rectangle) { anim->origin.w, anim->origin.x, anim->origin.y, anim->origin.z },
                            (Rectangle) { anim->dest.w, anim->dest.x, anim->dest.y, anim->dest.z },
-                           anim->position,
+                           Vector2Add(anim->position, offset),
                            anim->rotation,
                            (Color) { (unsigned char) anim->color.w, (unsigned char) anim->color.x, (unsigned char) anim->color.y, (unsigned char) anim->color.z });
         if (anim->shader) EndShaderMode();
@@ -340,4 +351,7 @@ void UnloadAnimable(Animable *anim) {
         free(anim);
         printf("INFO: ANIMABLE: Animable unloaded succesfully\n");
     }
+}
+void LoadAnimation(Animable **anim) {
+    // Nice
 }

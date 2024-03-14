@@ -66,6 +66,8 @@ void UpdateAnimable(Animable *anim, Shader shader);
 void DrawAnimable(Animable *anim, Shader shader, Vector2 offset);
 void UnloadAnimable(Animable *anim);
 void LoadAnimation(Animable **anims);
+void ButtonX(void);
+void ButtonZ(void);
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -85,7 +87,7 @@ int main() {
 
     InitWindow(screenWidth, screenHeight, "Danse Macrab");
 
-    SetExitKey(KEY_NULL);       // Disable KEY_ESCAPE to close window, X-button still works
+    SetExitKey(KEY_NULL);       // INFO: Disable KEY_ESCAPE to close window, X-button still works
     bool exitWindowRequested = false;   // Flag to request window to exit
     bool exitWindow = false;    // Flag to set window to exit
 
@@ -97,7 +99,7 @@ int main() {
     Rectangle destRec = { -virtualRatio, -virtualRatio, screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
     Vector2 origin = { 0.0f, 0.0f };
 
-    Animable *test = LoadAnimable("./resources/anims/mainMenu/crab.tsv", true);                   // TODO: Delete test and load a whole anim with anims
+    //Animable *test = LoadAnimable("./resources/anims/mainMenu/crab.tsv", true);                   // TODO: Delete test and load a whole anim with anims
     Animable *anims[ANIM_SIZE] = { NULL };
 
     Shader shader = LoadShader(0, "contour.fs");
@@ -105,15 +107,14 @@ int main() {
 
     Dialog dialog = { 0, "Test", "Null", "NULL", "null", 1, "volfe" };
 
-    SetTargetFPS(60);           // Set our game to run at 60 frames-per-second
+    SetTargetFPS(60);           // INFO: Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
     // Main game loop
     while (!exitWindow) {
         //---------------------------------------------------------------------------------
-        // Update: This is for calculations and events which do not affect Texture or Drawing in a direct way
+        // INFO: Update: This is for calculations and events which do not affect Texture or Drawing in a direct way
         //---------------------------------------------------------------------------------
-        // Detect if X-button or KEY_ESCAPE have been pressed to close window
-        if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) exitWindowRequested = true;
+        if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) exitWindowRequested = true;      // Detect if X-button or KEY_ESCAPE have been pressed to close window
         if (exitWindowRequested) {
             // A request for close window has been issued, we can save data before closing
             // or just show a message asking for confirmation
@@ -121,14 +122,20 @@ int main() {
             else if (IsKeyPressed(KEY_N) || IsKeyPressedRepeat(KEY_ESCAPE)) exitWindowRequested = false;
         }
         else {
-            UpdateAnimable(test, shader);
+            //UpdateAnimable(test, shader);
             if (IsKeyPressed(KEY_ENTER)) {
                 LoadDialog(dialog.next, &dialog);
                 //printf("Id: %d\tNext: %d\tFile: %s\n%s\n%s\n%s\n%s\n", dialog.id, dialog.next, dialog.file, dialog.name, dialog.line1, dialog.line2, dialog.line3);
             }
+            if (IsKeyPressed(KEY_Z)) {
+                ButtonZ();
+            }
+            if (IsKeyPressed(KEY_X)) {
+                ButtonX();
+            }
         }
         //----------------------------------------------------------------------------------
-        // Texture: In this texture mode I create an smaller version of the game which is later rescaled in the draw mode
+        // INFO: Texture: In this texture mode I create an smaller version of the game which is later rescaled in the draw mode
         //----------------------------------------------------------------------------------
         BeginTextureMode(target);
             ClearBackground(BLACK);
@@ -137,7 +144,7 @@ int main() {
                     DrawText("Are you sure you want to exit program? [Y/N]", 40, 90, 8, WHITE);
                 }
                 else {
-                    DrawAnimable(test, shader);     // TODO: A way to give offset to every anim in a smart way, useful when abilities
+                    //DrawAnimable(test, shader);     // TODO: A way to give offset to every anim in a smart way, useful when abilities
                     if (dialog.id) {
                         DrawText(dialog.name, 64, 120, 8, WHITE);
                         DrawText(dialog.line1, 64, 140, 8, WHITE);
@@ -148,7 +155,7 @@ int main() {
             EndMode2D();
         EndTextureMode();
         //----------------------------------------------------------------------------------
-        // Draw: Take the texture in lower resolution and rescale it to a bigger res, all this while preserving pixel perfect
+        // INFO: Draw: Take the texture in lower resolution and rescale it to a bigger res, all this while preserving pixel perfect
         //----------------------------------------------------------------------------------
         BeginDrawing();
             ClearBackground(RAYWHITE);
@@ -163,7 +170,7 @@ int main() {
     //--------------------------------------------------------------------------------------
     UnloadShader(shader);
     UnloadRenderTexture(target);
-    UnloadAnimable(test);
+    //UnloadAnimable(test);
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
     return 0;
@@ -354,4 +361,15 @@ void UnloadAnimable(Animable *anim) {
 }
 void LoadAnimation(Animable **anim) {
     // Nice
+}
+void ButtonX(void) {
+    // Nice
+}
+void ButtonZ(void) {
+    switch (state) {
+        case TITLE:
+            break;
+        default:
+            break;
+    }
 }

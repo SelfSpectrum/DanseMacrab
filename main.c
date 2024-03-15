@@ -65,15 +65,13 @@ void ParseAnimable(char *line, Animable *anim, bool loadTexture);
 void UpdateAnimable(Animable *anim, Shader shader);
 void DrawAnimable(Animable *anim, Shader shader, Vector2 offset);
 void UnloadAnimable(Animable *anim);
-void LoadAnimation(Animable **anims);
-void ButtonX(void);
-void ButtonZ(void);
+void LoadAnimation(Animable **anims, unsigned int id);
+void UnloadAnimation(Animable **anims);
+void ButtonX(GameState state, Animable **anims);
+void ButtonZ(GameState state, Animable **anims);
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
-
-GameState state = TITLE;
-
 int main() {
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -100,11 +98,12 @@ int main() {
     Vector2 origin = { 0.0f, 0.0f };
 
     //Animable *test = LoadAnimable("./resources/anims/mainMenu/crab.tsv", true);                   // TODO: Delete test and load a whole anim with anims
-    Animable *anims[ANIM_SIZE] = { NULL };
 
     Shader shader = LoadShader(0, "contour.fs");
     //SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture);  // INFO: General structure of how to load a texture
 
+    GameState state = TITLE;                                  // INFO: Contains the current state of the game
+    Animable *anims[ANIM_SIZE] = { NULL };                    // INFO: Animation handling and rendering
     Dialog dialog = { 0, "Test", "Null", "NULL", "null", 1, "volfe" };
 
     SetTargetFPS(60);           // INFO: Set our game to run at 60 frames-per-second
@@ -128,10 +127,10 @@ int main() {
                 //printf("Id: %d\tNext: %d\tFile: %s\n%s\n%s\n%s\n%s\n", dialog.id, dialog.next, dialog.file, dialog.name, dialog.line1, dialog.line2, dialog.line3);
             }
             if (IsKeyPressed(KEY_Z)) {
-                ButtonZ();
+                ButtonZ(state, anims);
             }
             if (IsKeyPressed(KEY_X)) {
-                ButtonX();
+                ButtonX(state, anims);
             }
         }
         //----------------------------------------------------------------------------------
@@ -359,15 +358,27 @@ void UnloadAnimable(Animable *anim) {
         printf("INFO: ANIMABLE: Animable unloaded succesfully\n");
     }
 }
-void LoadAnimation(Animable **anim) {
+void LoadAnimation(Animable **anims, unsigned int id) {
     // Nice
 }
+void UnloadAnimation(Animale **anims) {
+    //Nice
+}
 void ButtonX(void) {
-    // Nice
+    switch (state) {
+        case TITLE:
+            UnloadAnimation(anims);
+        case MAINMENU:
+            break;
+        default:
+            break;
+    }
 }
 void ButtonZ(void) {
     switch (state) {
         case TITLE:
+            break;
+        case MAINMENU:
             break;
         default:
             break;

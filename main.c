@@ -65,13 +65,18 @@ void ParseAnimable(char *line, Animable *anim, bool loadTexture);
 void UpdateAnimable(Animable *anim, Shader shader);
 void DrawAnimable(Animable *anim, Shader shader, Vector2 offset);
 void UnloadAnimable(Animable *anim);
-void LoadAnimation(Animable **anims, unsigned int id);
-void UnloadAnimation(Animable **anims);
-void ButtonX(GameState state, Animable **anims);
-void ButtonZ(GameState state, Animable **anims);
+void LoadAnimation(int id);
+void UnloadAnimation();
+void ButtonX();
+void ButtonZ();
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
+
+GameState state = TITLE;                                      // INFO: Contains the current state of the game
+Animable *anims[ANIM_SIZE] = { NULL };                        // INFO: Animation handling and rendering
+FILE *animsData = fopen("./resources/anims/animations.tsv", "r");  // INFO: Big file with every single independent animation data
+
 int main() {
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -102,8 +107,6 @@ int main() {
     Shader shader = LoadShader(0, "contour.fs");
     //SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture);  // INFO: General structure of how to load a texture
 
-    GameState state = TITLE;                                  // INFO: Contains the current state of the game
-    Animable *anims[ANIM_SIZE] = { NULL };                    // INFO: Animation handling and rendering
     Dialog dialog = { 0, "Test", "Null", "NULL", "null", 1, "volfe" };
 
     SetTargetFPS(60);           // INFO: Set our game to run at 60 frames-per-second
@@ -127,10 +130,10 @@ int main() {
                 //printf("Id: %d\tNext: %d\tFile: %s\n%s\n%s\n%s\n%s\n", dialog.id, dialog.next, dialog.file, dialog.name, dialog.line1, dialog.line2, dialog.line3);
             }
             if (IsKeyPressed(KEY_Z)) {
-                ButtonZ(state, anims);
+                ButtonZ();
             }
             if (IsKeyPressed(KEY_X)) {
-                ButtonX(state, anims);
+                ButtonX();
             }
         }
         //----------------------------------------------------------------------------------
@@ -169,7 +172,7 @@ int main() {
     //--------------------------------------------------------------------------------------
     UnloadShader(shader);
     UnloadRenderTexture(target);
-    //UnloadAnimable(test);
+    UnloadAnimation();
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
     return 0;
@@ -355,19 +358,50 @@ void UnloadAnimable(Animable *anim) {
         fclose(anim->data);
         UnloadTexture(anim->texture);
         free(anim);
+        anim = NULL;
         printf("INFO: ANIMABLE: Animable unloaded succesfully\n");
     }
 }
-void LoadAnimation(Animable **anims, unsigned int id) {
-    // Nice
+void LoadAnimation(int id) {
+    int i = 0;
+    int j;
+    char line[256];
+    char *token;
+    char *saveptr;
+    bool repeat;
+    rewind(animsData);
+    while (fgets(line, sizeof(line), animsData)) {
+        if (i == id) {
+            token = strtok_r(line, "	", &saveptr);
+            printf("INFO: ANIMATION: Loading %s in the %d register", token, i);
+            while (token != NULL) {
+                for (j = 0; j < ANIM_SIZE; j++) {
+                    if (anims[j] == NULL) {
+                        token = strtok_r(line, "	", &saveptr);
+                        repeat = strtok_r(line, "	", &saveptr);
+                        anims[j] = LoadAnimable(token, repeat);
+                        token = strtok_r(line, "	", &saveptr);
+                        break;
+                    }
+                }
+            }
+            break;
+        }
+        i++;
+    }
 }
-void UnloadAnimation(Animale **anims) {
-    //Nice
+void UnloadAnimation(void) {
+    int i;
+    for (i = 0; i < ANIM_SIZE; i++) {
+      if (anims[i] != NULL) {
+          UnloadAnimable(anims[i]);
+      }
+  }
 }
 void ButtonX(void) {
     switch (state) {
         case TITLE:
-            UnloadAnimation(anims);
+            UnloadAnimation();
         case MAINMENU:
             break;
         default:
@@ -377,7 +411,7 @@ void ButtonX(void) {
 void ButtonZ(void) {
     switch (state) {
         case TITLE:
-            break;
+            LoadAnimation(0);
         case MAINMENU:
             break;
         default:

@@ -69,9 +69,9 @@ void UpdateAnimable(Animable *anim, Shader shader);
 void DrawAnimable(Animable *anim, Shader shader, Vector2 offset);
 void UnloadAnimable(Animable *anim);
 void LoadAnimation(int id);
-void UnloadAnimation();
-void ButtonX();
-void ButtonZ();
+void UnloadAnimation(void);
+void ButtonX(void);
+void ButtonZ(void);
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------

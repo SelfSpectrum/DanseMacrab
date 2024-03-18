@@ -6,6 +6,7 @@
 #include <raymath.h>
 
 #define ANIM_SIZE 32
+#define TEX_SIZE 8
 //---
 // Let's set some structs to work with along the gaem
 //---
@@ -76,6 +77,7 @@ void ButtonZ();
 GameState state = TITLE;                                      // INFO: Contains the current state of the game
 Animable *anims[ANIM_SIZE] = { NULL };                        // INFO: Animation handling and rendering
 FILE *animsData;                                              // INFO: Big file with every single independent animation data
+Texture2D[]
 
 int main() {
     // Initialization
@@ -102,13 +104,14 @@ int main() {
     Rectangle destRec = { -virtualRatio, -virtualRatio, screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
     Vector2 origin = { 0.0f, 0.0f };
 
-
     animsData = fopen("./resources/anims/animations.tsv", "r");
 
     //Animable *test = LoadAnimable("./resources/anims/mainMenu/crab.tsv", true);                   // TODO: Delete test and load a whole anim with anims
 
     Shader shader = LoadShader(0, "contour.fs");
     //SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture);  // INFO: General structure of how to load a texture
+
+    int animCount;
 
     Dialog dialog = { 0, "Test", "Null", "NULL", "null", 1, "volfe" };
 
@@ -128,6 +131,9 @@ int main() {
         }
         else {
             //UpdateAnimable(test, shader);
+            for (animCount = 0; animCount < ANIM_SIZE; animCount++) {
+                if (anims[animCount] != NULL) UpdateAnimable(anims[animCount], shader);
+            }
             if (IsKeyPressed(KEY_ENTER)) {
                 LoadDialog(dialog.next, &dialog);
                 //printf("Id: %d\tNext: %d\tFile: %s\n%s\n%s\n%s\n%s\n", dialog.id, dialog.next, dialog.file, dialog.name, dialog.line1, dialog.line2, dialog.line3);
@@ -150,6 +156,9 @@ int main() {
                 }
                 else {
                     //DrawAnimable(test, shader);     // TODO: A way to give offset to every anim in a smart way, useful when abilities
+                    for (animCount = 0; animCount < ANIM_SIZE; animCount++) {
+                        if (anims[animCount] != NULL) DrawAnimable(anims[animCount], shader, (Vector2) { 0.0f });
+                    }
                     if (dialog.id) {
                         DrawText(dialog.name, 64, 120, 8, WHITE);
                         DrawText(dialog.line1, 64, 140, 8, WHITE);
@@ -361,7 +370,6 @@ void UnloadAnimable(Animable *anim) {
         fclose(anim->data);
         UnloadTexture(anim->texture);
         free(anim);
-        anim = NULL;
         printf("INFO: ANIMABLE: Animable unloaded succesfully\n");
     }
 }
@@ -384,10 +392,12 @@ void LoadAnimation(int id) {
             while (token != NULL) {
                 for (j = 0; j < ANIM_SIZE; j++) {
                     if (anims[j] == NULL) {
-                        token = strtok_r(line, "	", &saveptr);
-                        repeat = strtok_r(line, "	", &saveptr);
+                        token = strtok_r(NULL, "	", &saveptr);
+                        printf("INFO: ANIMATION: Direction %s\n", token);
+                        repeat = strtok_r(NULL, "	", &saveptr);
+                        printf("INFO: ANIMATION: Repeat %d\n", repeat);
                         anims[j] = LoadAnimable(token, repeat);
-                        token = strtok_r(line, "	", &saveptr);
+                        token = strtok_r(NULL, "	", &saveptr);
                         break;
                     }
                 }
@@ -402,6 +412,7 @@ void UnloadAnimation(void) {
     for (i = 0; i < ANIM_SIZE; i++) {
       if (anims[i] != NULL) {
           UnloadAnimable(anims[i]);
+          anims[i] = NULL;
       }
   }
 }

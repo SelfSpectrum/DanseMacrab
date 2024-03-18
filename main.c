@@ -21,8 +21,10 @@ typedef struct Animable Animable;
 struct Animable {
     unsigned int frame;       // Frame needed to change to the next event
     unsigned int currentFrame;// Current frame of animation
+    int index;
     FILE *data;               // File that contains the animation data
-    Texture2D texture;        // Texture from where the sample will come
+    //Texture2D texture;      // INFO: Deprecated: Texture from where the sample will come
+    int textureIndex;         // Index in the Texture array from where the sample will come
     Quaternion origin;        // Rectangle of origin to get the texture sample
     Quaternion dest;          // Rectangle of destination to place the texture sample
     Vector2 position;         // Position of the destination???
@@ -61,7 +63,7 @@ enum GameState {
 //------------------------------------------------------------------------------------
 void LoadDialog(int record, Dialog *dialog);
 void ParseDialog(char *line, Dialog *dialog);
-Animable *LoadAnimable(const char *animSheet, bool repeat);
+Animable *LoadAnimable(const char *animSheet, bool repeat, int index);
 void ParseAnimable(char *line, Animable *anim, bool loadTexture);
 void UpdateAnimable(Animable *anim, Shader shader);
 void DrawAnimable(Animable *anim, Shader shader, Vector2 offset);
@@ -77,7 +79,7 @@ void ButtonZ();
 GameState state = TITLE;                                      // INFO: Contains the current state of the game
 Animable *anims[ANIM_SIZE] = { NULL };                        // INFO: Animation handling and rendering
 FILE *animsData;                                              // INFO: Big file with every single independent animation data
-Texture2D[]
+Texture2D textures[TEX_SIZE];
 
 int main() {
     // Initialization
@@ -105,6 +107,7 @@ int main() {
     Vector2 origin = { 0.0f, 0.0f };
 
     animsData = fopen("./resources/anims/animations.tsv", "r");
+    textures[0] = LoadTexture("./resources/gfx/bigSprites00.png");
 
     //Animable *test = LoadAnimable("./resources/anims/mainMenu/crab.tsv", true);                   // TODO: Delete test and load a whole anim with anims
 
@@ -184,6 +187,7 @@ int main() {
     //--------------------------------------------------------------------------------------
     UnloadShader(shader);
     UnloadRenderTexture(target);
+    for (animCount = 0; animCount < TEX_SIZE; animCount++) UnloadTexture(textures[animCount]);
     UnloadAnimation();
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
@@ -237,7 +241,7 @@ void ParseDialog(char *line, Dialog *dialog) {
     dialog->emotion = atof(token);
 }
 
-Animable *LoadAnimable(const char *animSheet, bool repeat) {
+Animable *LoadAnimable(const char *animSheet, bool repeat, int index) {
     Animable *anim = (Animable*) malloc(sizeof(Animable));          // Dynamic allocation since many animables might be created and destroyed in quick successions, don't forget to free later
     if (anim != NULL) {
         char line[256];       // Line from the file that contains all the struct data
@@ -253,6 +257,7 @@ Animable *LoadAnimable(const char *animSheet, bool repeat) {
             anim->currentFrame = 0;
             anim->data = file;
             anim->repeat = repeat;
+            anim->index = index;
             return anim;
         }
         else {
@@ -269,10 +274,11 @@ void ParseAnimable(char *line, Animable *anim, bool loadTexture) {
     token = strtok_r(line, "	", &saveptr); // A line of animation folllow the following pattern: u4 str f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 i4
     anim->frame = (unsigned int) atoi(token);
     token = strtok_r(NULL, "	", &saveptr);
-    if (loadTexture) {
-        //if (anim->texture.id > 0) UnloadTexture(anim->texture);     // INFO: Used to be able to change texture during execution, but had problems
-        anim->texture = LoadTexture(token);
-    }
+    //if (loadTexture) {
+        //if (anim->texture.id > 0) UnloadTexture(anim->texture);
+        //anim->texture = LoadTexture(token);
+    //}
+    anim->textureIndex = atoi(token);             // Now I can change texture easily xd
     token = strtok_r(NULL, "	", &saveptr);
     anim->origin.w = atof(token);
     token = strtok_r(NULL, "	", &saveptr);
@@ -349,14 +355,14 @@ void UpdateAnimable(Animable *anim, Shader shader) {
             }
             else UnloadAnimable(anim);
         }
-        if (anim->shader) SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), anim->texture);
+        if (anim->shader) SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), textures[anim->textureIndex]);
     }
 }
 void DrawAnimable(Animable *anim, Shader shader, Vector2 offset) {
     if (anim != NULL) {
         //printf("%u\n", anim->currentFrame);   // TODO: A good way of view the frame count as debug inside game
         if (anim->shader) BeginShaderMode(shader);
-            DrawTexturePro(anim->texture,
+            DrawTexturePro(textures[anim->textureIndex],
                            (Rectangle) { anim->origin.w, anim->origin.x, anim->origin.y, anim->origin.z },
                            (Rectangle) { anim->dest.w, anim->dest.x, anim->dest.y, anim->dest.z },
                            Vector2Add(anim->position, offset),
@@ -367,8 +373,9 @@ void DrawAnimable(Animable *anim, Shader shader, Vector2 offset) {
 }
 void UnloadAnimable(Animable *anim) {
     if (anim != NULL) {
+        anims[anim->index] = NULL;
         fclose(anim->data);
-        UnloadTexture(anim->texture);
+        // UnloadTexture(anim->texture);
         free(anim);
         printf("INFO: ANIMABLE: Animable unloaded succesfully\n");
     }
@@ -394,9 +401,9 @@ void LoadAnimation(int id) {
                     if (anims[j] == NULL) {
                         token = strtok_r(NULL, "	", &saveptr);
                         printf("INFO: ANIMATION: Direction %s\n", token);
-                        repeat = strtok_r(NULL, "	", &saveptr);
+                        repeat = (bool) atoi(strtok_r(NULL, "	", &saveptr));
                         printf("INFO: ANIMATION: Repeat %d\n", repeat);
-                        anims[j] = LoadAnimable(token, repeat);
+                        anims[j] = LoadAnimable(token, repeat, j);
                         token = strtok_r(NULL, "	", &saveptr);
                         break;
                     }
@@ -412,7 +419,6 @@ void UnloadAnimation(void) {
     for (i = 0; i < ANIM_SIZE; i++) {
       if (anims[i] != NULL) {
           UnloadAnimable(anims[i]);
-          anims[i] = NULL;
       }
   }
 }

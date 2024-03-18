@@ -75,7 +75,7 @@ void ButtonZ();
 
 GameState state = TITLE;                                      // INFO: Contains the current state of the game
 Animable *anims[ANIM_SIZE] = { NULL };                        // INFO: Animation handling and rendering
-FILE *animsData = fopen("./resources/anims/animations.tsv", "r");  // INFO: Big file with every single independent animation data
+FILE *animsData;                                              // INFO: Big file with every single independent animation data
 
 int main() {
     // Initialization
@@ -101,6 +101,9 @@ int main() {
     Rectangle sourceRec = { 0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height };
     Rectangle destRec = { -virtualRatio, -virtualRatio, screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
     Vector2 origin = { 0.0f, 0.0f };
+
+
+    animsData = fopen("./resources/anims/animations.tsv", "r");
 
     //Animable *test = LoadAnimable("./resources/anims/mainMenu/crab.tsv", true);                   // TODO: Delete test and load a whole anim with anims
 
@@ -363,6 +366,10 @@ void UnloadAnimable(Animable *anim) {
     }
 }
 void LoadAnimation(int id) {
+    if (animsData == NULL) {
+        printf("ERROR: ANIMATION: Error opening animation file\n");
+        return;
+    }
     int i = 0;
     int j;
     char line[256];
@@ -373,7 +380,7 @@ void LoadAnimation(int id) {
     while (fgets(line, sizeof(line), animsData)) {
         if (i == id) {
             token = strtok_r(line, "	", &saveptr);
-            printf("INFO: ANIMATION: Loading %s in the %d register", token, i);
+            printf("INFO: ANIMATION: Loading %s in the %d register\n", token, i);
             while (token != NULL) {
                 for (j = 0; j < ANIM_SIZE; j++) {
                     if (anims[j] == NULL) {

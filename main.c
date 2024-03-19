@@ -7,15 +7,25 @@
 
 #define ANIM_SIZE 16
 #define TEX_SIZE 8
+#define SOUND_SIZE 8
+#define SFXALIAS_SIZE 8
+#define DRAW_SIZE 16
 //------------------------------------------------------------------------------------
 // Let's set some structs to work with along the gaem
 //------------------------------------------------------------------------------------
 typedef struct Entity Entity;
 struct Entity {
     int health;
-    Vector2 position;
-    Vector2 size;
+    //Sprite *sprite;           // Might me wrong xd
     //Animable *anim;           // Might be useful? Is this even the correct way? No idea
+};
+typedef struct Sprite Sprite;
+struct Sprite {
+    int textureOffIndex;
+    int textureOnIndex;
+    Rectangle origin;
+    Rectangle dest;
+    Vector2 position;
 };
 typedef struct Animable Animable;
 struct Animable {
@@ -71,6 +81,7 @@ void DrawAnimable(Animable *anim, Shader shader);
 void UnloadAnimable(Animable *anim);
 void LoadAnimation(int id, Vector2 offset);
 void UnloadAnimation(void);
+void PlaySecSound(int id);
 void ButtonX(void);
 void ButtonZ(void);
 //------------------------------------------------------------------------------------
@@ -79,7 +90,11 @@ void ButtonZ(void);
 GameState state = TITLE;                                      // INFO: Contains the current state of the game
 Animable *anims[ANIM_SIZE] = { NULL };                        // INFO: Animation handling and rendering
 FILE *animsData;                                              // INFO: Big file with every single independent animation data
-Texture2D textures[TEX_SIZE];
+Texture2D textures[TEX_SIZE];                                 // INFO: Here I hold all the texture used in the game
+Sound sounds[SOUND_SIZE];                                     // INFO: Here I hold all the sounds used in the game
+Sound sfxAlias[SFXALIAS_SIZE];                                // INFO: Used to reproduce several sounds at once
+int sfxPos = 0;
+
 
 int main() {
     // Initialization
@@ -113,13 +128,16 @@ int main() {
     //Animable *test = LoadAnimable("./resources/anims/mainMenu/crab.tsv", true);                   // TODO: Delete test and load a whole anim with anims
 
     Shader shader = LoadShader(0, "contour.fs");
-    //SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture);  // INFO: General structure of how to load a texture
+    //SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture);      // INFO: General structure of how to load a texture
 
     Music music = LoadMusicStream("./resources/sfx/title.mp3");
+    music.looping = true;
+    sounds[0] = LoadSound("./resources/sfx/pressStart.mp3");
     PlayMusicStream(music);
-
+    SetMusicVolume(music, 0.5f);
     int animCount;
     int texCount;
+    int sfxCount;
 
     Dialog dialog = { 0, "Test", "Null", "NULL", "null", 1, "volfe" };
 
@@ -198,11 +216,14 @@ int main() {
     }
     // De-Initialization
     //--------------------------------------------------------------------------------------
+    StopMusicStream(music);
     UnloadShader(shader);
     UnloadRenderTexture(target);
     for (texCount = 0; texCount < TEX_SIZE; texCount++) UnloadTexture(textures[texCount]);
     UnloadAnimation();
     UnloadMusicStream(music);   // Unload music stream buffers from RAM
+    for (sfxCount = 0; sfxCount < SFXALIAS_SIZE; sfxCount++) UnloadSoundAlias(sfxAlias[sfxCount]);
+    for (sfxCount = 0; sfxCount < SOUND_SIZE; sfxCount++) UnloadSound(sounds[sfxCount]);
     CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
     CloseWindow();              // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
@@ -437,6 +458,13 @@ void UnloadAnimation(void) {
       }
   }
 }
+void PlaySecSound(int id) {
+    id = id % SOUND_SIZE;
+    UnloadSoundAlias(sfxAlias[sfxPos]);
+    sfxAlias[sfxPos] = LoadSoundAlias(sounds[id]);
+    PlaySound(sfxAlias[sfxPos]);
+    sfxPos = (sfxPos + 1) % SFXALIAS_SIZE;
+}
 void ButtonX(void) {
     switch (state) {
         case TITLE:
@@ -451,6 +479,7 @@ void ButtonZ(void) {
     switch (state) {
         case TITLE:
             LoadAnimation(0, (Vector2) { 0 });
+            PlaySecSound(0);
         case MAINMENU:
             break;
         default:

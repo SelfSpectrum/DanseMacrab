@@ -21,11 +21,12 @@ struct Entity {
 };
 typedef struct Sprite Sprite;
 struct Sprite {
-    int textureOffIndex;
-    int textureOnIndex;
-    Rectangle origin;
+    int textureIndex;
+    Rectangle originOff;
+    Rectangle originOn;
     Rectangle dest;
     Vector2 position;
+    Color color;
 };
 typedef struct Animable Animable;
 struct Animable {
@@ -82,6 +83,10 @@ void UnloadAnimable(Animable *anim);
 void LoadAnimation(int id, Vector2 offset);
 void UnloadAnimation(void);
 void PlaySecSound(int id);
+void LoadSprite(const char *spriteSheet);
+Sprite *ParseSprite(char *line);
+void DrawSprite(void);
+void UnloadSprite(void);
 void ButtonX(void);
 void ButtonZ(void);
 //------------------------------------------------------------------------------------
@@ -93,8 +98,8 @@ FILE *animsData;                                              // INFO: Big file 
 Texture2D textures[TEX_SIZE];                                 // INFO: Here I hold all the texture used in the game
 Sound sounds[SOUND_SIZE];                                     // INFO: Here I hold all the sounds used in the game
 Sound sfxAlias[SFXALIAS_SIZE];                                // INFO: Used to reproduce several sounds at once
-int sfxPos = 0;
-
+int sfxPos = 0;                                               // INFO: Universal position to locate one "free" sfxAlias
+Sprite *sprites[DRAW_SIZE] = { NULL };                        // INFO: What and where to render
 
 int main() {
     // Initialization
@@ -134,9 +139,10 @@ int main() {
     music.looping = true;
     sounds[0] = LoadSound("./resources/sfx/pressStart.mp3");
     PlayMusicStream(music);
-    SetMusicVolume(music, 0.5f);
+    SetMusicVolume(music, 1.0f);
     int animCount;
     int texCount;
+    int spriteCount;
     int sfxCount;
 
     Dialog dialog = { 0, "Test", "Null", "NULL", "null", 1, "volfe" };
@@ -219,6 +225,7 @@ int main() {
     StopMusicStream(music);
     UnloadShader(shader);
     UnloadRenderTexture(target);
+    UnloadSprite();
     for (texCount = 0; texCount < TEX_SIZE; texCount++) UnloadTexture(textures[texCount]);
     UnloadAnimation();
     UnloadMusicStream(music);   // Unload music stream buffers from RAM
@@ -278,7 +285,7 @@ void ParseDialog(char *line, Dialog *dialog) {
 }
 
 Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 offset) {
-    Animable *anim = (Animable*) malloc(sizeof(Animable));          // Dynamic allocation since many animables might be created and destroyed in quick successions, don't forget to free later
+    Animable *anim = (Animable *) malloc(sizeof(Animable));          // Dynamic allocation since many animables might be created and destroyed in quick successions, don't forget to free later
     if (anim != NULL) {
         char line[256];       // Line from the file that contains all the struct data
         FILE *file = fopen(animSheet, "r");
@@ -295,7 +302,6 @@ Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 of
             anim->repeat = repeat;
             anim->index = index;
             anim->offset = offset;
-            return anim;
         }
         else {
             printf("INFO: ANIMABLE: File does not contains usable data!\n");
@@ -303,7 +309,7 @@ Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 of
             return NULL;
         }
     }
-    return NULL;
+    return anim;
 }
 void ParseAnimable(char *line, Animable *anim, bool loadTexture) {
     char *token;      // 
@@ -457,6 +463,71 @@ void UnloadAnimation(void) {
           UnloadAnimable(anims[i]);
       }
   }
+}
+void LoadSprite(const char *spriteSheet) {
+    FILE *file = fopen(spriteSheet, "r");
+    if (file != NULL) {
+        char line[256];
+        while (fgets(line, sizeof(line), file)) {
+            ParseSprite(line);
+        }
+    }
+    fclose(file);
+}
+Sprite *ParseSprite(char *line) {
+    Sprite *sprite = (Sprite *) malloc(sizeof(Sprite));
+    char *token;
+    char *saveptr;
+    if (sprite != NULL) {
+        token = strtok_r(line, "	", &saveptr);
+        sprite->textureIndex = atoi(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->originOff.x = atof(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->originOff.y = atof(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->originOff.width = atof(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->originOff.height = atof(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->originOn.x = atof(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->originOn.y = atof(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->originOn.width = atof(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->originOn.height = atof(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->dest.x = atof(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->dest.y = atof(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->dest.width = atof(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->dest.height = atof(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->position.x = atof(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->position.y = atof(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->color.r = (char) atoi(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->color.g = (char) atoi(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->color.b = (char) atoi(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->color.a = (char) atoi(token);
+    }
+    return sprite;
+}
+void UnloadSprite(void) {
+    int i;
+    for (i = 0; i < DRAW_SIZE; i++) {
+        if (sprites[i] != NULL) {
+            free(sprites[i]);
+            sprites[i] = NULL;
+        }
+    }
 }
 void PlaySecSound(int id) {
     id = id % SOUND_SIZE;

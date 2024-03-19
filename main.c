@@ -5,11 +5,11 @@
 #include <raylib.h>
 #include <raymath.h>
 
-#define ANIM_SIZE 32
+#define ANIM_SIZE 16
 #define TEX_SIZE 8
-//---
+//------------------------------------------------------------------------------------
 // Let's set some structs to work with along the gaem
-//---
+//------------------------------------------------------------------------------------
 typedef struct Entity Entity;
 struct Entity {
     int health;
@@ -34,6 +34,7 @@ struct Animable {
     Quaternion deltaDest;
     Vector2 deltaPos;
     float deltaRotation;
+    Vector2 offset;
     bool shader;              // Draw inside shader mode?
     bool repeat;              // Upon finishing, rewind animation?
 };
@@ -63,19 +64,18 @@ enum GameState {
 //------------------------------------------------------------------------------------
 void LoadDialog(int record, Dialog *dialog);
 void ParseDialog(char *line, Dialog *dialog);
-Animable *LoadAnimable(const char *animSheet, bool repeat, int index);
+Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 offset);
 void ParseAnimable(char *line, Animable *anim, bool loadTexture);
-void UpdateAnimable(Animable *anim, Shader shader);
-void DrawAnimable(Animable *anim, Shader shader, Vector2 offset);
+void UpdateAnimable(Animable *anim);
+void DrawAnimable(Animable *anim, Shader shader);
 void UnloadAnimable(Animable *anim);
-void LoadAnimation(int id);
+void LoadAnimation(int id, Vector2 offset);
 void UnloadAnimation(void);
 void ButtonX(void);
 void ButtonZ(void);
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
-
 GameState state = TITLE;                                      // INFO: Contains the current state of the game
 Animable *anims[ANIM_SIZE] = { NULL };                        // INFO: Animation handling and rendering
 FILE *animsData;                                              // INFO: Big file with every single independent animation data
@@ -93,6 +93,7 @@ int main() {
     const float virtualRatio = (float)screenWidth/(float)virtualScreenWidth;
 
     InitWindow(screenWidth, screenHeight, "Danse Macrab");
+    InitAudioDevice();
 
     SetExitKey(KEY_NULL);       // INFO: Disable KEY_ESCAPE to close window, X-button still works
     bool exitWindowRequested = false;   // Flag to request window to exit
@@ -114,7 +115,11 @@ int main() {
     Shader shader = LoadShader(0, "contour.fs");
     //SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture);  // INFO: General structure of how to load a texture
 
+    Music music = LoadMusicStream("./resources/sfx/title.mp3");
+    PlayMusicStream(music);
+
     int animCount;
+    int texCount;
 
     Dialog dialog = { 0, "Test", "Null", "NULL", "null", 1, "volfe" };
 
@@ -125,6 +130,7 @@ int main() {
         //---------------------------------------------------------------------------------
         // INFO: Update: This is for calculations and events which do not affect Texture or Drawing in a direct way
         //---------------------------------------------------------------------------------
+        UpdateMusicStream(music);   // Update music buffer with new stream data
         if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) exitWindowRequested = true;      // Detect if X-button or KEY_ESCAPE have been pressed to close window
         if (exitWindowRequested) {
             // A request for close window has been issued, we can save data before closing
@@ -135,7 +141,10 @@ int main() {
         else {
             //UpdateAnimable(test, shader);
             for (animCount = 0; animCount < ANIM_SIZE; animCount++) {
-                if (anims[animCount] != NULL) UpdateAnimable(anims[animCount], shader);
+                if (anims[animCount] != NULL) UpdateAnimable(anims[animCount]);
+            }
+            for (texCount = 0; texCount < TEX_SIZE; texCount++) {
+                SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), textures[texCount]);
             }
             if (IsKeyPressed(KEY_ENTER)) {
                 LoadDialog(dialog.next, &dialog);
@@ -158,10 +167,14 @@ int main() {
                     DrawText("Are you sure you want to exit program? [Y/N]", 40, 90, 8, WHITE);
                 }
                 else {
-                    //DrawAnimable(test, shader);     // TODO: A way to give offset to every anim in a smart way, useful when abilities
                     for (animCount = 0; animCount < ANIM_SIZE; animCount++) {
-                        if (anims[animCount] != NULL) DrawAnimable(anims[animCount], shader, (Vector2) { 0.0f });
+                        if (anims[animCount] != NULL) DrawAnimable(anims[animCount], shader);
                     }
+                    BeginShaderMode(shader);
+                        DrawTexturePro(textures[0], (Rectangle) {0, 304, 208, 160}, (Rectangle) {0, 0, 208, 160}, (Vector2) {-80, -38}, 0.0f, WHITE);
+                        DrawTexturePro(textures[0], (Rectangle) {0, 288, 188, 16}, (Rectangle) {0, 0, 188, 16}, (Vector2) {-60, -140}, 0.0f, WHITE);
+                        DrawTexturePro(textures[0], (Rectangle) {188, 288, 88, 16}, (Rectangle) {0, 0, 88, 16}, (Vector2) {-112, -156}, 0.0f, WHITE);
+                    EndShaderMode();
                     if (dialog.id) {
                         DrawText(dialog.name, 64, 120, 8, WHITE);
                         DrawText(dialog.line1, 64, 140, 8, WHITE);
@@ -187,9 +200,11 @@ int main() {
     //--------------------------------------------------------------------------------------
     UnloadShader(shader);
     UnloadRenderTexture(target);
-    for (animCount = 0; animCount < TEX_SIZE; animCount++) UnloadTexture(textures[animCount]);
+    for (texCount = 0; texCount < TEX_SIZE; texCount++) UnloadTexture(textures[texCount]);
     UnloadAnimation();
-    CloseWindow();        // Close window and OpenGL context
+    UnloadMusicStream(music);   // Unload music stream buffers from RAM
+    CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
+    CloseWindow();              // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
     return 0;
 }
@@ -241,7 +256,7 @@ void ParseDialog(char *line, Dialog *dialog) {
     dialog->emotion = atof(token);
 }
 
-Animable *LoadAnimable(const char *animSheet, bool repeat, int index) {
+Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 offset) {
     Animable *anim = (Animable*) malloc(sizeof(Animable));          // Dynamic allocation since many animables might be created and destroyed in quick successions, don't forget to free later
     if (anim != NULL) {
         char line[256];       // Line from the file that contains all the struct data
@@ -258,6 +273,7 @@ Animable *LoadAnimable(const char *animSheet, bool repeat, int index) {
             anim->data = file;
             anim->repeat = repeat;
             anim->index = index;
+            anim->offset = offset;
             return anim;
         }
         else {
@@ -334,7 +350,7 @@ void ParseAnimable(char *line, Animable *anim, bool loadTexture) {
     token = strtok_r(NULL, "	", &saveptr);
     anim->shader = (bool) atoi(token);
 }
-void UpdateAnimable(Animable *anim, Shader shader) {
+void UpdateAnimable(Animable *anim) {
     if (anim != NULL) {
         char line[256];
         anim->origin = QuaternionAdd(anim->origin, anim->deltaOrigin);
@@ -355,17 +371,16 @@ void UpdateAnimable(Animable *anim, Shader shader) {
             }
             else UnloadAnimable(anim);
         }
-        if (anim->shader) SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), textures[anim->textureIndex]);
     }
 }
-void DrawAnimable(Animable *anim, Shader shader, Vector2 offset) {
+void DrawAnimable(Animable *anim, Shader shader) {
     if (anim != NULL) {
         //printf("%u\n", anim->currentFrame);   // TODO: A good way of view the frame count as debug inside game
         if (anim->shader) BeginShaderMode(shader);
             DrawTexturePro(textures[anim->textureIndex],
                            (Rectangle) { anim->origin.w, anim->origin.x, anim->origin.y, anim->origin.z },
                            (Rectangle) { anim->dest.w, anim->dest.x, anim->dest.y, anim->dest.z },
-                           Vector2Add(anim->position, offset),
+                           Vector2Add(anim->position, anim->offset),
                            anim->rotation,
                            (Color) { (unsigned char) anim->color.w, (unsigned char) anim->color.x, (unsigned char) anim->color.y, (unsigned char) anim->color.z });
         if (anim->shader) EndShaderMode();
@@ -380,7 +395,7 @@ void UnloadAnimable(Animable *anim) {
         printf("INFO: ANIMABLE: Animable unloaded succesfully\n");
     }
 }
-void LoadAnimation(int id) {
+void LoadAnimation(int id, Vector2 offset) {
     if (animsData == NULL) {
         printf("ERROR: ANIMATION: Error opening animation file\n");
         return;
@@ -403,7 +418,7 @@ void LoadAnimation(int id) {
                         printf("INFO: ANIMATION: Direction %s\n", token);
                         repeat = (bool) atoi(strtok_r(NULL, "	", &saveptr));
                         printf("INFO: ANIMATION: Repeat %d\n", repeat);
-                        anims[j] = LoadAnimable(token, repeat, j);
+                        anims[j] = LoadAnimable(token, repeat, j, offset);
                         token = strtok_r(NULL, "	", &saveptr);
                         break;
                     }
@@ -435,7 +450,7 @@ void ButtonX(void) {
 void ButtonZ(void) {
     switch (state) {
         case TITLE:
-            LoadAnimation(0);
+            LoadAnimation(0, (Vector2) { 0 });
         case MAINMENU:
             break;
         default:

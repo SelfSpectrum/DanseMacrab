@@ -22,11 +22,12 @@ struct Entity {
 typedef struct Sprite Sprite;
 struct Sprite {
     int textureIndex;
-    Rectangle originOff;
-    Rectangle originOn;
+    Rectangle origin;
     Rectangle dest;
     Vector2 position;
+    float rotation;
     Color color;
+    bool shader;
 };
 typedef struct Animable Animable;
 struct Animable {
@@ -85,10 +86,11 @@ void UnloadAnimation(void);
 void PlaySecSound(int id);
 void LoadSprite(const char *spriteSheet);
 Sprite *ParseSprite(char *line);
-void DrawSprite(void);
+void DrawSprite(Shader shader);
 void UnloadSprite(void);
 void ButtonX(void);
 void ButtonZ(void);
+void SetState(GameState newState);
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -142,10 +144,10 @@ int main() {
     SetMusicVolume(music, 1.0f);
     int animCount;
     int texCount;
-    int spriteCount;
     int sfxCount;
 
     Dialog dialog = { 0, "Test", "Null", "NULL", "null", 1, "volfe" };
+    SetState(TITLE);
 
     SetTargetFPS(60);           // INFO: Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -174,12 +176,8 @@ int main() {
                 LoadDialog(dialog.next, &dialog);
                 //printf("Id: %d\tNext: %d\tFile: %s\n%s\n%s\n%s\n%s\n", dialog.id, dialog.next, dialog.file, dialog.name, dialog.line1, dialog.line2, dialog.line3);
             }
-            if (IsKeyPressed(KEY_Z)) {
-                ButtonZ();
-            }
-            if (IsKeyPressed(KEY_X)) {
-                ButtonX();
-            }
+            if (IsKeyPressed(KEY_Z)) ButtonZ();
+            if (IsKeyPressed(KEY_X)) ButtonX();
         }
         //----------------------------------------------------------------------------------
         // INFO: Texture: In this texture mode I create an smaller version of the game which is later rescaled in the draw mode
@@ -194,11 +192,7 @@ int main() {
                     for (animCount = 0; animCount < ANIM_SIZE; animCount++) {
                         if (anims[animCount] != NULL) DrawAnimable(anims[animCount], shader);
                     }
-                    BeginShaderMode(shader);
-                        DrawTexturePro(textures[0], (Rectangle) {0, 304, 208, 160}, (Rectangle) {0, 0, 208, 160}, (Vector2) {-80, -38}, 0.0f, WHITE);
-                        DrawTexturePro(textures[0], (Rectangle) {0, 288, 188, 16}, (Rectangle) {0, 0, 188, 16}, (Vector2) {-60, -140}, 0.0f, WHITE);
-                        DrawTexturePro(textures[0], (Rectangle) {188, 288, 88, 16}, (Rectangle) {0, 0, 88, 16}, (Vector2) {-112, -156}, 0.0f, WHITE);
-                    EndShaderMode();
+                    DrawSprite(shader);
                     if (dialog.id) {
                         DrawText(dialog.name, 64, 120, 8, WHITE);
                         DrawText(dialog.line1, 64, 140, 8, WHITE);
@@ -468,8 +462,14 @@ void LoadSprite(const char *spriteSheet) {
     FILE *file = fopen(spriteSheet, "r");
     if (file != NULL) {
         char line[256];
+        int i;
         while (fgets(line, sizeof(line), file)) {
-            ParseSprite(line);
+            for (i = 0; i < DRAW_SIZE; i++) {
+                if (sprites[i] == NULL) {
+                    sprites[i] = ParseSprite(line);
+                    break;
+                }
+            }
         }
     }
     fclose(file);
@@ -482,21 +482,13 @@ Sprite *ParseSprite(char *line) {
         token = strtok_r(line, "	", &saveptr);
         sprite->textureIndex = atoi(token);
         token = strtok_r(NULL, "	", &saveptr);
-        sprite->originOff.x = atof(token);
+        sprite->origin.x = atof(token);
         token = strtok_r(NULL, "	", &saveptr);
-        sprite->originOff.y = atof(token);
+        sprite->origin.y = atof(token);
         token = strtok_r(NULL, "	", &saveptr);
-        sprite->originOff.width = atof(token);
+        sprite->origin.width = atof(token);
         token = strtok_r(NULL, "	", &saveptr);
-        sprite->originOff.height = atof(token);
-        token = strtok_r(NULL, "	", &saveptr);
-        sprite->originOn.x = atof(token);
-        token = strtok_r(NULL, "	", &saveptr);
-        sprite->originOn.y = atof(token);
-        token = strtok_r(NULL, "	", &saveptr);
-        sprite->originOn.width = atof(token);
-        token = strtok_r(NULL, "	", &saveptr);
-        sprite->originOn.height = atof(token);
+        sprite->origin.height = atof(token);
         token = strtok_r(NULL, "	", &saveptr);
         sprite->dest.x = atof(token);
         token = strtok_r(NULL, "	", &saveptr);
@@ -517,8 +509,25 @@ Sprite *ParseSprite(char *line) {
         sprite->color.b = (char) atoi(token);
         token = strtok_r(NULL, "	", &saveptr);
         sprite->color.a = (char) atoi(token);
+        token = strtok_r(NULL, "	", &saveptr);
+        sprite->shader = (bool) atoi(token);
     }
     return sprite;
+}
+void DrawSprite(Shader shader) {
+    int i;
+    for (i = 0; i < DRAW_SIZE; i++) {
+        if (sprites[i] != NULL  ) {
+            if (sprites[i]->shader) BeginShaderMode(shader);
+            DrawTexturePro(textures[sprites[i]->textureIndex],
+                           sprites[i]->origin,
+                           sprites[i]->dest,
+                           sprites[i]->position,
+                           sprites[i]->rotation,
+                           sprites[i]->color);
+            if (sprites[i]->shader) EndShaderMode();
+        }
+    }
 }
 void UnloadSprite(void) {
     int i;
@@ -549,10 +558,24 @@ void ButtonX(void) {
 void ButtonZ(void) {
     switch (state) {
         case TITLE:
-            LoadAnimation(0, (Vector2) { 0 });
             PlaySecSound(0);
         case MAINMENU:
             break;
+        default:
+            break;
+    }
+}
+void SetState(GameState newState) {
+    UnloadSprite();
+    UnloadAnimation();
+    state = newState;
+    switch (state) {
+        case TITLE:
+            LoadSprite("./resources/layout/mainTitle.tsv");
+            LoadAnimation(0, (Vector2) { 0 });
+            break;
+//        case MAINMENU:
+//            LoadSprite("./resources/layout/mainMenu.tsv");
         default:
             break;
     }

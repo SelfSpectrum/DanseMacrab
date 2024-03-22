@@ -10,14 +10,45 @@
 #define SOUND_SIZE 8
 #define SFXALIAS_SIZE 8
 #define DRAW_SIZE 16
-//------------------------------------------------------------------------------------
-// Let's set some structs to work with along the gaem
+
+// INFO: Let's set some structs to work with along the gaem
 //------------------------------------------------------------------------------------
 typedef struct Entity Entity;
 struct Entity {
+    // INFO: VITALS
+    int maxHealth;
     int health;
-    //Sprite *sprite;           // Might me wrong xd
-    //Animable *anim;           // Might be useful? Is this even the correct way? No idea
+    int maxStamina;
+    int stamina;
+    int maxStress;
+    int stress;
+    // INFO: ATTRIBUTES
+    int physique;
+    int reflex;
+    int lore;
+    int charisma;
+    // INFO: STATS
+    float attack;
+    float defense;
+    float special;
+    float resistance;
+    float precision;
+    float evasion;
+    // INFO: OTHER STUFF
+    char name[64];
+    Sprite *sprite;             // Might be wrong xd
+    //Animable *anim;             // Might be useful? Is this even the correct way? No idea
+};
+typedef struct Player Player;
+struct Player {
+    char class[32];
+    //Weapon weapon;
+    //Armor armor;
+    //Charm charm;
+};
+typedef struct Enemy Enemy;
+struct Enemy {
+    char description[256];
 };
 typedef struct Sprite Sprite;
 struct Sprite {
@@ -28,6 +59,11 @@ struct Sprite {
     float rotation;
     Color color;
     bool shader;
+};
+typedef struct Combat Combat;
+struct Combat {
+    Entity enemy[5];
+    Entity playable[5];
 };
 typedef struct Animable Animable;
 struct Animable {
@@ -69,10 +105,8 @@ enum GameState {
 };
 
 // TODO: Perhaps a good way to clean code is by turning the whole dual camera system into an struct and some functions
-// TODO: Need to implement the CircularBuffer along its functions
 
-//------------------------------------------------------------------------------------
-// Function declarations
+// INFO: Function declarations
 //------------------------------------------------------------------------------------
 void LoadDialog(int record, Dialog *dialog);
 void ParseDialog(char *line, Dialog *dialog);
@@ -91,8 +125,8 @@ void UnloadSprite(void);
 void ButtonX(void);
 void ButtonZ(void);
 void SetState(GameState newState);
-//------------------------------------------------------------------------------------
-// Program main entry point
+
+// INFO: Program main entry point
 //------------------------------------------------------------------------------------
 GameState state = TITLE;                                      // INFO: Contains the current state of the game
 Animable *anims[ANIM_SIZE] = { NULL };                        // INFO: Animation handling and rendering
@@ -150,12 +184,12 @@ int main() {
     SetState(TITLE);
 
     SetTargetFPS(60);           // INFO: Set our game to run at 60 frames-per-second
+
+    // INFO: Main game loop
     //--------------------------------------------------------------------------------------
-    // Main game loop
     while (!exitWindow) {
-        //---------------------------------------------------------------------------------
         // INFO: Update: This is for calculations and events which do not affect Texture or Drawing in a direct way
-        //---------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------------
         UpdateMusicStream(music);   // Update music buffer with new stream data
         if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) exitWindowRequested = true;      // Detect if X-button or KEY_ESCAPE have been pressed to close window
         if (exitWindowRequested) {
@@ -179,7 +213,6 @@ int main() {
             if (IsKeyPressed(KEY_Z)) ButtonZ();
             if (IsKeyPressed(KEY_X)) ButtonX();
         }
-        //----------------------------------------------------------------------------------
         // INFO: Texture: In this texture mode I create an smaller version of the game which is later rescaled in the draw mode
         //----------------------------------------------------------------------------------
         BeginTextureMode(target);
@@ -202,7 +235,6 @@ int main() {
                 }
             EndMode2D();
         EndTextureMode();
-        //----------------------------------------------------------------------------------
         // INFO: Draw: Take the texture in lower resolution and rescale it to a bigger res, all this while preserving pixel perfect
         //----------------------------------------------------------------------------------
         BeginDrawing();
@@ -212,9 +244,8 @@ int main() {
             EndMode2D();
             DrawFPS(10, 10);
         EndDrawing();
-        //----------------------------------------------------------------------------------
     }
-    // De-Initialization
+    // INFO: De-Initialization
     //--------------------------------------------------------------------------------------
     StopMusicStream(music);
     UnloadShader(shader);
@@ -227,7 +258,6 @@ int main() {
     for (sfxCount = 0; sfxCount < SOUND_SIZE; sfxCount++) UnloadSound(sounds[sfxCount]);
     CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
     CloseWindow();              // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
     return 0;
 }
 
@@ -306,9 +336,9 @@ Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 of
     return anim;
 }
 void ParseAnimable(char *line, Animable *anim, bool loadTexture) {
-    char *token;      // 
-    char *saveptr;    // 
-    token = strtok_r(line, "	", &saveptr); // A line of animation folllow the following pattern: u4 str f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 i4
+    char *token;
+    char *saveptr;
+    token = strtok_r(line, "	", &saveptr);
     anim->frame = (unsigned int) atoi(token);
     token = strtok_r(NULL, "	", &saveptr);
     //if (loadTexture) {

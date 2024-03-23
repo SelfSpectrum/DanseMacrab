@@ -13,8 +13,8 @@
 
 // INFO: Let's set some structs to work with along the gaem
 //------------------------------------------------------------------------------------
-typedef struct Entity Entity;
-struct Entity {
+typedef struct Player Player;
+struct Player {
     // INFO: VITALS
     int maxHealth;
     int health;
@@ -36,19 +36,71 @@ struct Entity {
     float evasion;
     // INFO: OTHER STUFF
     char name[64];
+    char class[32];
+    Weapon weapon;
+    Armor armor;
+    Charm charm;
     Sprite *sprite;             // Might be wrong xd
     //Animable *anim;             // Might be useful? Is this even the correct way? No idea
 };
-typedef struct Player Player;
-struct Player {
-    char class[32];
-    //Weapon weapon;
-    //Armor armor;
-    //Charm charm;
-};
 typedef struct Enemy Enemy;
 struct Enemy {
+    // INFO: VITALS
+    int maxHealth;
+    int health;
+    int maxStamina;
+    int stamina;
+    int maxStress;
+    int stress;
+    // INFO: ATTRIBUTES
+    int physique;
+    int reflex;
+    int lore;
+    int charisma;
+    // INFO: STATS
+    float attack;
+    float defense;
+    float special;
+    float resistance;
+    float precision;
+    float evasion;
+    // INFO: OTHER STUFF
+    char name[64];
     char description[256];
+    DamageType weakness[2];
+    DamageType resistances[2];
+    Sprite *sprite;             // Might be wrong xd
+    //Animable *anim;             // Might be useful? Is this even the correct way? No idea
+};
+typedef struct Weapon Weapon;
+struct Weapon {
+    char name[64];
+    char description[256];
+    int cost;
+    Technique attack;
+    Technique tech;
+};
+typedef struct Armor Armor;
+struct Armor {
+    char name[64];
+    char description[256];
+    int cost;
+    Technique tech;
+};
+typedef struct Charm Charm;
+struct Charm {
+    int health;
+    int stamina;
+    int health;
+    float attack;
+    float defense;
+    float special;
+    float resistance;
+};
+typedef struct Technique Technique;
+struct Technique {
+    int power;
+    int precision;
 };
 typedef struct Sprite Sprite;
 struct Sprite {
@@ -100,8 +152,20 @@ struct Dialog {
 
 typedef enum GameState GameState;
 enum GameState {
-    TITLE = 0,
-    MAINMENU = 1
+    STATE_TITLE = 0,
+    STATE_MAINMENU = 1,
+    STATE_FIGHT = 2
+};
+typedef enum DamageType DamageType;
+enum DamageType {
+    DMG_NONE = 0,
+    DMG_SLASHING = 1,
+    DMG_BLUDGEONING = 2,
+    DMG_PIERCING = 3,
+    DMG_FIRE = 4,
+    DMG_ICE = 5,
+    DMG_ACID = 6,
+    DMG_PSYCHIC = 7
 };
 
 // TODO: Perhaps a good way to clean code is by turning the whole dual camera system into an struct and some functions
@@ -600,12 +664,15 @@ void SetState(GameState newState) {
     UnloadAnimation();
     state = newState;
     switch (state) {
-        case TITLE:
+        case STATE_TITLE:
             LoadSprite("./resources/layout/mainTitle.tsv");
             LoadAnimation(0, (Vector2) { 0 });
+            SetState(STATE_FIGHT);
             break;
-//        case MAINMENU:
+//        case STATE_MAINMENU:
 //            LoadSprite("./resources/layout/mainMenu.tsv");
+        case STATE_FIGHT:
+            break;
         default:
             break;
     }

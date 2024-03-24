@@ -13,7 +13,99 @@
 
 // INFO: Let's set some structs to work with along the gaem
 //------------------------------------------------------------------------------------
+
 typedef struct Player Player;
+typedef struct Enemy Enemy;
+typedef struct Weapon Weapon;
+typedef struct Armor Armor;
+typedef struct Charm Charm;
+typedef struct Technique Technique;
+typedef struct Sprite Sprite;
+typedef struct Animable Animable;
+typedef struct Combat Combat;
+typedef struct Dialog Dialog;
+typedef union Entity Entity;
+typedef enum GameState GameState;
+typedef enum DamageType DamageType;
+
+struct Technique {
+    int power;
+    int precision;
+};
+struct Weapon {
+    char name[64];
+    char description[256];
+    int cost;
+    Technique attack;
+    Technique tech;
+};
+struct Armor {
+    char name[64];
+    char description[256];
+    int cost;
+    Technique tech;
+};
+struct Charm {
+    int health;
+    int stamina;
+    int stress;
+    float attack;
+    float defense;
+    float special;
+    float resistance;
+};
+struct Sprite {
+    int textureIndex;
+    Rectangle origin;
+    Rectangle dest;
+    Vector2 position;
+    float rotation;
+    bool shader;
+};
+struct Animable {
+    unsigned int frame;       // Frame needed to change to the next event
+    unsigned int currentFrame;// Current frame of animation
+    int index;
+    FILE *data;               // File that contains the animation data
+    //Texture2D texture;      // INFO: Deprecated: Texture from where the sample will come
+    int textureIndex;         // Index in the Texture array from where the sample will come
+    Quaternion origin;        // Rectangle of origin to get the texture sample
+    Quaternion dest;          // Rectangle of destination to place the texture sample
+    Vector2 position;         // Position of the destination???
+    float rotation;           // Rotation of the texture sample
+    Quaternion deltaOrigin;
+    Quaternion deltaDest;
+    Vector2 deltaPos;
+    float deltaRotation;
+    Vector2 offset;
+    bool shader;              // Draw inside shader mode?
+    bool repeat;              // Upon finishing, rewind animation?
+};
+struct Dialog {
+    int id;
+    char name[64];
+    char line1[64];
+    char line2[64];
+    char line3[64];
+    int next;
+    char file[64];
+    int emotion;
+};
+enum GameState {
+    STATE_TITLE = 0,
+    STATE_MAINMENU = 1,
+    STATE_FIGHT = 2
+};
+enum DamageType {
+    DMG_NONE = 0,
+    DMG_SLASHING = 1,
+    DMG_BLUDGEONING = 2,
+    DMG_PIERCING = 3,
+    DMG_FIRE = 4,
+    DMG_ICE = 5,
+    DMG_ACID = 6,
+    DMG_PSYCHIC = 7
+};
 struct Player {
     // INFO: VITALS
     int maxHealth;
@@ -43,129 +135,41 @@ struct Player {
     Sprite *sprite;             // Might be wrong xd
     //Animable *anim;             // Might be useful? Is this even the correct way? No idea
 };
-typedef struct Enemy Enemy;
 struct Enemy {
-    // INFO: VITALS
-    int maxHealth;
-    int health;
-    int maxStamina;
-    int stamina;
-    int maxStress;
-    int stress;
-    // INFO: ATTRIBUTES
-    int physique;
-    int reflex;
-    int lore;
-    int charisma;
-    // INFO: STATS
-    float attack;
-    float defense;
-    float special;
-    float resistance;
-    float precision;
-    float evasion;
-    // INFO: OTHER STUFF
-    char name[64];
-    char description[256];
-    DamageType weakness[2];
-    DamageType resistances[2];
-    Sprite *sprite;             // Might be wrong xd
-    //Animable *anim;             // Might be useful? Is this even the correct way? No idea
+	// INFO: VITALS
+	int maxHealth;
+	int health;
+	int maxStamina;
+	int stamina;
+	int maxStress;
+	int stress;
+	// INFO: ATTRIBUTES
+	int physique;
+	int reflex;
+	int lore;
+	int charisma;
+	// INFO: STATS
+	float attack;
+	float defense;
+	float special;
+	float resistance;
+	float precision;
+	float evasion;
+	// INFO: OTHER STUFF
+	char name[64];
+	char description[256];
+	DamageType weakness[2];
+	DamageType resistances[2];
+	Sprite *sprite;             // Might be wrong xd
+	//Animable *anim;             // Might be useful? Is this even the correct way? No idea
 };
-typedef struct Weapon Weapon;
-struct Weapon {
-    char name[64];
-    char description[256];
-    int cost;
-    Technique attack;
-    Technique tech;
+union Entity {
+	Enemy enemy;
+	Player player;
 };
-typedef struct Armor Armor;
-struct Armor {
-    char name[64];
-    char description[256];
-    int cost;
-    Technique tech;
-};
-typedef struct Charm Charm;
-struct Charm {
-    int health;
-    int stamina;
-    int health;
-    float attack;
-    float defense;
-    float special;
-    float resistance;
-};
-typedef struct Technique Technique;
-struct Technique {
-    int power;
-    int precision;
-};
-typedef struct Sprite Sprite;
-struct Sprite {
-    int textureIndex;
-    Rectangle origin;
-    Rectangle dest;
-    Vector2 position;
-    float rotation;
-    Color color;
-    bool shader;
-};
-typedef struct Combat Combat;
 struct Combat {
-    Entity enemy[5];
-    Entity playable[5];
-};
-typedef struct Animable Animable;
-struct Animable {
-    unsigned int frame;       // Frame needed to change to the next event
-    unsigned int currentFrame;// Current frame of animation
-    int index;
-    FILE *data;               // File that contains the animation data
-    //Texture2D texture;      // INFO: Deprecated: Texture from where the sample will come
-    int textureIndex;         // Index in the Texture array from where the sample will come
-    Quaternion origin;        // Rectangle of origin to get the texture sample
-    Quaternion dest;          // Rectangle of destination to place the texture sample
-    Vector2 position;         // Position of the destination???
-    float rotation;           // Rotation of the texture sample
-    Quaternion color;         // Tint of the texture sample
-    Quaternion deltaOrigin;
-    Quaternion deltaDest;
-    Vector2 deltaPos;
-    float deltaRotation;
-    Vector2 offset;
-    bool shader;              // Draw inside shader mode?
-    bool repeat;              // Upon finishing, rewind animation?
-};
-typedef struct Dialog Dialog;
-struct Dialog {
-    int id;
-    char name[64];
-    char line1[64];
-    char line2[64];
-    char line3[64];
-    int next;
-    char file[64];
-    int emotion;
-};
-
-typedef enum GameState GameState;
-enum GameState {
-    STATE_TITLE = 0,
-    STATE_MAINMENU = 1,
-    STATE_FIGHT = 2
-};
-typedef enum DamageType DamageType;
-enum DamageType {
-    DMG_NONE = 0,
-    DMG_SLASHING = 1,
-    DMG_BLUDGEONING = 2,
-    DMG_PIERCING = 3,
-    DMG_FIRE = 4,
-    DMG_ICE = 5,
-    DMG_ACID = 6,
-    DMG_PSYCHIC = 7
+	Entity enemy[5];
+	Entity playable[5];
 };
 
 // TODO: Perhaps a good way to clean code is by turning the whole dual camera system into an struct and some functions
@@ -192,14 +196,15 @@ void SetState(GameState newState);
 
 // INFO: Program main entry point
 //------------------------------------------------------------------------------------
-GameState state = TITLE;                                      // INFO: Contains the current state of the game
-Animable *anims[ANIM_SIZE] = { NULL };                        // INFO: Animation handling and rendering
-FILE *animsData;                                              // INFO: Big file with every single independent animation data
-Texture2D textures[TEX_SIZE];                                 // INFO: Here I hold all the texture used in the game
-Sound sounds[SOUND_SIZE];                                     // INFO: Here I hold all the sounds used in the game
-Sound sfxAlias[SFXALIAS_SIZE];                                // INFO: Used to reproduce several sounds at once
-int sfxPos = 0;                                               // INFO: Universal position to locate one "free" sfxAlias
-Sprite *sprites[DRAW_SIZE] = { NULL };                        // INFO: What and where to render
+GameState state = STATE_TITLE;					// INFO: Contains the current state of the game
+Animable *anims[ANIM_SIZE] = { NULL };				// INFO: Animation handling and rendering
+FILE *animsData;						// INFO: Big file with every single independent animation data
+Texture2D textures[TEX_SIZE];					// INFO: Here I hold all the texture used in the game
+Sound sounds[SOUND_SIZE];					// INFO: Here I hold all the sounds used in the game
+Sound sfxAlias[SFXALIAS_SIZE];					// INFO: Used to reproduce several sounds at once
+int sfxPos = 0;							// INFO: Universal position to locate one "free" sfxAlias
+Sprite *sprites[DRAW_SIZE] = { NULL };				// INFO: What and where to render
+Color globalColor = { 255, 0, 0, 5 };				// INFO: Global color used to render the white lines in all textures as colors
 
 int main() {
     // Initialization
@@ -245,7 +250,7 @@ int main() {
     int sfxCount;
 
     Dialog dialog = { 0, "Test", "Null", "NULL", "null", 1, "volfe" };
-    SetState(TITLE);
+    SetState(STATE_TITLE);
 
     SetTargetFPS(60);           // INFO: Set our game to run at 60 frames-per-second
 
@@ -433,14 +438,6 @@ void ParseAnimable(char *line, Animable *anim, bool loadTexture) {
     token = strtok_r(NULL, "	", &saveptr);
     anim->rotation = atof(token);
     token = strtok_r(NULL, "	", &saveptr);
-    anim->color.w = atof(token);
-    token = strtok_r(NULL, "	", &saveptr);
-    anim->color.x = atof(token);
-    token = strtok_r(NULL, "	", &saveptr);
-    anim->color.y = atof(token);
-    token = strtok_r(NULL, "	", &saveptr);
-    anim->color.z = atof(token);
-    token = strtok_r(NULL, "	", &saveptr);
     anim->deltaOrigin.w = atof(token);
     token = strtok_r(NULL, "	", &saveptr);
     anim->deltaOrigin.x = atof(token);
@@ -497,7 +494,7 @@ void DrawAnimable(Animable *anim, Shader shader) {
                            (Rectangle) { anim->dest.w, anim->dest.x, anim->dest.y, anim->dest.z },
                            Vector2Add(anim->position, anim->offset),
                            anim->rotation,
-                           (Color) { (unsigned char) anim->color.w, (unsigned char) anim->color.x, (unsigned char) anim->color.y, (unsigned char) anim->color.z });
+                           globalColor);
         if (anim->shader) EndShaderMode();
     }
 }
@@ -595,14 +592,8 @@ Sprite *ParseSprite(char *line) {
         sprite->position.x = atof(token);
         token = strtok_r(NULL, "	", &saveptr);
         sprite->position.y = atof(token);
-        token = strtok_r(NULL, "	", &saveptr);
-        sprite->color.r = (char) atoi(token);
-        token = strtok_r(NULL, "	", &saveptr);
-        sprite->color.g = (char) atoi(token);
-        token = strtok_r(NULL, "	", &saveptr);
-        sprite->color.b = (char) atoi(token);
-        token = strtok_r(NULL, "	", &saveptr);
-        sprite->color.a = (char) atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	sprite->rotation = atof(token);
         token = strtok_r(NULL, "	", &saveptr);
         sprite->shader = (bool) atoi(token);
     }
@@ -618,7 +609,7 @@ void DrawSprite(Shader shader) {
                            sprites[i]->dest,
                            sprites[i]->position,
                            sprites[i]->rotation,
-                           sprites[i]->color);
+                           globalColor);
             if (sprites[i]->shader) EndShaderMode();
         }
     }
@@ -641,9 +632,9 @@ void PlaySecSound(int id) {
 }
 void ButtonX(void) {
     switch (state) {
-        case TITLE:
+        case STATE_TITLE:
             UnloadAnimation();
-        case MAINMENU:
+        case STATE_MAINMENU:
             break;
         default:
             break;
@@ -651,9 +642,10 @@ void ButtonX(void) {
 }
 void ButtonZ(void) {
     switch (state) {
-        case TITLE:
+        case STATE_TITLE:
             PlaySecSound(0);
-        case MAINMENU:
+            SetState(STATE_FIGHT);
+        case STATE_MAINMENU:
             break;
         default:
             break;
@@ -667,7 +659,6 @@ void SetState(GameState newState) {
         case STATE_TITLE:
             LoadSprite("./resources/layout/mainTitle.tsv");
             LoadAnimation(0, (Vector2) { 0 });
-            SetState(STATE_FIGHT);
             break;
 //        case STATE_MAINMENU:
 //            LoadSprite("./resources/layout/mainMenu.tsv");

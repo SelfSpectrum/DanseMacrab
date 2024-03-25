@@ -41,6 +41,16 @@ struct Sprite {
 	float rotation;
 	bool shader;
 };
+struct Button {
+	int textureIndex;
+	Rectangle originOff;
+	Rectangle originOn;
+	Rectangle dest;
+	Vector2 position;
+	float rotation;
+	bool shader;
+	bool selected;
+};
 struct Animable {
 	unsigned int frame;       // Frame needed to change to the next event
 	unsigned int currentFrame;// Current frame of animation
@@ -75,10 +85,6 @@ enum GameState {
 	STATE_MAINMENU,
 	STATE_SELECTCARDS,
 	STATE_FIGHT
-};
-struct Button Button {
-	Sprite *spriteOff;
-	Sprite *spriteOn;
 };
 enum DamageType {
 	DMG_NONE = 0,
@@ -120,13 +126,12 @@ struct Armor {
 };
 struct Charm {
 	EquipType type;
+	char name[64];
+	char description[256];
+	int cost;
 	int health;
 	int stamina;
 	int stress;
-	float attack;
-	float defense;
-	float special;
-	float resistance;
 };
 union Equip {
 	Weapon weapon;
@@ -190,6 +195,7 @@ struct Combat {
 
 // INFO: Function declarations
 //------------------------------------------------------------------------------------
+// INFO: GFX functions
 void LoadDialog(int record, Dialog *dialog);
 void ParseDialog(char *line, Dialog *dialog);
 Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 offset);
@@ -199,15 +205,22 @@ void DrawAnimable(Animable *anim, Shader shader);
 void UnloadAnimable(Animable *anim);
 void LoadAnimation(int id, Vector2 offset);
 void UnloadAnimation(void);
-void PlaySecSound(int id);
 void LoadSprite(const char *spriteSheet);
 Sprite *ParseSprite(char *line);
 void DrawSprite(Shader shader);
 void UnloadSprite(void);
 void LoadCombat(const char *combatSheet);
-void ButtonX(void);
-void ButtonZ(void);
+void LoadButton(const char *buttonSheet);
+Button *ParseButton(char *line);
+void DrawButton(Shader shader);
+void UnloadButton(void);
+// INFO: Input functions
+void Accept(void);
+void Cancel(void);
+void Menu(void);
 void SetState(GameState newState);
+// INFO: SFX functions
+void PlaySecSound(int id);
 
 // INFO: Program main entry point
 //------------------------------------------------------------------------------------
@@ -222,7 +235,8 @@ Sprite *sprites[DRAW_SIZE] = { NULL };				// INFO: What and where to render
 Color globalColor = { 255, 0, 0, 255 };				// INFO: Global color used to render the white lines in all textures as colors
 Combat combat = { { NULL }, { NULL } };				// INFO: Data from position, entities and stuff for combat
 Button *buttons[BUTTON_SIZE] = { NULL };			// INFO: Set of buttons. Ideal to load per state
-int buttonAmount;						// INFO: Useful when needed to wrap around the buttons
+int buttonAmount = 0;						// INFO: Useful when needed to wrap around the buttons
+int buttonPosition = 0;
 
 int main() {
 	// Initialization
@@ -252,6 +266,11 @@ int main() {
 
 	animsData = fopen("./resources/anims/animations.tsv", "r");
 	textures[0] = LoadTexture("./resources/gfx/bigSprites00.png");
+	textures[3] = LoadTexture("./resources/gfx/cards.png");
+	textures[4] = LoadTexture("./resources/gfx/UI.png");
+	textures[5] = LoadTexture("./resources/gfx/abilities.png");
+	textures[6] = LoadTexture("./resources/gfx/attacks.png");
+	textures[7] = LoadTexture("./resources/gfx/entities.png");
 
 	//Animable *test = LoadAnimable("./resources/anims/mainMenu/crab.tsv", true);                   // TODO: Delete test and load a whole anim with anims
 
@@ -296,8 +315,8 @@ int main() {
 				LoadDialog(dialog.next, &dialog);
 				//printf("Id: %d\tNext: %d\tFile: %s\n%s\n%s\n%s\n%s\n", dialog.id, dialog.next, dialog.file, dialog.name, dialog.line1, dialog.line2, dialog.line3);
 			}
-			if (IsKeyPressed(KEY_Z)) ButtonZ();
-			if (IsKeyPressed(KEY_X)) ButtonX();
+			if (IsKeyPressed(KEY_Z)) Accept();
+			if (IsKeyPressed(KEY_X)) Cancel();
 		}
 		// INFO: Texture: In this texture mode I create an smaller version of the game which is later rescaled in the draw mode
 		//----------------------------------------------------------------------------------
@@ -312,6 +331,7 @@ int main() {
 						if (anims[animCount] != NULL) DrawAnimable(anims[animCount], shader);
 					}
 					DrawSprite(shader);
+					DrawButton(shader);
 					if (dialog.id) {
 						DrawText(dialog.name, 64, 120, 8, WHITE);
 						DrawText(dialog.line1, 64, 140, 8, WHITE);
@@ -337,6 +357,7 @@ int main() {
 	UnloadShader(shader);
 	UnloadRenderTexture(target);
 	UnloadSprite();
+	UnloadButton();
 	for (texCount = 0; texCount < TEX_SIZE; texCount++) UnloadTexture(textures[texCount]);
 	UnloadAnimation();
 	UnloadMusicStream(music);   // Unload music stream buffers from RAM
@@ -344,6 +365,7 @@ int main() {
 	for (sfxCount = 0; sfxCount < SOUND_SIZE; sfxCount++) UnloadSound(sounds[sfxCount]);
 	CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
 	CloseWindow();              // Close window and OpenGL context
+	fclose(animsData);
 	return 0;
 }
 
@@ -615,7 +637,7 @@ void DrawSprite(Shader shader) {
 					sprites[i]->dest,
 					sprites[i]->position,
 					sprites[i]->rotation,
-                           globalColor);
+					globalColor);
 			if (sprites[i]->shader) EndShaderMode();
 		}
 	}
@@ -629,6 +651,91 @@ void UnloadSprite(void) {
 		}
 	}
 }
+void LoadButton(const char *spriteSheet) {
+	FILE *file = fopen(spriteSheet, "r");
+	if (file != NULL) {
+		char line[256];
+		int i;
+		while (fgets(line, sizeof(line), file)) {
+			for (i = 0; i < BUTTON_SIZE; i++) {
+				if (buttons[i] == NULL) {
+					buttons[i] = ParseButton(line);
+					buttonAmount++;
+					break;
+				}
+			}
+		}
+	}
+	fclose(file);
+}
+Button *ParseButton(char *line) {
+	Button *button = (Button *) malloc(sizeof(Button));
+	char *token;
+	char *saveptr;
+	if (button != NULL) {
+		token = strtok_r(line, "	", &saveptr);
+		button->textureIndex = atoi(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		button->originOff.x = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		button->originOff.y = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		button->originOff.width = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		button->originOff.height = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		button->originOn.x = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		button->originOn.y = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		button->originOn.width = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		button->originOn.height = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		button->dest.x = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		button->dest.y = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		button->dest.width = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		button->dest.height = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		button->position.x = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		button->position.y = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		button->rotation = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		button->shader = (bool) atoi(token);
+		button->selected = false;
+	}
+	return button;
+}
+void DrawButton(Shader shader) {
+	int i;
+	for (i = 0; i < BUTTON_SIZE; i++) {
+		if (buttons[i] != NULL  ) {
+			if (buttons[i]->shader) BeginShaderMode(shader);
+			DrawTexturePro(textures[buttons[i]->textureIndex],
+					(buttons[i]->selected) ? buttons[i]->originOn : buttons[i]->originOff,
+					buttons[i]->dest,
+					buttons[i]->position,
+					buttons[i]->rotation,
+					globalColor);
+			if (buttons[i]->shader) EndShaderMode();
+		}
+	}
+}
+void UnloadButton(void) {
+	int i;
+	buttonAmount = 0;
+	for (i = 0; i < BUTTON_SIZE; i++) {
+		if (buttons[i] != NULL) {
+			free(buttons[i]);
+			buttons[i] = NULL;
+		}
+	}
+}
 void PlaySecSound(int id) {
 	id = id % SOUND_SIZE;
 	UnloadSoundAlias(sfxAlias[sfxPos]);
@@ -636,17 +743,15 @@ void PlaySecSound(int id) {
 	PlaySound(sfxAlias[sfxPos]);
 	sfxPos = (sfxPos + 1) % SFXALIAS_SIZE;
 }
-void ButtonX(void) {
-	switch (state) {
-		case STATE_TITLE:
-			break;
-		case STATE_MAINMENU:
-			break;
-		default:
-			break;
+void Menu(void) {
+	if (buttonAmount > 0) {
+		if (IsKeyPressed(KEY_LEFT)) {
+			buttons[buttonPosition]->selected = false;
+			buttonPosition++;
+		}
 	}
 }
-void ButtonZ(void) {
+void Accept(void) {
 	switch (state) {
 		case STATE_TITLE:
 			PlaySecSound(0);
@@ -657,9 +762,20 @@ void ButtonZ(void) {
 			break;
 	}
 }
+void Cancel(void) {
+	switch (state) {
+		case STATE_TITLE:
+			break;
+		case STATE_MAINMENU:
+			break;
+		default:
+			break;
+	}
+}
 void SetState(GameState newState) {
 	UnloadSprite();
 	UnloadAnimation();
+	UnloadButton();
 	state = newState;
 	switch (state) {
 		case STATE_TITLE:
@@ -670,6 +786,7 @@ void SetState(GameState newState) {
 			LoadSprite("./resources/layout/mainMenu.tsv");
 			break;
 		case STATE_FIGHT:
+			LoadButton("./resources/layout/fightButtons.tsv");
 			break;
 		default:
 			break;

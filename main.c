@@ -10,6 +10,7 @@
 #define SOUND_SIZE 8
 #define SFXALIAS_SIZE 8
 #define DRAW_SIZE 16
+#define BUTTON_SIZE 8
 
 // INFO: Let's set some structs to work with along the gaem
 //------------------------------------------------------------------------------------
@@ -24,6 +25,7 @@ typedef struct Sprite Sprite;
 typedef struct Animable Animable;
 typedef struct Combat Combat;
 typedef struct Dialog Dialog;
+typedef struct Button Button;
 typedef union Entity Entity;
 typedef union Equip Equip;
 typedef enum GameState GameState;
@@ -69,9 +71,14 @@ struct Dialog {
 	int emotion;
 };
 enum GameState {
-	STATE_TITLE = 0,
-	STATE_MAINMENU = 1,
-	STATE_FIGHT = 2
+	STATE_TITLE,
+	STATE_MAINMENU,
+	STATE_SELECTCARDS,
+	STATE_FIGHT
+};
+struct Button Button {
+	Sprite *spriteOff;
+	Sprite *spriteOn;
 };
 enum DamageType {
 	DMG_NONE = 0,
@@ -84,13 +91,13 @@ enum DamageType {
 	DMG_PSYCHIC = 7
 };
 enum EntityType {
-	ENTITY_ENEMY = 0;
-	ENTITY_PLAYER = 1;
+	ENTITY_ENEMY = 0,
+	ENTITY_PLAYER = 1
 };
 enum EquipType {
-	EQUIP_WEAPON = 0;
-	EQUIP_ARMOR = 1;
-	EQUIP_CHARM = 2;
+	EQUIP_WEAPON = 0,
+	EQUIP_ARMOR = 1,
+	EQUIP_CHARM = 2
 };
 struct Technique {
 	int power;
@@ -214,6 +221,8 @@ int sfxPos = 0;							// INFO: Universal position to locate one "free" sfxAlias
 Sprite *sprites[DRAW_SIZE] = { NULL };				// INFO: What and where to render
 Color globalColor = { 255, 0, 0, 255 };				// INFO: Global color used to render the white lines in all textures as colors
 Combat combat = { { NULL }, { NULL } };				// INFO: Data from position, entities and stuff for combat
+Button *buttons[BUTTON_SIZE] = { NULL };			// INFO: Set of buttons. Ideal to load per state
+int buttonAmount;						// INFO: Useful when needed to wrap around the buttons
 
 int main() {
 	// Initialization
@@ -470,13 +479,13 @@ void UpdateAnimable(Animable *anim) {
 		if (anim->currentFrame >= anim->frame) {
 			if (anim->frame != 0) {
 				fgets(line, sizeof(line), anim->data);
-				ParseAnimable(line, anim, false);
+				ParseAnimable(line, anim);
 			}
 			else if (anim->repeat) {
 				anim->currentFrame = 0;
 				rewind(anim->data);
 				fgets(line, sizeof(line), anim->data);
-				ParseAnimable(line, anim, false);
+				ParseAnimable(line, anim);
 			}
 			else UnloadAnimable(anim);
 		}

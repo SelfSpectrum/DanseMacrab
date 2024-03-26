@@ -24,7 +24,6 @@ typedef struct Technique Technique;
 typedef struct Sprite Sprite;
 typedef struct Animable Animable;
 typedef struct Combat Combat;
-typedef struct Dialog Dialog;
 typedef struct Button Button;
 typedef union Entity Entity;
 typedef union Equip Equip;
@@ -69,16 +68,6 @@ struct Animable {
 	Vector2 offset;
 	bool shader;              // Draw inside shader mode?
 	bool repeat;              // Upon finishing, rewind animation?
-};
-struct Dialog {
-	int id;
-	char name[64];
-	char line1[64];
-	char line2[64];
-	char line3[64];
-	int next;
-	char file[64];
-	int emotion;
 };
 enum GameState {
 	STATE_TITLE,
@@ -196,8 +185,6 @@ struct Combat {
 // INFO: Function declarations
 //------------------------------------------------------------------------------------
 // INFO: GFX functions
-void LoadDialog(int record, Dialog *dialog);
-void ParseDialog(char *line, Dialog *dialog);
 Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 offset);
 void ParseAnimable(char *line, Animable *anim);
 void UpdateAnimable(Animable *anim);
@@ -217,7 +204,10 @@ void UnloadButton(void);
 // INFO: Input functions
 void Accept(void);
 void Cancel(void);
+void Start(void);
+void Select(void);
 void Menu(void);
+void ChangeSelection(void);
 void SetState(GameState newState);
 // INFO: SFX functions
 void PlaySecSound(int id);
@@ -232,11 +222,25 @@ Sound sounds[SOUND_SIZE];					// INFO: Here I hold all the sounds used in the ga
 Sound sfxAlias[SFXALIAS_SIZE];					// INFO: Used to reproduce several sounds at once
 int sfxPos = 0;							// INFO: Universal position to locate one "free" sfxAlias
 Sprite *sprites[DRAW_SIZE] = { NULL };				// INFO: What and where to render
-Color globalColor = { 255, 0, 0, 255 };				// INFO: Global color used to render the white lines in all textures as colors
+Color globalColor = { 255, 255, 255, 255 };			// INFO: Global color used to render the white lines in all textures as colors
 Combat combat = { { NULL }, { NULL } };				// INFO: Data from position, entities and stuff for combat
+// ----------------------------------------------------------------------------------------
+// INFO: Variables for button work, they're a lot
+// ----------------------------------------------------------------------------------------
 Button *buttons[BUTTON_SIZE] = { NULL };			// INFO: Set of buttons. Ideal to load per state
 int buttonAmount = 0;						// INFO: Useful when needed to wrap around the buttons
 int buttonPosition = 0;
+int buttonSkip = 0;
+int startKey = KEY_ENTER;
+int selectKey = KEY_BACKSPACE;
+int acceptKey = KEY_Z;
+int cancelKey = KEY_X;
+int leftKey = KEY_LEFT;
+int rightKey = KEY_RIGHT;
+int upKey = KEY_UP;
+int downKey = KEY_DOWN;
+int extraAKey = KEY_A;
+int extraBKey = KEY_B;
 
 int main() {
 	// Initialization
@@ -286,7 +290,6 @@ int main() {
 	int texCount;
 	int sfxCount;
 
-	Dialog dialog = { 0, "Test", "Null", "NULL", "null", 1, "volfe" };
 	SetState(STATE_TITLE);
 
 	SetTargetFPS(60);           // INFO: Set our game to run at 60 frames-per-second
@@ -294,14 +297,14 @@ int main() {
 	// INFO: Main game loop
 	//--------------------------------------------------------------------------------------
 	while (!exitWindow) {
-		// INFO: Update: This is for calculations and events which do not affect Texture or Drawing in a direct way
-		// //----------------------------------------------------------------------------------
-		UpdateMusicStream(music);   // Update music buffer with new stream data
-		if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) exitWindowRequested = true;      // Detect if X-button or KEY_ESCAPE have been pressed to close window
+// INFO: Update: This is for calculations and events which do not affect Texture or Drawing in a direct way
+//----------------------------------------------------------------------------------
+		UpdateMusicStream(music);	// Update music buffer with new stream data
+		if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) exitWindowRequested = true;	// Detect if X-button or KEY_ESCAPE have been pressed to close window
 		if (exitWindowRequested) {
 			// A request for close window has been issued, we can save data before closing or just show a message asking for confirmation
-			if (IsKeyPressed(KEY_Y) || IsKeyPressed(KEY_ENTER)) exitWindow = true;
-			else if (IsKeyPressed(KEY_N) || IsKeyPressedRepeat(KEY_ESCAPE)) exitWindowRequested = false;
+			if (IsKeyPressed(acceptKey) || IsKeyPressed(startKey)) exitWindow = true;
+			else if (IsKeyPressed(cancelKey)) exitWindowRequested = false;
 		}
 		else {
 			//UpdateAnimable(test, shader);
@@ -311,20 +314,18 @@ int main() {
 			for (texCount = 0; texCount < TEX_SIZE; texCount++) {
 				SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), textures[texCount]);
 			}
-			if (IsKeyPressed(KEY_ENTER)) {
-				LoadDialog(dialog.next, &dialog);
-				//printf("Id: %d\tNext: %d\tFile: %s\n%s\n%s\n%s\n%s\n", dialog.id, dialog.next, dialog.file, dialog.name, dialog.line1, dialog.line2, dialog.line3);
-			}
-			if (IsKeyPressed(KEY_Z)) Accept();
-			if (IsKeyPressed(KEY_X)) Cancel();
+			if (IsKeyPressed(startKey)) Start();
+			if (IsKeyPressed(acceptKey)) Accept();
+			if (IsKeyPressed(cancelKey)) Cancel();
+			Menu();
 		}
-		// INFO: Texture: In this texture mode I create an smaller version of the game which is later rescaled in the draw mode
-		//----------------------------------------------------------------------------------
+// INFO: Texture: In this texture mode I create an smaller version of the game which is later rescaled in the draw mode
+//----------------------------------------------------------------------------------
 		BeginTextureMode(target);
 			ClearBackground(BLACK);
 			BeginMode2D(worldSpaceCamera);
 				if (exitWindowRequested) {
-					DrawText("Are you sure you want to exit program? [Y/N]", 40, 90, 8, WHITE);
+					DrawText("Are you sure you want to exit program?", 50, 90, 8, globalColor);
 				}
 				else {
 					for (animCount = 0; animCount < ANIM_SIZE; animCount++) {
@@ -332,17 +333,11 @@ int main() {
 					}
 					DrawSprite(shader);
 					DrawButton(shader);
-					if (dialog.id) {
-						DrawText(dialog.name, 64, 120, 8, WHITE);
-						DrawText(dialog.line1, 64, 140, 8, WHITE);
-						DrawText(dialog.line2, 64, 150, 8, WHITE);
-						DrawText(dialog.line3, 64, 160, 8, WHITE);
-					}
 				}
 			EndMode2D();
 		EndTextureMode();
-		// INFO: Draw: Take the texture in lower resolution and rescale it to a bigger res, all this while preserving pixel perfect
-		//----------------------------------------------------------------------------------
+// INFO: Draw: Take the texture in lower resolution and rescale it to a bigger res, all this while preserving pixel perfect
+//----------------------------------------------------------------------------------
 		BeginDrawing();
 			ClearBackground(RAYWHITE);
 			BeginMode2D(screenSpaceCamera);
@@ -367,46 +362,6 @@ int main() {
 	CloseWindow();              // Close window and OpenGL context
 	fclose(animsData);
 	return 0;
-}
-
-void LoadDialog(int record, Dialog *dialog) {
-	char line[256];
-	char direction[128];
-	sprintf(direction, "./resources/dialog/%s.tsv", dialog->file);
-	//printf("%s\n", direction);
-	FILE *file = fopen(direction, "r");                       // TODO: Load and unload files is not a good idea, find a way to don't
-	if (file == NULL) {
-		printf("Error opening the file!\n");
-		return;
-	}
-	int i = 1;
-	while (fgets(line, sizeof(line), file)) {
-		if (i == record) {
-			ParseDialog(line, dialog);
-			break;
-		}
-		i++;
-	}
-	dialog->id = i;
-	fclose(file);
-}
-void ParseDialog(char *line, Dialog *dialog) {
-	char *token;
-	char *saveptr;
-	token = strtok_r(line, "	", &saveptr);
-	strcpy(dialog->name, token);
-	token = strtok_r(NULL, "	", &saveptr);
-	strcpy(dialog->line1, token);
-	token = strtok_r(NULL, "	", &saveptr);
-	strcpy(dialog->line2, token);
-	token = strtok_r(NULL, "	", &saveptr);
-	strcpy(dialog->line3, token);
-	token = strtok_r(NULL, "	", &saveptr);
-	dialog->next = atof(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	strcpy(dialog->file, token);
-	token = strtok_r(NULL, "	", &saveptr);
-	dialog->emotion = atof(token);
 }
 
 Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 offset) {
@@ -745,10 +700,46 @@ void PlaySecSound(int id) {
 }
 void Menu(void) {
 	if (buttonAmount > 0) {
-		if (IsKeyPressed(KEY_LEFT)) {
+		if (IsKeyPressed(rightKey)) {
 			buttons[buttonPosition]->selected = false;
 			buttonPosition++;
+			ChangeSelection();
 		}
+		if (IsKeyPressed(leftKey)) {
+			buttons[buttonPosition]->selected = false;
+			buttonPosition--;
+			ChangeSelection();
+		}
+		if (IsKeyPressed(downKey)) {
+			buttons[buttonPosition]->selected = false;
+			buttonPosition += buttonSkip;
+			ChangeSelection();
+		}
+		if (IsKeyPressed(upKey)) {
+			buttons[buttonPosition]->selected = false;
+			buttonPosition -= buttonSkip;
+			ChangeSelection();
+		}
+	}
+}
+void ChangeSelection(void) {
+	if (buttonPosition < 0) buttonPosition += buttonAmount;
+	else if (buttonPosition > (buttonAmount - 1)) buttonPosition -= buttonAmount;
+	buttons[buttonPosition]->selected = true;
+}
+void Start(void) {
+	switch (state) {
+		case STATE_TITLE:
+			Accept();
+			break;
+		default:
+			break;
+	}
+}
+void Select(void) {
+	switch (state) {
+		default:
+			break;
 	}
 }
 void Accept(void) {
@@ -787,6 +778,7 @@ void SetState(GameState newState) {
 			break;
 		case STATE_FIGHT:
 			LoadButton("./resources/layout/fightButtons.tsv");
+			buttonSkip = 2;
 			break;
 		default:
 			break;

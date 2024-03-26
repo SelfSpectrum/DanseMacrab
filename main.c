@@ -132,18 +132,17 @@ struct Player {
 	// INFO: VITALS
 	int maxHealth;
 	int health;
-	int maxStamina;
-	int stamina;
 	int maxStress;
 	int stress;
 	// INFO: ATTRIBUTES
-	int physique;
-	int reflex;
-	int lore;
-	int charisma;
+	int physique[6];		// Physique + Athletics, Constitution, Medicine, Melee, Vibes
+	int reflex[6];			// Reflex + Accuracy, Acrobatics, Mischief, Perception, Touch
+	int lore[6];			// Lore + Arcanum, Beasts, Dream, Dungeons, Nature
+	int charisma[6];		// Charisma + Anima, Authority, Drama, Kinship, Passion
 	// INFO: OTHER STUFF
 	char name[64];
 	char class[32];
+	char description[128];
 	Weapon weapon;
 	Armor armor;
 	Charm charm;
@@ -158,13 +157,13 @@ struct Enemy {
 	int maxStress;
 	int stress;
 	// INFO: ATTRIBUTES
-	int physique;
-	int reflex;
-	int lore;
-	int charisma;
+	int physique[6];		// Physique + Athletics, Constitution, Medicine, Melee, Vibes
+	int reflex[6];			// Reflex + Accuracy, Acrobatics, Mischief, Perception, Touch
+	int lore[6];			// Lore + Arcanum, Beasts, Dream, Dungeons, Nature
+	int charisma[6];		// Charisma + Anima, Authority, Drama, Kinship, Passion
 	// INFO: OTHER STUFF
 	char name[64];
-	char description[256];
+	char description[128];
 	DamageType weakness[2];
 	DamageType resistances[2];
 	Sprite *sprite;			// Might be wrong xd
@@ -193,6 +192,7 @@ void UnloadAnimable(Animable *anim);
 void LoadAnimation(int id, Vector2 offset);
 void UnloadAnimation(void);
 void LoadSprite(const char *spriteSheet);
+void LoadSingleSprite(const char *spriteSheet);
 Sprite *ParseSprite(char *line);
 void DrawSprite(Shader shader);
 void UnloadSprite(void);
@@ -211,6 +211,8 @@ void ChangeSelection(void);
 void SetState(GameState newState);
 // INFO: SFX functions
 void PlaySecSound(int id);
+void LowPassFilter(void *buffer, unsigned int frames);
+// INFO: Entities functions
 
 // INFO: Program main entry point
 //------------------------------------------------------------------------------------
@@ -284,6 +286,7 @@ int main() {
 	Music music = LoadMusicStream("./resources/sfx/title.mp3");
 	music.looping = true;
 	sounds[0] = LoadSound("./resources/sfx/pressStart.mp3");
+	sounds[1] = LoadSound("./resources/sfx/selectButton.mp3");
 	PlayMusicStream(music);
 	SetMusicVolume(music, 1.0f);
 	int animCount;
@@ -291,6 +294,8 @@ int main() {
 	int sfxCount;
 
 	SetState(STATE_TITLE);
+	
+	//combat.playable[2] = LoadEntity("", ENTITY_PLAYER); TODO
 
 	SetTargetFPS(60);           // INFO: Set our game to run at 60 frames-per-second
 
@@ -748,6 +753,9 @@ void Accept(void) {
 			PlaySecSound(0);
 			SetState(STATE_FIGHT);
 		case STATE_MAINMENU:
+			break;
+		case STATE_FIGHT:
+			PlaySecSound(1);
 			break;
 		default:
 			break;

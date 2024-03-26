@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
+//void UnloadAudio(void);
+
 int main(void) {
 	// Initialization
 	const int screenWidth = 800;

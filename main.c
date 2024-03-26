@@ -192,7 +192,7 @@ void UnloadAnimable(Animable *anim);
 void LoadAnimation(int id, Vector2 offset);
 void UnloadAnimation(void);
 void LoadSprite(const char *spriteSheet);
-void LoadSingleSprite(const char *spriteSheet);
+Sprite *LoadSingleSprite(const char *spriteSheet, int id);
 Sprite *ParseSprite(char *line);
 void DrawSprite(Shader shader);
 void UnloadSprite(void);
@@ -226,6 +226,7 @@ int sfxPos = 0;							// INFO: Universal position to locate one "free" sfxAlias
 Sprite *sprites[DRAW_SIZE] = { NULL };				// INFO: What and where to render
 Color globalColor = { 255, 255, 255, 255 };			// INFO: Global color used to render the white lines in all textures as colors
 Combat combat = { { NULL }, { NULL } };				// INFO: Data from position, entities and stuff for combat
+FILE *spriteData;
 // ----------------------------------------------------------------------------------------
 // INFO: Variables for button work, they're a lot
 // ----------------------------------------------------------------------------------------
@@ -271,6 +272,7 @@ int main() {
 	Vector2 origin = { 0.0f, 0.0f };
 
 	animsData = fopen("./resources/anims/animations.tsv", "r");
+	spriteData = fopen("./resources/gfx/sprites.tsv", "r");
 	textures[0] = LoadTexture("./resources/gfx/bigSprites00.png");
 	textures[3] = LoadTexture("./resources/gfx/cards.png");
 	textures[4] = LoadTexture("./resources/gfx/UI.png");
@@ -358,14 +360,19 @@ int main() {
 	UnloadRenderTexture(target);
 	UnloadSprite();
 	UnloadButton();
-	for (texCount = 0; texCount < TEX_SIZE; texCount++) UnloadTexture(textures[texCount]);
 	UnloadAnimation();
 	UnloadMusicStream(music);   // Unload music stream buffers from RAM
+
+	for (texCount = 0; texCount < TEX_SIZE; texCount++) UnloadTexture(textures[texCount]);
 	for (sfxCount = 0; sfxCount < SFXALIAS_SIZE; sfxCount++) UnloadSoundAlias(sfxAlias[sfxCount]);
 	for (sfxCount = 0; sfxCount < SOUND_SIZE; sfxCount++) UnloadSound(sounds[sfxCount]);
+
+	fclose(animsData);
+	fclose(spriteData);
+
 	CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
 	CloseWindow();              // Close window and OpenGL context
-	fclose(animsData);
+
 	return 0;
 }
 
@@ -552,6 +559,22 @@ void LoadSprite(const char *spriteSheet) {
 		}
 	}
 	fclose(file);
+}
+Sprite *LoadSingleSprite(int id) {
+	rewind(spriteData)
+	if (spriteData != NULL) {
+		char line[256];
+		int i = 1;
+		fgets(line, sizeof(line), spriteData);
+		while (fgets(line, sizeof(line), spriteData)) {
+			if (i == id) {
+				return ParseSprite(line);
+			}
+			i++;
+		}
+	}
+	fclose(file);
+	return NULL;
 }
 Sprite *ParseSprite(char *line) {
 	Sprite *sprite = (Sprite *) malloc(sizeof(Sprite));

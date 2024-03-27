@@ -192,7 +192,7 @@ void UnloadAnimable(Animable *anim);
 void LoadAnimation(int id, Vector2 offset);
 void UnloadAnimation(void);
 void LoadSprite(const char *spriteSheet);
-Sprite *LoadSingleSprite(const char *spriteSheet, int id);
+Sprite *LoadSingleSprite(int id);
 Sprite *ParseSprite(char *line);
 void DrawSprite(Shader shader);
 void UnloadSprite(void);
@@ -268,7 +268,8 @@ int main() {
 
 	RenderTexture2D target = LoadRenderTexture(virtualScreenWidth, virtualScreenHeight);
 	Rectangle sourceRec = { 0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height };
-	Rectangle destRec = { -virtualRatio, -virtualRatio, screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
+	//Rectangle destRec = { -virtualRatio, -virtualRatio , screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
+	Rectangle destRec = { 20.0f, -20.0f, screenWidth, screenHeight };
 	Vector2 origin = { 0.0f, 0.0f };
 
 	animsData = fopen("./resources/anims/animations.tsv", "r");
@@ -346,7 +347,7 @@ int main() {
 // INFO: Draw: Take the texture in lower resolution and rescale it to a bigger res, all this while preserving pixel perfect
 //----------------------------------------------------------------------------------
 		BeginDrawing();
-			ClearBackground(RAYWHITE);
+			ClearBackground(RED);
 			BeginMode2D(screenSpaceCamera);
 				DrawTexturePro(target.texture, sourceRec, destRec, origin, 0.0f, WHITE);
 			EndMode2D();
@@ -561,7 +562,7 @@ void LoadSprite(const char *spriteSheet) {
 	fclose(file);
 }
 Sprite *LoadSingleSprite(int id) {
-	rewind(spriteData)
+	rewind(spriteData);
 	if (spriteData != NULL) {
 		char line[256];
 		int i = 1;
@@ -573,7 +574,6 @@ Sprite *LoadSingleSprite(int id) {
 			i++;
 		}
 	}
-	fclose(file);
 	return NULL;
 }
 Sprite *ParseSprite(char *line) {

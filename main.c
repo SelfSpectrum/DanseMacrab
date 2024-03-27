@@ -31,6 +31,8 @@ typedef enum GameState GameState;
 typedef enum DamageType DamageType;
 typedef enum EntityType EntityType;
 typedef enum EquipType EquipType;
+typedef enum AttributeType AttributeType;
+typedef enum StatusType StatusType;
 
 struct Sprite {
 	int textureIndex;
@@ -94,9 +96,61 @@ enum EquipType {
 	EQUIP_ARMOR = 1,
 	EQUIP_CHARM = 2
 };
+enum AttributeType {	// ATTR % 6 for index
+	ATTR_PHYSIQUE = 0,
+	ATTR_ATHLETICS = 1,
+	ATTR_CONSTITUTION = 2,
+	ATTR_MEDICINE = 3,
+	ATTR_MELEE = 4,
+	ATTR_VIBES = 5,
+	ATTR_REFLEX = 6,
+	ATTR_ACCURACY = 7,
+	ATTR_ACROBATICS = 8,
+	ATTR_MISCHIEF = 9,
+	ATTR_PERCEPTION = 10,
+	ATTR_TOUCH = 11,
+	ATTR_LORE = 12,
+	ATTR_ARCANUM = 13,
+	ATTR_BEASTS = 14,
+	ATTR_DREAM = 15,
+	ATTR_DUNGEONS = 16,
+	ATTR_NATURE = 17,
+	ATTR_CHARISMA = 18,
+	ATTR_ANIMA = 19,
+	ATTR_AUTHORITY = 20,
+	ATTR_DRAMA = 21,
+	ATTR_KINSHIP = 22,
+	ATTR_PASSION = 23
+};
+enum StatusType {
+	STATUS_BLEED = 0,
+	STATUS_BLINDED = 1,
+	STATUS_BURNING = 2,
+	STATUS_CONFUSED = 3,
+	STATUS_DEAFENED = 4,
+	STATUS_DEATH = 5,
+	STATUS_DEVOURED = 6,
+	STATUS_DROWNING = 7,
+	STATUS_GRAPPLED = 8,
+	STATUS_HORRIFIED = 9,
+	STATUS_INVISIBLE = 10,
+	STATUS_MOURNFUL = 11,
+	STATUS_PARALYZED = 12,
+	STATUS_PASSANGER = 13,
+	STATUS_POISONED = 14,
+	STATUS_POSSESSION = 15,
+	STATUS_PRONE = 16,
+	STATUS_RAGE = 17,
+	STATUS_SLEEPING = 18,
+	STATUS_SUFFOCATING = 19
+};
+
 struct Technique {
-	int power;
-	int precision;
+	int dice;
+	int amount;
+	AttributeType attr;		// Used for bonusses
+	StatusType status;		// Apply status effect to apply
+	bool save;			// Save ends or not?
 };
 struct Weapon {
 	EquipType type;
@@ -212,8 +266,16 @@ void SetState(GameState newState);
 // INFO: SFX functions
 void PlaySecSound(int id);
 void LowPassFilter(void *buffer, unsigned int frames);
+void Crossfade();
 // INFO: Entities functions
-
+//------------------------------------------------------------------------------------
+void LoadEnemies(const char *enemySheet);
+void LoadPlayer(const char *playerSheet);
+void MoveEntity(Entity *entity, int position);
+void DamageEntity(Entity *entity, Technique tech);
+void KillEntity(Entity *entity);
+void UnloadEntity(Entity *entity);
+//------------------------------------------------------------------------------------
 // INFO: Program main entry point
 //------------------------------------------------------------------------------------
 GameState state = STATE_TITLE;					// INFO: Contains the current state of the game
@@ -226,7 +288,7 @@ int sfxPos = 0;							// INFO: Universal position to locate one "free" sfxAlias
 Sprite *sprites[DRAW_SIZE] = { NULL };				// INFO: What and where to render
 Color globalColor = { 255, 255, 255, 255 };			// INFO: Global color used to render the white lines in all textures as colors
 Combat combat = { { NULL }, { NULL } };				// INFO: Data from position, entities and stuff for combat
-FILE *spriteData;
+FILE *spriteData;						// INFO: Big file with the sprites that will load individually
 // ----------------------------------------------------------------------------------------
 // INFO: Variables for button work, they're a lot
 // ----------------------------------------------------------------------------------------

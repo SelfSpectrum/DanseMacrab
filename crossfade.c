@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
+void Crossfade();
 //void UnloadAudio(void);
 
 int main(void) {

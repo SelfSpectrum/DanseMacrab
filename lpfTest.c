@@ -21,13 +21,11 @@ static unsigned int delayBufferSize = 0;
 static unsigned int delayReadIndex = 2;
 static unsigned int delayWriteIndex = 0;
 
-//------------------------------------------------------------------------------------
 // Module Functions Declaration
 //------------------------------------------------------------------------------------
 static void AudioProcessEffectLPF(void *buffer, unsigned int frames);   // Audio effect: lowpass filter
 static void AudioProcessEffectDelay(void *buffer, unsigned int frames); // Audio effect: delay
 
-//------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
 int main(void)
@@ -41,7 +39,7 @@ int main(void)
 
     InitAudioDevice();              // Initialize audio device
 
-    Music music = LoadMusicStream("resources/country.mp3");
+    Music music = LoadMusicStream("resources/sfx/danseMacabre.mp3");
 
     // Allocate buffer for the delay effect
     delayBufferSize = 48000*2;      // 1 second delay (device sampleRate*channels)
@@ -146,7 +144,7 @@ int main(void)
 static void AudioProcessEffectLPF(void *buffer, unsigned int frames)
 {
     static float low[2] = { 0.0f, 0.0f };
-    static const float cutoff = 70.0f / 44100.0f; // 70 Hz lowpass filter
+    static const float cutoff = 200.0f / 44100.0f; // 70 Hz lowpass filter
     const float k = cutoff / (cutoff + 0.1591549431f); // RC filter formula
 
     // Converts the buffer data before using it

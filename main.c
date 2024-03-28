@@ -31,6 +31,8 @@ typedef enum GameState GameState;
 typedef enum DamageType DamageType;
 typedef enum EntityType EntityType;
 typedef enum EquipType EquipType;
+typedef enum DiceType DiceType;
+typedef enum TechniqueType TechniqueType;
 typedef enum AttributeType AttributeType;
 typedef enum StatusType StatusType;
 
@@ -96,6 +98,34 @@ enum EquipType {
 	EQUIP_ARMOR = 1,
 	EQUIP_CHARM = 2
 };
+enum DiceType {
+	DICE_D100,
+	DICE_D20,
+	DICE_D12,
+	DICE_2D6,
+	DICE_D10,
+	DICE_D8,
+	DICE_D6,
+	DICE_D4,
+	DICE_SAVED100,
+	DICE_SAVED20,
+	DICE_SAVED12,
+	DICE_SAVE2D6,
+	DICE_SAVED10,
+	DICE_SAVED8,
+	DICE_SAVED6,
+	DICE_SAVED4
+};
+enum TechniqueType {
+	TECH_ATTACK,
+	TECH_CHECK,
+	TECH_TOME,
+	TECH_SONG,
+	TECH_DRACONIC,
+	TECH_GOREART,
+	TECH_DEMONHAND,
+	TECH_SUMMON
+};
 enum AttributeType {	// ATTR % 6 for index
 	ATTR_PHYSIQUE = 0,
 	ATTR_ATHLETICS = 1,
@@ -123,34 +153,41 @@ enum AttributeType {	// ATTR % 6 for index
 	ATTR_PASSION = 23
 };
 enum StatusType {
-	STATUS_BLEED = 0,
-	STATUS_BLINDED = 1,
-	STATUS_BURNING = 2,
-	STATUS_CONFUSED = 3,
-	STATUS_DEAFENED = 4,
-	STATUS_DEATH = 5,
-	STATUS_DEVOURED = 6,
-	STATUS_DROWNING = 7,
-	STATUS_GRAPPLED = 8,
-	STATUS_HORRIFIED = 9,
-	STATUS_INVISIBLE = 10,
-	STATUS_MOURNFUL = 11,
-	STATUS_PARALYZED = 12,
-	STATUS_PASSANGER = 13,
-	STATUS_POISONED = 14,
-	STATUS_POSSESSION = 15,
-	STATUS_PRONE = 16,
-	STATUS_RAGE = 17,
-	STATUS_SLEEPING = 18,
-	STATUS_SUFFOCATING = 19
+	STATUS_NONE = 0,
+	STATUS_BLEED = 1,
+	STATUS_BLINDED = 2,
+	STATUS_BURNING = 3,
+	STATUS_CONFUSED = 4,
+	STATUS_DEAFENED = 5,
+	STATUS_DEATH = 6,
+	STATUS_DEVOURED = 7,
+	STATUS_DROWNING = 8,
+	STATUS_GRAPPLED = 9,
+	STATUS_HORRIFIED = 10,
+	STATUS_INVISIBLE = 11,
+	STATUS_MOURNFUL = 12,
+	STATUS_PARALYZED = 13,
+	STATUS_PASSANGER = 14,
+	STATUS_POISONED = 15,
+	STATUS_POSSESSION = 16,
+	STATUS_PRONE = 17,
+	STATUS_RAGE = 18,
+	STATUS_SLEEPING = 19,
+	STATUS_SUFFOCATING = 20
 };
 
 struct Technique {
-	int dice;
-	int amount;
-	AttributeType attr;		// Used for bonusses
+	// For when rolling and stuff (?
+	DiceType roll;
+	AttributeType attr;		// Used for bonusses on the roll, save or difficulty
+	// Costs, money and HP are the commonest
+	int costMoney;
+	int costHP;
+	// Value pool, could be used for damage or healing
+	DiceType diceSide;
+	int diceAmount;
+	int flatBonus;
 	StatusType status;		// Apply status effect to apply
-	bool save;			// Save ends or not?
 };
 struct Weapon {
 	EquipType type;

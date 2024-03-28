@@ -87,7 +87,11 @@ enum DamageType {
 	DMG_FIRE = 4,
 	DMG_ICE = 5,
 	DMG_ACID = 6,
-	DMG_PSYCHIC = 7
+	DMG_PSYCHIC = 7,
+	DMG_HEALNATURE = 8,
+	DMG_HEALBLOODY = 9,
+	DMG_HEALPSY = 10,
+	DMG_HEALARMOR = 11
 };
 enum EntityType {
 	ENTITY_ENEMY = 0,
@@ -153,27 +157,27 @@ enum AttributeType {	// ATTR % 6 for index
 	ATTR_PASSION = 23
 };
 enum StatusType {
-	STATUS_NONE = 0,
-	STATUS_BLEED = 1,
-	STATUS_BLINDED = 2,
-	STATUS_BURNING = 3,
-	STATUS_CONFUSED = 4,
-	STATUS_DEAFENED = 5,
-	STATUS_DEATH = 6,
-	STATUS_DEVOURED = 7,
-	STATUS_DROWNING = 8,
-	STATUS_GRAPPLED = 9,
-	STATUS_HORRIFIED = 10,
-	STATUS_INVISIBLE = 11,
-	STATUS_MOURNFUL = 12,
-	STATUS_PARALYZED = 13,
-	STATUS_PASSANGER = 14,
-	STATUS_POISONED = 15,
-	STATUS_POSSESSION = 16,
-	STATUS_PRONE = 17,
-	STATUS_RAGE = 18,
-	STATUS_SLEEPING = 19,
-	STATUS_SUFFOCATING = 20
+	STATUS_NONE = 0,		// No effect
+	STATUS_BLEED = 1,		// Take damage everytime the entity moves
+	STATUS_BLINDED = 2,		// Must succeed on
+	STATUS_BURNING = 3,		// 1d10 fire damage, might destroy items
+	STATUS_CONFUSED = 4,		// If a tech don't hit, counts as critical fumble
+	STATUS_DEAFENED = 5,		// Can't communicate
+	STATUS_DEATH = 6,		// Die after some turns
+	STATUS_DEVOURED = 7,		// 1d10 acid damage, deal stress
+	STATUS_DROWNING = 8,		// Deal stress
+	STATUS_GRAPPLED = 9,		// Can't move or dodge
+	STATUS_HORRIFIED = 10,		// Can't be in front of an enemy
+	STATUS_INVISIBLE = 11,		//
+	STATUS_MOURNFUL = 12,		// Can't do anything
+	STATUS_PARALYZED = 13,		// Can't move or take actions
+	STATUS_PASSANGER = 14,		// Carry an entity
+	STATUS_POISONED = 15,		// Disadvantage on all rolls
+	STATUS_POSSESSION = 16,		// Another creature controls actions
+	STATUS_PRONE = 17,		// Melee are crits
+	STATUS_RAGE = 18,		// Attack the closest creature
+	STATUS_SLEEPING = 19,		// Attacks autohit
+	STATUS_SUFFOCATING = 20		// Deal stress
 };
 
 struct Technique {
@@ -183,11 +187,22 @@ struct Technique {
 	// Costs, money and HP are the commonest
 	int costMoney;
 	int costHP;
+	int costStress
 	// Value pool, could be used for damage or healing
 	DiceType diceSide;
 	int diceAmount;
 	int flatBonus;
 	StatusType status;		// Apply status effect to apply
+	// Spawn entity?
+	bool ally;
+	int spawnId;
+	// Modify stats
+	int physique[6];
+	int reflex[6];
+	int lore[6];
+	int charisma[6];
+	float damageMultiplayer;
+	float healMultiplayer;
 };
 struct Weapon {
 	EquipType type;

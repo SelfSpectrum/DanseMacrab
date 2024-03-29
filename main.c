@@ -169,40 +169,45 @@ enum StatusType {
 	STATUS_GRAPPLED = 9,		// Can't move or dodge
 	STATUS_HORRIFIED = 10,		// Can't be in front of an enemy
 	STATUS_INVISIBLE = 11,		//
-	STATUS_MOURNFUL = 12,		// Can't do anything
-	STATUS_PARALYZED = 13,		// Can't move or take actions
-	STATUS_PASSANGER = 14,		// Carry an entity
-	STATUS_POISONED = 15,		// Disadvantage on all rolls
-	STATUS_POSSESSION = 16,		// Another creature controls actions
-	STATUS_PRONE = 17,		// Melee are crits
-	STATUS_RAGE = 18,		// Attack the closest creature
-	STATUS_SLEEPING = 19,		// Attacks autohit
-	STATUS_SUFFOCATING = 20		// Deal stress
+	STATUS_LINKED = 12,		// Two or more creatures link, what happens to one, happens to all
+	STATUS_MOURNFUL = 13,		// Can't do anything
+	STATUS_PARALYZED = 14,		// Can't move or take actions
+	STATUS_PASSANGER = 15,		// Carry an entity
+	STATUS_POISONED = 16,		// Disadvantage on all rolls
+	STATUS_POSSESSION = 17,		// Another creature controls actions
+	STATUS_PRONE = 18,		// Melee are crits
+	STATUS_RAGE = 19,		// Attack the closest creature
+	STATUS_SLEEPING = 20,		// Attacks autohit
+	STATUS_SUFFOCATING = 21		// Deal stress
 };
 
 struct Technique {
+	char name[64];
+	char description[256];
 	// For when rolling and stuff (?
 	DiceType roll;
 	AttributeType attr;		// Used for bonusses on the roll, save or difficulty
 	// Costs, money and HP are the commonest
 	int costMoney;
 	int costHP;
-	int costStress
+	int costStress;
 	// Value pool, could be used for damage or healing
 	DiceType diceSide;
 	int diceAmount;
 	int flatBonus;
 	StatusType status;		// Apply status effect to apply
 	// Spawn entity?
-	bool ally;
+	bool spawnEntity;
+	bool spawnAsEnemy;
 	int spawnId;
 	// Modify stats
 	int physique[6];
 	int reflex[6];
 	int lore[6];
 	int charisma[6];
-	float damageMultiplayer;
-	float healMultiplayer;
+	int damageMultiplayer;
+	int hurtMultiplayer;
+	int healMultiplayer;
 };
 struct Weapon {
 	EquipType type;
@@ -235,11 +240,14 @@ union Equip {
 };
 struct Player {
 	EntityType type;
+	int position;
 	// INFO: VITALS
 	int maxHealth;
 	int health;
 	int maxStress;
 	int stress;
+	int demonTally;
+	int accumulatedDamage;
 	// INFO: ATTRIBUTES
 	int physique[6];		// Physique + Athletics, Constitution, Medicine, Melee, Vibes
 	int reflex[6];			// Reflex + Accuracy, Acrobatics, Mischief, Perception, Touch
@@ -257,6 +265,7 @@ struct Player {
 };
 struct Enemy {
 	EntityType type;
+	int position;
 	// INFO: VITALS
 	int maxHealth;
 	int health;
@@ -324,7 +333,7 @@ void Crossfade();
 void LoadEnemies(const char *enemySheet);
 void LoadPlayer(const char *playerSheet);
 void MoveEntity(Entity *entity, int position);
-void DamageEntity(Entity *entity, Technique tech);
+void DamageEntity(Entity *attacker, Technique tech);
 void KillEntity(Entity *entity);
 void UnloadEntity(Entity *entity);
 //------------------------------------------------------------------------------------
@@ -831,6 +840,11 @@ void UnloadButton(void) {
 			free(buttons[i]);
 			buttons[i] = NULL;
 		}
+	}
+}
+void LoadEnemies(const char *enemySheet) {
+	FILE *file = fopen(enemySheet, "r");
+	if (file != NULL) {
 	}
 }
 void PlaySecSound(int id) {

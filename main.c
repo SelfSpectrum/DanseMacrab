@@ -503,14 +503,11 @@ int main() {
 Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 offset) {
 	Animable *anim = (Animable *) malloc(sizeof(Animable));          // Dynamic allocation since many animables might be created and destroyed in quick successions, don't forget to free later
 	if (anim != NULL) {
-		char line[256];       // Line from the file that contains all the struct data
-		FILE *file = fopen(animSheet, "r");
-		if (file == NULL) {     // If the file has problems to open, lack of memory won't be a problem, I hope
-			printf("INFO: ANIMABLE: Error opening the animation file %s!\n", animSheet);
-			fclose(file);
-			return NULL;
-		}
-		if (fgets(line, sizeof(line), file)) {
+
+		if (FileExists(animSheet)) {	// If the file has problems to open, lack of memory won't be a problem, I hope
+			char line[256];       // Line from the file that contains all the struct data
+			FILE *file = fopen(animSheet, "r");
+			fgets(line, sizeof(line), file);
 			ParseAnimable(line, anim);
 			printf("INFO: ANIMABLE: Animable loaded succesfully\n");
 			anim->currentFrame = 0;
@@ -518,12 +515,9 @@ Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 of
 			anim->repeat = repeat;
 			anim->index = index;
 			anim->offset = offset;
-		}
-		else {
-			printf("INFO: ANIMABLE: File does not contains usable data!\n");
 			fclose(file);
-			return NULL;
 		}
+		else printf("INFO: ANIMABLE: Error opening the animation file %s!\n", animSheet);
 	}
 	return anim;
 }
@@ -631,13 +625,14 @@ void LoadAnimation(int id, Vector2 offset) {
 		printf("ERROR: ANIMATION: Error opening animation file\n");
 		return;
 	}
-	int i = 0;
+	int i = 1;
 	int j;
 	char line[256];
 	char *token;
 	char *saveptr;
 	bool repeat;
 	rewind(animsData);
+	fgets(line, sizeof(line), animsData);
 	while (fgets(line, sizeof(line), animsData)) {
 		if (i == id) {
 			token = strtok_r(line, "	", &saveptr);
@@ -669,8 +664,8 @@ void UnloadAnimation(void) {
 	}
 }
 void LoadSprite(const char *spriteSheet) {
-	FILE *file = fopen(spriteSheet, "r");
-	if (file != NULL) {
+	if (FileExists(spriteSheet)) {
+		FILE *file = fopen(spriteSheet, "r");
 		char line[256];
 		int i;
 		while (fgets(line, sizeof(line), file)) {
@@ -681,8 +676,8 @@ void LoadSprite(const char *spriteSheet) {
 				}
 			}
 		}
+		fclose(file);
 	}
-	fclose(file);
 }
 Sprite *LoadSingleSprite(int id) {
 	rewind(spriteData);
@@ -757,9 +752,9 @@ void UnloadSprite(void) {
 		}
 	}
 }
-void LoadButton(const char *spriteSheet) {
-	FILE *file = fopen(spriteSheet, "r");
-	if (file != NULL) {
+void LoadButton(const char *buttonSheet) {
+	if (FileExists(buttonSheet)) {
+		FILE *file = fopen(buttonSheet, "r");
 		char line[256];
 		int i;
 		while (fgets(line, sizeof(line), file)) {
@@ -771,8 +766,8 @@ void LoadButton(const char *spriteSheet) {
 				}
 			}
 		}
+		fclose(file);
 	}
-	fclose(file);
 }
 Button *ParseButton(char *line) {
 	Button *button = (Button *) malloc(sizeof(Button));
@@ -843,8 +838,15 @@ void UnloadButton(void) {
 	}
 }
 void LoadEnemies(const char *enemySheet) {
-	FILE *file = fopen(enemySheet, "r");
-	if (file != NULL) {
+	if (FileExists(enemySheet)) {
+		char line[512];
+		char *token;
+		char *saveptr;
+		FILE *file = fopen(enemySheet, "r");
+
+		fgets(line, sizeof(line), file);
+		token = strtok_r(line, "	", &saveptr);
+		fclose(file);
 	}
 }
 void PlaySecSound(int id) {

@@ -330,7 +330,8 @@ void LowPassFilter(void *buffer, unsigned int frames);
 void Crossfade();
 // INFO: Entities functions
 //------------------------------------------------------------------------------------
-void LoadEnemies(const char *enemySheet);
+void LoadEnemiesFile(FILE **file, const char *enemySheet);
+void LoadEnemiesOnCombat(FILE *file, int id);
 void LoadPlayer(const char *playerSheet);
 void MoveEntity(Entity *entity, int position);
 void DamageEntity(Entity *attacker, Technique tech);
@@ -391,8 +392,8 @@ int main() {
 
 	RenderTexture2D target = LoadRenderTexture(virtualScreenWidth, virtualScreenHeight);
 	Rectangle sourceRec = { 0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height };
-	//Rectangle destRec = { -virtualRatio, -virtualRatio , screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
-	Rectangle destRec = { 20.0f, -20.0f, screenWidth, screenHeight };
+	Rectangle destRec = { -virtualRatio, -virtualRatio , screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
+	//Rectangle destRec = { 20.0f, -20.0f, screenWidth, screenHeight };
 	Vector2 origin = { 0.0f, 0.0f };
 
 	animsData = fopen("./resources/anims/animations.tsv", "r");
@@ -837,17 +838,17 @@ void UnloadButton(void) {
 		}
 	}
 }
-void LoadEnemies(const char *enemySheet) {
-	if (FileExists(enemySheet)) {
-		char line[512];
-		char *token;
-		char *saveptr;
-		FILE *file = fopen(enemySheet, "r");
-
-		fgets(line, sizeof(line), file);
-		token = strtok_r(line, "	", &saveptr);
-		fclose(file);
-	}
+void LoadEnemiesFile(FILE **file, const char *enemySheet) {
+	if (*file != NULL) fclose(*file);
+	if (FileExists(enemySheet)) *file = fopen(enemySheet, "r");
+}
+void LoadEnemiesOnCombat(FILE *file, int id) {
+	char line[512];
+	char *token;
+	char *saveptr;
+	fgets(line, sizeof(line), file);
+	
+	token = strtok_r(line, "	", &saveptr);
 }
 void PlaySecSound(int id) {
 	id = id % SOUND_SIZE;

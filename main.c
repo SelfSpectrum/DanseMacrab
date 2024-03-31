@@ -230,7 +230,6 @@ struct Charm {
 	char description[256];
 	int cost;
 	int health;
-	int stamina;
 	int stress;
 };
 union Equip {
@@ -331,7 +330,8 @@ void Crossfade();
 // INFO: Entities functions
 //------------------------------------------------------------------------------------
 void LoadEnemiesFile(FILE **file, const char *enemySheet);
-void LoadEnemiesOnCombat(FILE *file, int id);
+void LoadEnemiesOnCombat(FILE **file, int id);
+Entity *LoadEnemy(int id);
 void LoadPlayer(const char *playerSheet);
 void MoveEntity(Entity *entity, int position);
 void DamageEntity(Entity *attacker, Technique tech);
@@ -342,7 +342,6 @@ void UnloadEntity(Entity *entity);
 //------------------------------------------------------------------------------------
 GameState state = STATE_TITLE;					// INFO: Contains the current state of the game
 Animable *anims[ANIM_SIZE] = { NULL };				// INFO: Animation handling and rendering
-FILE *animsData;						// INFO: Big file with every single independent animation data
 Texture2D textures[TEX_SIZE];					// INFO: Here I hold all the texture used in the game
 Sound sounds[SOUND_SIZE];					// INFO: Here I hold all the sounds used in the game
 Sound sfxAlias[SFXALIAS_SIZE];					// INFO: Used to reproduce several sounds at once
@@ -350,7 +349,13 @@ int sfxPos = 0;							// INFO: Universal position to locate one "free" sfxAlias
 Sprite *sprites[DRAW_SIZE] = { NULL };				// INFO: What and where to render
 Color globalColor = { 255, 255, 255, 255 };			// INFO: Global color used to render the white lines in all textures as colors
 Combat combat = { { NULL }, { NULL } };				// INFO: Data from position, entities and stuff for combat
+// ----------------------------------------------------------------------------------------
+// INFO: Files to load global data
+// ----------------------------------------------------------------------------------------
+FILE *animsData;						// INFO: Big file with every single independent animation data
 FILE *spriteData;						// INFO: Big file with the sprites that will load individually
+FILE *enemyData;						// INFO: Big file with every single enemy
+
 // ----------------------------------------------------------------------------------------
 // INFO: Variables for button work, they're a lot
 // ----------------------------------------------------------------------------------------
@@ -842,13 +847,28 @@ void LoadEnemiesFile(FILE **file, const char *enemySheet) {
 	if (*file != NULL) fclose(*file);
 	if (FileExists(enemySheet)) *file = fopen(enemySheet, "r");
 }
-void LoadEnemiesOnCombat(FILE *file, int id) {
+void LoadEnemiesOnCombat(FILE **file, int id) {
 	char line[512];
 	char *token;
 	char *saveptr;
+	int i = 1;
 	fgets(line, sizeof(line), file);
-	
+	while (fgets(line, sizeof(line), file)) {
+		if (i == id) {
+			token = strtok_r(line, "	", &saveptr);
+
+			combat.enemy;
+		}
+		i++;
+	}
 	token = strtok_r(line, "	", &saveptr);
+}
+Entity *LoadEnemy(int id) {
+	Entity *enemy = (Entity *) malloc(sizeof(Entity));
+	if (enemy != NULL) {
+		enemy->enemy.type = ENTITY_ENEMY;
+	}
+	return enemy;
 }
 void PlaySecSound(int id) {
 	id = id % SOUND_SIZE;

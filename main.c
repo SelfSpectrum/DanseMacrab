@@ -355,7 +355,6 @@ Combat combat = { { NULL }, { NULL } };				// INFO: Data from position, entities
 FILE *animsData;						// INFO: Big file with every single independent animation data
 FILE *spriteData;						// INFO: Big file with the sprites that will load individually
 FILE *enemyData;						// INFO: Big file with every single enemy
-
 // ----------------------------------------------------------------------------------------
 // INFO: Variables for button work, they're a lot
 // ----------------------------------------------------------------------------------------
@@ -391,6 +390,8 @@ int main() {
 	SetExitKey(KEY_NULL);       // INFO: Disable KEY_ESCAPE to close window, X-button still works
 	bool exitWindowRequested = false;   // Flag to request window to exit
 	bool exitWindow = false;    // Flag to set window to exit
+	
+	//bool runGame = true;		// To know if the game should run, useful if the loading of a file fails
 
 	Camera2D worldSpaceCamera = { {0, 0}, {0, 0}, 0.0f, 1.0f };
 	Camera2D screenSpaceCamera = { {0, 0}, {0, 0}, 0.0f, 1.0f };
@@ -398,11 +399,12 @@ int main() {
 	RenderTexture2D target = LoadRenderTexture(virtualScreenWidth, virtualScreenHeight);
 	Rectangle sourceRec = { 0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height };
 	Rectangle destRec = { -virtualRatio, -virtualRatio , screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
-	//Rectangle destRec = { 20.0f, -20.0f, screenWidth, screenHeight };
 	Vector2 origin = { 0.0f, 0.0f };
 
 	animsData = fopen("./resources/anims/animations.tsv", "r");
 	spriteData = fopen("./resources/gfx/sprites.tsv", "r");
+	enemyData = fopen("./resources/combat/enemies.tsv", "r");
+
 	textures[0] = LoadTexture("./resources/gfx/bigSprites00.png");
 	textures[3] = LoadTexture("./resources/gfx/cards.png");
 	textures[4] = LoadTexture("./resources/gfx/UI.png");
@@ -410,10 +412,7 @@ int main() {
 	textures[6] = LoadTexture("./resources/gfx/attacks.png");
 	textures[7] = LoadTexture("./resources/gfx/entities.png");
 
-	//Animable *test = LoadAnimable("./resources/anims/mainMenu/crab.tsv", true);                   // TODO: Delete test and load a whole anim with anims
-
 	Shader shader = LoadShader(0, "contour.fs");
-	//SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), texture);      // INFO: General structure of how to load a texture
 
 	Music music = LoadMusicStream("./resources/sfx/title.mp3");
 	music.looping = true;
@@ -421,6 +420,7 @@ int main() {
 	sounds[1] = LoadSound("./resources/sfx/selectButton.mp3");
 	PlayMusicStream(music);
 	SetMusicVolume(music, 1.0f);
+
 	int animCount;
 	int texCount;
 	int sfxCount;
@@ -499,6 +499,7 @@ int main() {
 
 	fclose(animsData);
 	fclose(spriteData);
+	fclose(enemyData);
 
 	CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
 	CloseWindow();              // Close window and OpenGL context
@@ -852,8 +853,8 @@ void LoadEnemiesOnCombat(FILE **file, int id) {
 	char *token;
 	char *saveptr;
 	int i = 1;
-	fgets(line, sizeof(line), file);
-	while (fgets(line, sizeof(line), file)) {
+	fgets(line, sizeof(line), *file);
+	while (fgets(line, sizeof(line), *file)) {
 		if (i == id) {
 			token = strtok_r(line, "	", &saveptr);
 
@@ -866,7 +867,11 @@ void LoadEnemiesOnCombat(FILE **file, int id) {
 Entity *LoadEnemy(int id) {
 	Entity *enemy = (Entity *) malloc(sizeof(Entity));
 	if (enemy != NULL) {
+		char line[512];
+		char *saveptr;
+	fgets(line, sizeof(line), enemyData);
 		enemy->enemy.type = ENTITY_ENEMY;
+		enemy->enemy.maxHealth =  
 	}
 	return enemy;
 }
@@ -923,6 +928,9 @@ void Select(void) {
 }
 void Accept(void) {
 	switch (state) {
+}
+void Accept(void) {
+	switch (state) {
 		case STATE_TITLE:
 			PlaySecSound(0);
 			SetState(STATE_FIGHT);
@@ -963,6 +971,3 @@ void SetState(GameState newState) {
 			buttonSkip = 2;
 			break;
 		default:
-			break;
-	}
-}

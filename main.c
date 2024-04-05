@@ -259,8 +259,7 @@ struct Player {
 	Weapon weapon;
 	Armor armor;
 	Charm charm;
-	Sprite *sprite;			// Might be wrong xd
-	//Animable *anim;		// Might be useful? Is this even the correct way? No idea
+	Sprite *sprite;
 };
 struct Enemy {
 	EntityType type;
@@ -271,17 +270,16 @@ struct Enemy {
 	int maxStress;
 	int stress;
 	// INFO: ATTRIBUTES
-	int physique[6];		// Physique + Athletics, Constitution, Medicine, Melee, Vibes
-	int reflex[6];			// Reflex + Accuracy, Acrobatics, Mischief, Perception, Touch
-	int lore[6];			// Lore + Arcanum, Beasts, Dream, Dungeons, Nature
-	int charisma[6];		// Charisma + Anima, Authority, Drama, Kinship, Passion
+	int physique;
+	int reflex;
+	int lore;
+	int charisma;
 	// INFO: OTHER STUFF
 	char name[64];
 	char description[128];
 	DamageType weakness[2];
 	DamageType resistances[2];
-	Sprite *sprite;			// Might be wrong xd
-	//Animable *anim;		// Might be useful? Is this even the correct way? No idea
+	Sprite *sprite;
 };
 union Entity {
 	Enemy enemy;
@@ -848,16 +846,16 @@ void LoadEnemiesFile(FILE **file, const char *enemySheet) {
 	if (*file != NULL) fclose(*file);
 	if (FileExists(enemySheet)) *file = fopen(enemySheet, "r");
 }
-void LoadEnemiesOnCombat(FILE **file, int id) {
+void LoadEnemiesOnCombat(FILE *file, int id) {
 	char line[512];
 	char *token;
 	char *saveptr;
 	int i = 1;
-	fgets(line, sizeof(line), *file);
-	while (fgets(line, sizeof(line), *file)) {
+	fgets(line, sizeof(line), file);
+	while (fgets(line, sizeof(line), file)) {
 		if (i == id) {
 			token = strtok_r(line, "	", &saveptr);
-
+			//
 			combat.enemy;
 		}
 		i++;

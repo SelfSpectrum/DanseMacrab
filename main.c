@@ -55,8 +55,8 @@ struct Button {
 	bool selected;
 };
 struct Animable {
-	unsigned int frame;       // Frame needed to change to the next event
-	unsigned int currentFrame;// Current frame of animation
+	int frame;       // Frame needed to change to the next event
+	int currentFrame;// Current frame of animation
 	int index;
 	FILE *data;               // File that contains the animation data
 	//Texture2D texture;      // INFO: Deprecated: Texture from where the sample will come
@@ -77,7 +77,8 @@ enum GameState {
 	STATE_TITLE,
 	STATE_MAINMENU,
 	STATE_SELECTCARDS,
-	STATE_FIGHT
+	STATE_FIGHT,
+	STATE_ATTACKMENU
 };
 enum DamageType {
 	DMG_NONE = 0,
@@ -417,7 +418,9 @@ int main() {
 	Music music = LoadMusicStream("./resources/sfx/title.mp3");
 	music.looping = true;
 	sounds[0] = LoadSound("./resources/sfx/pressStart.mp3");
-	sounds[1] = LoadSound("./resources/sfx/selectButton.mp3");
+	sounds[1] = LoadSound("./resources/sfx/buttonSelect.wav");
+	sounds[2] = LoadSound("./resources/sfx/buttonCancel.wav");
+	sounds[3] = LoadSound("./resources/sfx/error.wav");
 	PlayMusicStream(music);
 	SetMusicVolume(music, 1.0f);
 
@@ -497,9 +500,9 @@ int main() {
 	for (sfxCount = 0; sfxCount < SFXALIAS_SIZE; sfxCount++) UnloadSoundAlias(sfxAlias[sfxCount]);
 	for (sfxCount = 0; sfxCount < SOUND_SIZE; sfxCount++) UnloadSound(sounds[sfxCount]);
 
-	fclose(animsData);
-	fclose(spriteData);
-	fclose(enemyData);
+	if (animsData != NULL) fclose(animsData);
+	if (spriteData != NULL) fclose(spriteData);
+	if (enemyData != NULL) fclose(enemyData);
 
 	CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
 	CloseWindow();              // Close window and OpenGL context
@@ -993,10 +996,21 @@ void Accept(void) {
 	switch (state) {
 		case STATE_TITLE:
 			PlaySecSound(0);
-			SetState(STATE_FIGHT);
+			SetState(STATE_FIGHT);		// TODO: Change this when combat is done
 		case STATE_MAINMENU:
 			break;
 		case STATE_FIGHT:
+			switch (buttonPosition) {
+				case 0:
+					PlaySecSound(1);
+					SetState(STATE_ATTACKMENU);
+					break;
+				default:
+					PlaySecSound(3);
+					break;
+			}
+			break;
+		case STATE_ATTACKMENU:
 			PlaySecSound(1);
 			break;
 		default:
@@ -1008,6 +1022,10 @@ void Cancel(void) {
 		case STATE_TITLE:
 			break;
 		case STATE_MAINMENU:
+			break;
+		case STATE_ATTACKMENU:
+			PlaySecSound(2);
+			SetState(STATE_FIGHT);
 			break;
 		default:
 			break;
@@ -1021,13 +1039,14 @@ void SetState(GameState newState) {
 	switch (state) {
 		case STATE_TITLE:
 			LoadSprite("./resources/layout/mainTitle.tsv");
-			LoadAnimation(0, (Vector2) { 0 });
+			LoadAnimation(1, (Vector2) { 0 });
 			break;
 		case STATE_MAINMENU:
 			LoadSprite("./resources/layout/mainMenu.tsv");
 			break;
 		case STATE_FIGHT:
 			LoadButton("./resources/layout/fightButtons.tsv");
+			ChangeSelection();
 			buttonSkip = 2;
 			break;
 		default:

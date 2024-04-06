@@ -103,22 +103,22 @@ enum EquipType {
 	EQUIP_CHARM = 2
 };
 enum DiceType {
-	DICE_D100,
-	DICE_D20,
-	DICE_D12,
-	DICE_2D6,
-	DICE_D10,
-	DICE_D8,
-	DICE_D6,
-	DICE_D4,
-	DICE_SAVED100,
-	DICE_SAVED20,
-	DICE_SAVED12,
-	DICE_SAVE2D6,
-	DICE_SAVED10,
-	DICE_SAVED8,
-	DICE_SAVED6,
-	DICE_SAVED4
+	DICE_D100 = 8,
+	DICE_D20 = 7,
+	DICE_D12 = 6,
+	DICE_2D6 = 5,
+	DICE_D10 = 4,
+	DICE_D8 = 3,
+	DICE_D6 = 2,
+	DICE_D4 = 1,
+	DICE_SAVED100 = 16,
+	DICE_SAVED20 = 15,
+	DICE_SAVED12 = 14,
+	DICE_SAVE2D6 = 13,
+	DICE_SAVED10 = 12,
+	DICE_SAVED8 = 11,
+	DICE_SAVED6 = 10,
+	DICE_SAVED4 = 9
 };
 enum TechniqueType {
 	TECH_ATTACK,
@@ -264,6 +264,7 @@ struct Player {
 struct Enemy {
 	EntityType type;
 	int position;
+	int size;
 	// INFO: VITALS
 	int maxHealth;
 	int health;
@@ -328,13 +329,14 @@ void Crossfade();
 // INFO: Entities functions
 //------------------------------------------------------------------------------------
 void LoadEnemiesFile(FILE **file, const char *enemySheet);
-void LoadEnemiesOnCombat(FILE **file, int id);
+void LoadEnemiesOnCombat(FILE *file, int id);
 Entity *LoadEnemy(int id);
 void LoadPlayer(const char *playerSheet);
 void MoveEntity(Entity *entity, int position);
 void DamageEntity(Entity *attacker, Technique tech);
 void KillEntity(Entity *entity);
 void UnloadEntity(Entity *entity);
+int DiceMean(DiceType dice);
 //------------------------------------------------------------------------------------
 // INFO: Program main entry point
 //------------------------------------------------------------------------------------
@@ -842,6 +844,35 @@ void UnloadButton(void) {
 		}
 	}
 }
+int DiceMean(DiceType dice) {
+	switch (dice) {
+		case DICE_D100:
+		case DICE_SAVED100:
+			return 51;
+		case DICE_D20:
+		case DICE_SAVED20:
+			return 11;
+		case DICE_2D6:
+		case DICE_SAVE2D6:
+		case DICE_D12:
+		case DICE_SAVED12:
+			return 7;
+		case DICE_D10:
+		case DICE_SAVED10:
+			return 6;
+		case DICE_D8:
+		case DICE_SAVED8:
+			return 5;
+		case DICE_D6:
+		case DICE_SAVED6:
+			return 4;
+		case DICE_D4:
+		case DICE_SAVED4:
+			return 3;
+		default:
+			return 0;
+	}
+}
 void LoadEnemiesFile(FILE **file, const char *enemySheet) {
 	if (*file != NULL) fclose(*file);
 	if (FileExists(enemySheet)) *file = fopen(enemySheet, "r");
@@ -855,21 +886,55 @@ void LoadEnemiesOnCombat(FILE *file, int id) {
 	while (fgets(line, sizeof(line), file)) {
 		if (i == id) {
 			token = strtok_r(line, "	", &saveptr);
-			//
-			combat.enemy;
+			if (token[0] != '0') combat.enemy[0] = LoadEnemy(atoi(token));
+			token = strtok_r(NULL, "	", &saveptr);
+			if (token[0] != '0') combat.enemy[1] = LoadEnemy(atoi(token));
+			token = strtok_r(NULL, "	", &saveptr);
+			if (token[0] != '0') combat.enemy[2] = LoadEnemy(atoi(token));
+			token = strtok_r(NULL, "	", &saveptr);
+			if (token[0] != '0') combat.enemy[3] = LoadEnemy(atoi(token));
+			token = strtok_r(NULL, "	", &saveptr);
+			if (token[0] != '0') combat.enemy[4] = LoadEnemy(atoi(token));
 		}
 		i++;
 	}
-	token = strtok_r(line, "	", &saveptr);
 }
 Entity *LoadEnemy(int id) {
 	Entity *enemy = (Entity *) malloc(sizeof(Entity));
 	if (enemy != NULL) {
 		char line[512];
 		char *saveptr;
-	fgets(line, sizeof(line), enemyData);
-		enemy->enemy.type = ENTITY_ENEMY;
-		enemy->enemy.maxHealth =  
+		char *token;
+		int enemyId;
+		while (fgets(line, sizeof(line), enemyData)) {
+			token = strtok_r(line, "	", &saveptr);
+			enemyId = atoi(token);
+			if (enemyId == id) {
+				enemy->enemy.type = ENTITY_ENEMY;
+				token = strtok_r(NULL, "	", &saveptr);
+				strcpy(enemy->enemy.name, token);
+				token = strtok_r(NULL, "	", &saveptr);
+				strcpy(enemy->enemy.description, token);
+				token = strtok_r(NULL, "	", &saveptr);
+				enemy->enemy.sprite = LoadSingleSprite(atoi(token));
+				token = strtok_r(NULL, "	", &saveptr);
+				enemy->enemy.physique = atoi(token);
+				token = strtok_r(NULL, "	", &saveptr);
+				enemy->enemy.reflex = atoi(token);
+				token = strtok_r(NULL, "	", &saveptr);
+				enemy->enemy.lore = atoi(token);
+				token = strtok_r(NULL, "	", &saveptr);
+				enemy->enemy.charisma = atoi(token);
+				token = strtok_r(NULL, "	", &saveptr);
+				enemy->enemy.size = atoi(token);
+				token = strtok_r(NULL, "	", &saveptr);
+				enemy->enemy.maxHealth = DiceMean((DiceType) enemy->enemy.size) * atoi(token) + enemy->enemy.physique * atoi(token);
+				enemy->enemy.health = enemy->enemy.maxHealth;
+				token = strtok_r(NULL, "	", &saveptr);
+				enemy->enemy.maxStress = atoi(token);
+				enemy->enemy.stress = enemy->enemy.maxStress;
+			}
+		}
 	}
 	return enemy;
 }
@@ -926,9 +991,6 @@ void Select(void) {
 }
 void Accept(void) {
 	switch (state) {
-}
-void Accept(void) {
-	switch (state) {
 		case STATE_TITLE:
 			PlaySecSound(0);
 			SetState(STATE_FIGHT);
@@ -969,3 +1031,6 @@ void SetState(GameState newState) {
 			buttonSkip = 2;
 			break;
 		default:
+			break;
+	}
+}

@@ -147,7 +147,7 @@ enum AttributeType {	// ATTR % 6 for index
 	ATTR_LORE = 12,
 	ATTR_ARCANUM = 13,
 	ATTR_BEASTS = 14,
-	ATTR_DREAM = 15,
+	ATTR_DREAMS = 15,
 	ATTR_DUNGEONS = 16,
 	ATTR_NATURE = 17,
 	ATTR_CHARISMA = 18,
@@ -699,6 +699,7 @@ void UnloadAnimation(void) {
 			UnloadAnimable(anims[i]);
 		}
 	}
+	printf("INFO: ANIMATION: Animable array data unloaded.");
 }
 void LoadSprite(const char *spriteSheet) {
 	if (FileExists(spriteSheet)) {
@@ -713,20 +714,24 @@ void LoadSprite(const char *spriteSheet) {
 				}
 			}
 		}
+		printf("INFO: SPRITE: Sprites loaded from \"%s\" correctly.", spriteSheet);
 		fclose(file);
 	}
+	else printf("INFO: SPRITE: Sprite file \"%s\" not available.", spriteSheet);
 }
 Sprite *LoadSingleSprite(int id) {
 	rewind(spriteData);
 	if (spriteData != NULL) {
 		char line[256];
-		int i = 1;
+		char *token;
+		char *saveptr;
+		int spriteId;
 		fgets(line, sizeof(line), spriteData);
 		while (fgets(line, sizeof(line), spriteData)) {
-			if (i == id) {
+			token = strtok_r(line, "	", &saveptr);
+			if (spriteId == id) {
 				return ParseSprite(line);
 			}
-			i++;
 		}
 	}
 	return NULL;

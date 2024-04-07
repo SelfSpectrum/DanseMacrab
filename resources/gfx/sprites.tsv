@@ -1,1 +1,74 @@
-Texture ID	Origin X	Origin Y	Origin Width	Origin Height	Dest X	Dest Y	Dest Width	Dest Height	Pos X	Pos Y	Rotation	Shader
+ID	Nombre	Índice de Textura	Orígen X	Orígen Y	Orígen Largo	Orígen Alto	Orígen H X	Orígen H Y	Orígen H Largo	Orígen H Alto	Destino X	Destino Y	Destino Largo	Destino Alto	Rotación	Usa Shader
+100	Rin - Back	7									0	0	64	64	0	1
+101	Rin - Front															
+300	Crabber	7	0	0	64	64	0	0	0	0	0	0	64	64	0	1
+301	Crabby	7	64	0	64	64	0	0	0	0	0	0	64	64	0	1
+302	Egg Medium	7	128	0	64	64	0	0	0	0	0	0	64	64	0	1
+303	Urchin	7	192	0	64	64	0	0	0	0	0	0	64	64	0	1
+304	High & Bass	7	256	0	64	64	0	0	0	0	0	0	64	64	0	1
+305	Madness Bearer	7	320	0	64	64	0	0	0	0	0	0	64	64	0	1
+306	Gun Crab	7	384	0	64	64	0	0	0	0	0	0	64	64	0	1
+307	Crabberer	7	448	0	64	64	0	0	0	0	0	0	64	64	0	1
+308	Sharpie	7	0	64	64	64	0	0	0	0	0	0	64	64	0	1
+309	Frozen Crabber	7	64	64	64	64	0	0	0	0	0	0	64	64	0	1
+310	High Crabby	7	128	64	64	64	0	0	0	0	0	0	64	64	0	1
+311	Burnout	7	192	64	64	64	0	0	0	0	0	0	64	64	0	1
+312	Noxious Puncher	7	256	64	64	64	0	0	0	0	0	0	64	64	0	1
+313	Lightning Snap	7	320	64	64	64	0	0	0	0	0	0	64	64	0	1
+314	Morphing Soldier	7	384	64	64	64	0	0	0	0	0	0	64	64	0	1
+315	Horse	7	448	64	64	64	0	0	0	0	0	0	64	64	0	1
+500	Tech - Sword	5	0	0	16	16	64	0	16	16	0	0	16	16	0	0
+501	Tech - Shield	5	0	16	16	16	64	16	16	16	0	0	16	16	0	0
+502	Tech - Hammer	5	0	32	16	16	64	32	16	16	0	0	16	16	0	0
+515	Tech - None	5	0	240	16	16	64	240	16	16	0	0	16	16	0	0
+516	Tech - Slash	5	16	0	16	16	80	0	16	16	0	0	16	16	0	0
+517	Tech - Evade	5	16	16	16	16	80	16	16	16	0	0	16	16	0	0
+518	Tech - Smash	5	16	32	16	16	80	32	16	16	0	0	16	16	0	0
+535	Tech - Ice 	5	32	48	16	16	96	48	16	16	0	0	16	16	0	0
+547	Tech - Psychic	5	48	0	16	16	112	0	16	16	0	0	16	16	0	0
+548	Tech - Fire	5	48	16	16	16	112	16	16	16	0	0	16	16	0	0
+549	Tech - Whispers	5	48	32	16	16	112	32	16	16	0	0	16	16	0	0
+550	Tech - Counter Fire	5	48	48	16	16	112	48	16	16	0	0	16	16	0	0
+551	Tech - Madness	5	48	64	16	16	112	64	16	16	0	0	16	16	0	0
+552	Tech - Telekinesis Right	5	48	80	16	16	112	80	16	16	0	0	16	16	0	0
+553	Tech - Telekinesis Left	5	48	96	16	16	112	96	16	16	0	0	16	16	0	0
+554	Tech - Force Field	5	48	112	16	16	112	112	16	16	0	0	16	16	0	0
+555	Tech - Deflect	5	48	128	16	16	112	128	16	16	0	0	16	16	0	0
+556	Tech - Rend	5	48	144	16	16	112	144	16	16	0	0	16	16	0	0
+557	Tech - Gravity	5	48	160	16	16	112	160	16	16	0	0	16	16	0	0
+558	Tech - Implosion	5	48	176	16	16	112	176	16	16	0	0	16	16	0	0
+559	Tech - Psy Healing	5	48	192	16	16	112	192	16	16	0	0	16	16	0	0
+560	Tech - Lightning Rod	5	48	208	16	16	112	208	16	16	0	0	16	16	0	0
+561	Tech - Lightning	5	48	224	16	16	112	224	16	16	0	0	16	16	0	0
+562	Tech - Clear System	5	48	240	16	16	112	240	16	16	0	0	16	16	0	0
+563	Tech - Retaliate	5	128	0	16	16	192	0	16	16	0	0	16	16	0	0
+564	Tech - Transfuse	5	128	16	16	16	192	16	16	16	0	0	16	16	0	0
+565	Tech - Sharpen	5	128	32	16	16	192	32	16	16	0	0	16	16	0	0
+566	Tech - Guillotine	5	128	48	16	16	192	48	16	16	0	0	16	16	0	0
+567	Tech - Iron Maiden	5	128	64	16	16	192	64	16	16	0	0	16	16	0	0
+568	Tech - Virtuous Scarlet	5	128	80	16	16	192	80	16	16	0	0	16	16	0	0
+569	Tech - Still Life	5	128	96	16	16	192	96	16	16	0	0	16	16	0	0
+570	Tech - Blood in the Water	5	128	112	16	16	192	112	16	16	0	0	16	16	0	0
+571	Tech - Sensivity	5	128	128	16	16	192	128	16	16	0	0	16	16	0	0
+572	Tech - Red Strings	5	128	144	16	16	192	144	16	16	0	0	16	16	0	0
+573	Tech - Last Stand	5	128	160	16	16	192	160	16	16	0	0	16	16	0	0
+574	Tech - Necrosis	5	128	176	16	16	192	176	16	16	0	0	16	16	0	0
+575	Tech - Raw Flesh	5	128	192	16	16	192	192	16	16	0	0	16	16	0	0
+576	Tech - Bleeding	5	128	208	16	16	192	208	16	16	0	0	16	16	0	0
+577	Tech - Blind	5	128	224	16	16	192	224	16	16	0	0	16	16	0	0
+578	Tech - Anemia	5	128	240	16	16	192	240	16	16	0	0	16	16	0	0
+579	Tech - Now You See Me	5	144	0	16	16	208	0	16	16	0	0	16	16	0	0
+580	Tech - Sleigh of Hands	5	144	16	16	16	208	16	16	16	0	0	16	16	0	0
+581	Tech - Bind	5	144	32	16	16	208	32	16	16	0	0	16	16	0	0
+582	Tech - Hearing	5	144	48	16	16	208	48	16	16	0	0	16	16	0	0
+583	Tech - Pause	5	144	64	16	16	208	64	16	16	0	0	16	16	0	0
+584	Tech - Conduit	5	144	80	16	16	208	80	16	16	0	0	16	16	0	0
+585	Tech - I'm Watching You	5	144	96	16	16	208	96	16	16	0	0	16	16	0	0
+586	Tech - Destruction	5	144	112	16	16	208	112	16	16	0	0	16	16	0	0
+587	Tech - Stop	5	144	128	16	16	208	128	16	16	0	0	16	16	0	0
+588	Tech - Drop	5	144	144	16	16	208	144	16	16	0	0	16	16	0	0
+589	Tech - Cry	5	144	160	16	16	208	160	16	16	0	0	16	16	0	0
+590	Tech - Flee	5	144	176	16	16	208	176	16	16	0	0	16	16	0	0
+591	Tech - Cooperate	5	144	192	16	16	208	192	16	16	0	0	16	16	0	0
+592	Tech - Halt	5	144	208	16	16	208	208	16	16	0	0	16	16	0	0
+593	Tech - Summon	5	144	224	16	16	208	224	16	16	0	0	16	16	0	0

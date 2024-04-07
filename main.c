@@ -525,7 +525,6 @@ Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 of
 			anim->repeat = repeat;
 			anim->index = index;
 			anim->offset = offset;
-			fclose(file);
 		}
 		else printf("INFO: ANIMABLE: Error opening the animation file %s!\n", animSheet);
 	}
@@ -534,81 +533,82 @@ Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 of
 void ParseAnimable(char *line, Animable *anim) {
 	char *token;
 	char *saveptr;
+	//printf("INFO: ANIMABLE: Parsing line \"%s\".\n", line);
 	token = strtok_r(line, "	", &saveptr);
 	anim->frame = atoi(token);
-	printf("INFO: ANIMABLE: Frame %d parsed successfuly.\n", anim->frame);
+	//printf("INFO: ANIMABLE: Frame %d parsed successfuly.\n", anim->frame);
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->textureIndex = atoi(token);
-	printf("INFO: ANIMABLE: Texture Index %d parsed successfuly.\n", anim->textureIndex);
+	//printf("INFO: ANIMABLE: Texture Index %d parsed successfuly.\n", anim->textureIndex);
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->origin.w = atof(token);
-	printf("INFO: ANIMABLE: Origin W parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Origin W parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->origin.x = atof(token);
-	printf("INFO: ANIMABLE: Origin X parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Origin X parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->origin.y = atof(token);
-	printf("INFO: ANIMABLE: Origin Y parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Origin Y parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->origin.z = atof(token);
-	printf("INFO: ANIMABLE: Origin Z parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Origin Z parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->dest.w = atof(token);
-	printf("INFO: ANIMABLE: Dest W parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Dest W parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->dest.x = atof(token);
-	printf("INFO: ANIMABLE: Dest X parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Dest X parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->dest.y = atof(token);
-	printf("INFO: ANIMABLE: Dest Y parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Dest Y parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->dest.z = atof(token);
-	printf("INFO: ANIMABLE: Dest Z parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Dest Z parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->position.x = atof(token);
-	printf("INFO: ANIMABLE: Pos X parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Pos X parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->position.y = atof(token);
-	printf("INFO: ANIMABLE: Pos Y parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Pos Y parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->rotation = atof(token);
-	printf("INFO: ANIMABLE: Rotation parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Rotation parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaOrigin.w = atof(token);
-	printf("INFO: ANIMABLE: Delta Origin W parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Delta Origin W parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaOrigin.x = atof(token);
-	printf("INFO: ANIMABLE: Delta Origin X parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Delta Origin X parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaOrigin.y = atof(token);
-	printf("INFO: ANIMABLE: Delta Origin Y parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Delta Origin Y parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaOrigin.z = atof(token);
-	printf("INFO: ANIMABLE: Delta Origin Z parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Delta Origin Z parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaDest.w = atof(token);
-	printf("INFO: ANIMABLE: Delta Dest W parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Delta Dest W parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaDest.x = atof(token);
-	printf("INFO: ANIMABLE: Delta Dest X parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Delta Dest X parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaDest.y = atof(token);
-	printf("INFO: ANIMABLE: Delta Dest Y parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Delta Dest Y parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaDest.z = atof(token);
-	printf("INFO: ANIMABLE: Delta Dest Z parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Delta Dest Z parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaPos.x = atof(token);
-	printf("INFO: ANIMABLE: Delta Pos X parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Delta Pos X parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaPos.y = atof(token);
-	printf("INFO: ANIMABLE: Delta Pos Y parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Delta Pos Y parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaRotation = atof(token);
-	printf("INFO: ANIMABLE: Delta Rotation parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Delta Rotation parsed successfuly.\n");
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->shader = (bool) atoi(token);
-	printf("INFO: ANIMABLE: Shader use parsed successfuly.\n");
+	//printf("INFO: ANIMABLE: Shader use parsed successfuly.\n");
 }
 void UpdateAnimable(Animable *anim) {
 	if (anim != NULL) {
@@ -621,9 +621,9 @@ void UpdateAnimable(Animable *anim) {
 		if (anim->currentFrame >= anim->frame) {
 			if (anim->frame != 0) {
 				fgets(line, sizeof(line), anim->data);
-				printf("INFO: ANIMABLE: Next animable line loaded.\n");
+				//printf("INFO: ANIMABLE: Next animable line loaded.\n");
 				ParseAnimable(line, anim);
-				printf("INFO: ANIMABLE: Next animable line parsed.\n");
+				//printf("INFO: ANIMABLE: Next animable line parsed.\n");
 			}
 			else if (anim->repeat) {
 				anim->currentFrame = 0;

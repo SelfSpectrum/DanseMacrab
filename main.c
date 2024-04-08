@@ -78,7 +78,8 @@ enum GameState {
 	STATE_MAINMENU,
 	STATE_SELECTCARDS,
 	STATE_FIGHT,
-	STATE_ATTACKMENU
+	STATE_ATTACKMENU,
+	STATE_DEBUG
 };
 enum DamageType {
 	DMG_NONE = 0,
@@ -428,7 +429,7 @@ int main() {
 	int texCount;
 	int sfxCount;
 
-	SetState(STATE_TITLE);
+	SetState(STATE_DEBUG);
 	
 	//combat.playable[2] = LoadEntity("", ENTITY_PLAYER); TODO
 
@@ -473,6 +474,13 @@ int main() {
 					}
 					DrawSprite(shader);
 					DrawButton(shader);
+					BeginShaderMode(shader);
+						DrawTexturePro(textures[7], (Rectangle) { 0, 0, 64, 64 }, (Rectangle) { 0, 0, 64, 64 }, (Vector2) { 0, 0 }, 0, globalColor);
+						DrawTexturePro(textures[7], (Rectangle) { 0, 0, 64, 64 }, (Rectangle) { 0, 0, 64, 64 }, (Vector2) { -64, 0 }, 0, globalColor);
+						DrawTexturePro(textures[7], (Rectangle) { 0, 0, 64, 64 }, (Rectangle) { 0, 0, 64, 64 }, (Vector2) { -128, 0 }, 0, globalColor);
+						DrawTexturePro(textures[7], (Rectangle) { 0, 0, 64, 64 }, (Rectangle) { 0, 0, 64, 64 }, (Vector2) { -196, 0 }, 0, globalColor);
+						DrawTexturePro(textures[7], (Rectangle) { 0, 0, 64, 64 }, (Rectangle) { 0, 0, 64, 64 }, (Vector2) { -256, 0 }, 0, globalColor);
+					EndShaderMode();
 				}
 			EndMode2D();
 		EndTextureMode();
@@ -486,8 +494,8 @@ int main() {
 			DrawFPS(10, 10);
 		EndDrawing();
 	}
-	// INFO: De-Initialization
-	//--------------------------------------------------------------------------------------
+// INFO: De-Initialization
+//--------------------------------------------------------------------------------------
 	StopMusicStream(music);
 	UnloadShader(shader);
 	UnloadRenderTexture(target);
@@ -511,11 +519,11 @@ int main() {
 }
 
 Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 offset) {
-	Animable *anim = (Animable *) malloc(sizeof(Animable));          // Dynamic allocation since many animables might be created and destroyed in quick successions, don't forget to free later
+	Animable *anim = (Animable *) malloc(sizeof(Animable));		// Dynamic allocation since many animables might be created and destroyed in quick successions, don't forget to free later
 	if (anim != NULL) {
 
-		if (FileExists(animSheet)) {	// If the file has problems to open, lack of memory won't be a problem, I hope
-			char line[256];       // Line from the file that contains all the struct data
+		if (FileExists(animSheet)) {				// If the file has problems to open, lack of memory won't be a problem, I hope
+			char line[256];					// Line from the file that contains all the struct data
 			FILE *file = fopen(animSheet, "r");
 			fgets(line, sizeof(line), file);
 			ParseAnimable(line, anim);
@@ -670,7 +678,7 @@ void LoadAnimation(int id, Vector2 offset) {
 	bool repeat;
 	rewind(animsData);
 	fgets(line, sizeof(line), animsData);
-	while (fgets(line, sizeof(line), animsData)) {
+	while (fgets(line, sizeof(line), animsData) != NULL) {
 		if (i == id) {
 			token = strtok_r(line, "	", &saveptr);
 			printf("INFO: ANIMATION: Loading %s in the %d register\n", token, i);
@@ -706,7 +714,7 @@ void LoadSprite(const char *spriteSheet) {
 		FILE *file = fopen(spriteSheet, "r");
 		char line[256];
 		int i;
-		while (fgets(line, sizeof(line), file)) {
+		while (fgets(line, sizeof(line), file) != NULL) {
 			for (i = 0; i < DRAW_SIZE; i++) {
 				if (sprites[i] == NULL) {
 					sprites[i] = ParseSprite(line);
@@ -725,9 +733,9 @@ Sprite *LoadSingleSprite(int id) {
 		char line[256];
 		char *token;
 		char *saveptr;
-		int spriteId;
+		int spriteId = 0;
 		fgets(line, sizeof(line), spriteData);
-		while (fgets(line, sizeof(line), spriteData)) {
+		while (fgets(line, sizeof(line), spriteData) != NULL) {
 			token = strtok_r(line, "	", &saveptr);
 			if (spriteId == id) {
 				return ParseSprite(line);
@@ -799,7 +807,7 @@ void LoadButton(const char *buttonSheet) {
 		FILE *file = fopen(buttonSheet, "r");
 		char line[256];
 		int i;
-		while (fgets(line, sizeof(line), file)) {
+		while (fgets(line, sizeof(line), file) != NULL) {
 			for (i = 0; i < BUTTON_SIZE; i++) {
 				if (buttons[i] == NULL) {
 					buttons[i] = ParseButton(line);
@@ -918,7 +926,7 @@ void LoadEnemiesOnCombat(FILE *file, int id) {
 	char *saveptr;
 	int i = 1;
 	fgets(line, sizeof(line), file);
-	while (fgets(line, sizeof(line), file)) {
+	while (fgets(line, sizeof(line), file) != NULL) {
 		if (i == id) {
 			token = strtok_r(line, "	", &saveptr);
 			if (token[0] != '0') combat.enemy[0] = LoadEnemy(atoi(token));
@@ -941,7 +949,7 @@ Entity *LoadEnemy(int id) {
 		char *saveptr;
 		char *token;
 		int enemyId;
-		while (fgets(line, sizeof(line), enemyData)) {
+		while (fgets(line, sizeof(line), enemyData) != NULL) {
 			token = strtok_r(line, "	", &saveptr);
 			enemyId = atoi(token);
 			if (enemyId == id) {

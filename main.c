@@ -299,11 +299,6 @@ struct Combat {
 	Entity *playable[5];
 	int turn;
 };
-
-// TODO: Perhaps a good way to clean code is by turning the whole dual camera system into an struct and some functions
-
-// INFO: Function declarations
-//------------------------------------------------------------------------------------
 // INFO: GFX functions
 Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 offset);
 void ParseAnimable(char *line, Animable *anim);
@@ -322,7 +317,7 @@ void LoadButton(const char *buttonSheet);
 Button *ParseButton(char *line);
 void DrawButton(Shader shader);
 void UnloadButton(void);
-char *LoadText(int id);
+char *LoadText(int id);			// To load a text line with the corresponding translation
 char *LoadTextFormatChar(int id, char value);
 char *LoadTextFormatInt(int id, char value);
 // INFO: Input functions
@@ -338,7 +333,6 @@ void PlaySecSound(int id);
 void LowPassFilter(void *buffer, unsigned int frames);
 void Crossfade();
 // INFO: Entities functions
-//------------------------------------------------------------------------------------
 void LoadEnemiesFile(FILE **file, const char *enemySheet);
 void LoadEnemiesOnCombat(FILE *file, int id);
 Entity *LoadEnemy(int id);
@@ -347,6 +341,10 @@ void MoveEntity(Entity *entity, int position);
 void DamageEntity(Entity *attacker, Technique tech);
 void KillEntity(Entity *entity);
 void UnloadEntity(Entity *entity);
+// Equipment
+Equip *LoadEquip(int id);
+void UnloadEquip(Equip *equip);
+// Dice related
 int DiceMean(DiceType dice);
 //------------------------------------------------------------------------------------
 // INFO: Program main entry point
@@ -765,7 +763,9 @@ Sprite *ParseSprite(char *line) {
 	char *token;
 	char *saveptr;
 	if (sprite != NULL) {
-		token = strtok_r(line, "	", &saveptr);
+		token = strtok_r(line, "	", &saveptr); //To delete the sprite name
+		printf("INFO: SPRITE: Parsing %s\n", token);
+		token = strtok_r(NULL, "	", &saveptr);
 		sprite->textureIndex = atoi(token);
 		token = strtok_r(NULL, "	", &saveptr);
 		sprite->origin.x = atof(token);
@@ -971,9 +971,9 @@ Entity *LoadEnemy(int id) {
 			if (enemyId == id) {
 				enemy->enemy.type = ENTITY_ENEMY;
 				token = strtok_r(NULL, "	", &saveptr);
-				strcpy(enemy->enemy.name, token);
+				strcpy(enemy->enemy.name, LoadText(atoi(token)));
 				token = strtok_r(NULL, "	", &saveptr);
-				strcpy(enemy->enemy.description, token);
+				strcpy(enemy->enemy.description, LoadText(atoi(token)));
 				token = strtok_r(NULL, "	", &saveptr);
 				enemy->enemy.sprite = LoadSingleSprite(atoi(token));
 				token = strtok_r(NULL, "	", &saveptr);

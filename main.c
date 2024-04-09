@@ -319,7 +319,7 @@ void DrawButton(Shader shader);
 void UnloadButton(void);
 char *LoadText(int id);			// To load a text line with the corresponding translation
 char *LoadTextFormatChar(int id, char value);
-char *LoadTextFormatInt(int id, char value);
+char *LoadTextFormatInt(int id, int value);
 // INFO: Input functions
 void Accept(void);
 void Cancel(void);
@@ -901,6 +901,18 @@ void UnloadButton(void) {
 			free(buttons[i]);
 			buttons[i] = NULL;
 		}
+	}
+}
+char *LoadText(int id) {
+	char line[256];
+	char *token;
+	char *saveptr;
+	int textId = 0;
+	rewind(translationData);
+	while (fgets(line, sizeof(line), translationData) != NULL) {
+		token = strtok_r(line, "	", &saveptr);
+		textId = atoi(token);
+		if (textId == id) return strtok_r(line, "	", &saveptr);
 	}
 }
 int DiceMean(DiceType dice) {

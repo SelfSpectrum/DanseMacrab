@@ -35,6 +35,7 @@ typedef enum DiceType DiceType;
 typedef enum TechniqueType TechniqueType;
 typedef enum AttributeType AttributeType;
 typedef enum StatusType StatusType;
+typedef enum Language Language;
 
 struct Sprite {
 	int textureIndex;
@@ -182,6 +183,11 @@ enum StatusType {
 	STATUS_SLEEPING = 20,		// Attacks autohit
 	STATUS_SUFFOCATING = 21		// Deal stress
 };
+enum Language {
+	LANG_SPANISH = 0,
+	LANG_ENGLISH = 1,
+	LANG_RUSSIAN = 2
+};
 
 struct Technique {
 	char name[64];
@@ -316,6 +322,9 @@ void LoadButton(const char *buttonSheet);
 Button *ParseButton(char *line);
 void DrawButton(Shader shader);
 void UnloadButton(void);
+char *LoadText(int id);
+char *LoadTextFormatChar(int id, char value);
+char *LoadTextFormatInt(int id, char value);
 // INFO: Input functions
 void Accept(void);
 void Cancel(void);
@@ -356,7 +365,14 @@ Combat combat = { { NULL }, { NULL } };				// INFO: Data from position, entities
 // ----------------------------------------------------------------------------------------
 FILE *animsData;						// INFO: Big file with every single independent animation data
 FILE *spriteData;						// INFO: Big file with the sprites that will load individually
+FILE *charmData;
+FILE *armorData;
+FILE *weaponData;
+FILE *techData;
+FILE *characterData;
 FILE *enemyData;						// INFO: Big file with every single enemy
+FILE *dialogData;
+FILE *translationData;
 // ----------------------------------------------------------------------------------------
 // INFO: Variables for button work, they're a lot
 // ----------------------------------------------------------------------------------------
@@ -429,7 +445,7 @@ int main() {
 	int texCount;
 	int sfxCount;
 
-	SetState(STATE_DEBUG);
+	SetState(STATE_TITLE);
 	
 	//combat.playable[2] = LoadEntity("", ENTITY_PLAYER); TODO
 

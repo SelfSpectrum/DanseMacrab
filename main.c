@@ -912,7 +912,7 @@ char *LoadText(int id) {
 	while (fgets(line, sizeof(line), translationData) != NULL) {
 		token = strtok_r(line, "	", &saveptr);
 		textId = atoi(token);
-		if (textId == id) return strtok_r(line, "	", &saveptr);
+		if (textId == id) return line;
 	}
 }
 int DiceMean(DiceType dice) {

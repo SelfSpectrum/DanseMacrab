@@ -224,13 +224,26 @@ struct Weapon {
 	int cost;
 	Technique attack;
 	Technique tech;
+	int physique;
+	int reflex;
+	int lore;
+	int charisma;
+	int hurtMultiplayer;
+	int canUnequip;			// Useful for cursed weapons
 };
 struct Armor {
 	EquipType type;
 	char name[64];
 	char description[256];
 	int cost;
+	int health;
 	Technique tech;
+	int physique;
+	int reflex;
+	int lore;
+	int charisma;
+	int hurtMultiplayer;
+	int canUnequip;			// Useful for cursed armors
 };
 struct Charm {
 	EquipType type;
@@ -239,6 +252,13 @@ struct Charm {
 	int cost;
 	int health;
 	int stress;
+	StatusType inmunity;		// To what status effect the charm grants inmunity
+	int physique;
+	int reflex;
+	int lore;
+	int charisma;
+	int hurtMultiplayer;
+	int canUnequip;			// Useful for cursed charms
 };
 union Equip {
 	Weapon weapon;

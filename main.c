@@ -333,18 +333,24 @@ void ParseAnimable(char *line, Animable *anim);
 void UpdateAnimable(Animable *anim);
 void DrawAnimable(Animable *anim, Shader shader);
 void UnloadAnimable(Animable *anim);
+// Animations
 void LoadAnimation(int id, Vector2 offset);
 void UnloadAnimation(void);
+// Sprite work
 void LoadSprite(const char *spriteSheet);
 Sprite *LoadSingleSprite(int id);
 Sprite *ParseSprite(char *line);
 void DrawSprite(Shader shader);
 void UnloadSprite(void);
+void UnloadSingleSprite(Sprite **sprite);
+// Related with combat
 void LoadCombat(const char *combatSheet);
+// Buttons stuff
 void LoadButton(const char *buttonSheet);
 Button *ParseButton(char *line);
 void DrawButton(Shader shader);
 void UnloadButton(void);
+// Text and translations and stuff
 char *LoadText(int id);			// To load a text line with the corresponding translation
 char *LoadTextFormatChar(int id, char value);
 char *LoadTextFormatInt(int id, int value);
@@ -358,8 +364,8 @@ void ChangeSelection(void);
 void SetState(GameState newState);
 // INFO: SFX functions
 void PlaySecSound(int id);
-void LowPassFilter(void *buffer, unsigned int frames);
-void Crossfade();
+void LowPassFilter(void *buffer, unsigned int frames);		// TODO
+void Crossfade();						// TODO
 // INFO: Entities functions
 void LoadEnemiesFile(FILE **file, const char *enemySheet);
 void LoadEnemiesOnCombat(FILE *file, int id);
@@ -827,7 +833,7 @@ Sprite *ParseSprite(char *line) {
 }
 void DrawSprite(Shader shader) {
 	int i;
-	for (i = 0; i < DRAW_SIZE; i++) {
+	for (i = 0; i <= spritePos; i++) {
 		if (sprites[i] != NULL  ) {
 			if (sprites[i]->shader) BeginShaderMode(shader);
 			DrawTexturePro(textures[sprites[i]->textureIndex],
@@ -842,13 +848,17 @@ void DrawSprite(Shader shader) {
 }
 void UnloadSprite(void) {
 	int i;
-	for (i = 0; i < DRAW_SIZE; i++) {
+	for (i = 0; i <= spritePos; i++) {
 		if (sprites[i] != NULL) {
 			free(sprites[i]);
 			sprites[i] = NULL;
 		}
 	}
 	spritePos = 0;
+}
+void UnloadSingleSprite(Sprite **sprite) {
+	free(*sprite);
+	*sprite = NULL;
 }
 void LoadButton(const char *buttonSheet) {
 	if (FileExists(buttonSheet)) {

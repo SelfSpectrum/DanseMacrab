@@ -171,7 +171,7 @@ enum StatusType {
 	STATUS_DROWNING = 8,		// Deal stress
 	STATUS_GRAPPLED = 9,		// Can't move or dodge
 	STATUS_HORRIFIED = 10,		// Can't be in front of an enemy
-	STATUS_INVISIBLE = 11,		//
+	STATUS_INVISIBLE = 11,		// Must succeed a perception check before roll or attack
 	STATUS_LINKED = 12,		// Two or more creatures link, what happens to one, happens to all
 	STATUS_MOURNFUL = 13,		// Can't do anything
 	STATUS_PARALYZED = 14,		// Can't move or take actions
@@ -219,46 +219,53 @@ struct Technique {
 };
 struct Weapon {
 	EquipType type;
+	// Important stuff, what really makes the weapon unique
 	char name[64];
 	char description[256];
 	int cost;
 	Technique attack;
 	Technique tech;
+	// Stats modifier
 	int physique;
 	int reflex;
 	int lore;
 	int charisma;
 	int hurtMultiplayer;
-	int canUnequip;			// Useful for cursed weapons
+	bool canUnequip;		// Useful for cursed weapons
 };
 struct Armor {
 	EquipType type;
+	// Important stuff, what really makes the armor unique
 	char name[64];
 	char description[256];
 	int cost;
-	int health;
+	int armor;
 	Technique tech;
+	// Stats modifier
 	int physique;
 	int reflex;
 	int lore;
 	int charisma;
 	int hurtMultiplayer;
-	int canUnequip;			// Useful for cursed armors
+	bool canUnequip;		// Useful for cursed armors
 };
 struct Charm {
 	EquipType type;
+	// Important stuff, what really makes the charm unique
 	char name[64];
 	char description[256];
 	int cost;
 	int health;
+	int armor;
 	int stress;
 	StatusType inmunity;		// To what status effect the charm grants inmunity
+	// Stat modifier
 	int physique;
 	int reflex;
 	int lore;
 	int charisma;
 	int hurtMultiplayer;
-	int canUnequip;			// Useful for cursed charms
+	bool canUnequip;		// Useful for cursed charms
 };
 union Equip {
 	Weapon weapon;
@@ -306,8 +313,9 @@ struct Enemy {
 	// INFO: OTHER STUFF
 	char name[64];
 	char description[128];
-	DamageType weakness[2];
-	DamageType resistances[2];
+	DamageType weakness[5];		// Weakness against certain damage types, x2 damage
+	DamageType resistances[5];	// Resistance against certain damage types, x0.5 damage
+	StatusType inmunities[5];	// Inmunity against status effects
 	Sprite *sprite;
 };
 union Entity {
@@ -361,6 +369,8 @@ void MoveEntity(Entity *entity, int position);
 void DamageEntity(Entity *attacker, Technique tech);
 void KillEntity(Entity *entity);
 void UnloadEntity(Entity *entity);
+// Techniques
+//Technique *
 // Equipment
 Equip *LoadEquip(int id);
 void UnloadEquip(Equip *equip);
@@ -376,6 +386,7 @@ Sound sounds[SOUND_SIZE];					// INFO: Here I hold all the sounds used in the ga
 Sound sfxAlias[SFXALIAS_SIZE];					// INFO: Used to reproduce several sounds at once
 int sfxPos = 0;							// INFO: Universal position to locate one "free" sfxAlias
 Sprite *sprites[DRAW_SIZE] = { NULL };				// INFO: What and where to render
+int spritePos = 0;
 Color globalColor = { 255, 255, 255, 255 };			// INFO: Global color used to render the white lines in all textures as colors
 Combat combat = { { NULL }, { NULL } };				// INFO: Data from position, entities and stuff for combat
 // ----------------------------------------------------------------------------------------
@@ -514,6 +525,7 @@ int main() {
 						DrawTexturePro(textures[7], (Rectangle) { 0, 0, 64, 64 }, (Rectangle) { 0, 0, 64, 64 }, (Vector2) { -128, 0 }, 0, globalColor);
 						DrawTexturePro(textures[7], (Rectangle) { 0, 0, 64, 64 }, (Rectangle) { 0, 0, 64, 64 }, (Vector2) { -196, 0 }, 0, globalColor);
 						DrawTexturePro(textures[7], (Rectangle) { 0, 0, 64, 64 }, (Rectangle) { 0, 0, 64, 64 }, (Vector2) { -256, 0 }, 0, globalColor);
+						DrawTexturePro(textures[5], (Rectangle) { 0, 0, 16, 16 }, (Rectangle) { 0, 0, 16, 16 }, (Vector2) { 0, -16 }, 0, globalColor);
 					EndShaderMode();
 				}
 			EndMode2D();
@@ -741,20 +753,19 @@ void UnloadAnimation(void) {
 			UnloadAnimable(anims[i]);
 		}
 	}
-	printf("INFO: ANIMATION: Animable array data unloaded.");
+	printf("INFO: ANIMATION: Animable array data unloaded.\n");
 }
 void LoadSprite(const char *spriteSheet) {
 	if (FileExists(spriteSheet)) {
 		FILE *file = fopen(spriteSheet, "r");
 		char line[256];
-		int i;
 		while (fgets(line, sizeof(line), file) != NULL) {
-			for (i = 0; i < DRAW_SIZE; i++) {
-				if (sprites[i] == NULL) {
-					sprites[i] = ParseSprite(line);
-					break;
-				}
+			if (spritePos >= DRAW_SIZE) {
+				printf("WARNING: SPRITE: Sprites register full.", spriteSheet);
+				break;
 			}
+			sprites[spritePos] = ParseSprite(line);
+			spritePos++;
 		}
 		printf("INFO: SPRITE: Sprites loaded from \"%s\" correctly.", spriteSheet);
 		fclose(file);
@@ -837,6 +848,7 @@ void UnloadSprite(void) {
 			sprites[i] = NULL;
 		}
 	}
+	spritePos = 0;
 }
 void LoadButton(const char *buttonSheet) {
 	if (FileExists(buttonSheet)) {
@@ -934,6 +946,7 @@ char *LoadText(int id) {
 		textId = atoi(token);
 		if (textId == id) return line;
 	}
+	return "ERROR";
 }
 int DiceMean(DiceType dice) {
 	switch (dice) {

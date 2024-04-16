@@ -190,8 +190,8 @@ enum Language {
 };
 
 struct Technique {
-	char name[64];
-	char description[256];
+	char *name;
+	char *description;
 	// For when rolling and stuff (?
 	DiceType roll;
 	AttributeType attr;		// Used for bonusses on the roll, save or difficulty
@@ -374,7 +374,7 @@ void LoadPlayer(const char *playerSheet);
 void MoveEntity(Entity *entity, int position);
 void DamageEntity(Entity *attacker, Technique tech);
 void KillEntity(Entity *entity);
-void UnloadEntity(Entity *entity);
+void UnloadEntity(Entity **entity);
 // Techniques
 //Technique *
 // Equipment
@@ -431,7 +431,6 @@ int main() {
 	//--------------------------------------------------------------------------------------
 	const int virtualScreenWidth = 320;
 	const int virtualScreenHeight = 180;
-
 	const int screenWidth = 960;
 	const int screenHeight = 540;
 
@@ -767,7 +766,7 @@ void LoadSprite(const char *spriteSheet) {
 		char line[256];
 		while (fgets(line, sizeof(line), file) != NULL) {
 			if (spritePos >= DRAW_SIZE) {
-				printf("WARNING: SPRITE: Sprites register full.", spriteSheet);
+				printf("WARNING: SPRITE: Sprites register full.");
 				break;
 			}
 			sprites[spritePos] = ParseSprite(line);
@@ -788,6 +787,7 @@ Sprite *LoadSingleSprite(int id) {
 		fgets(line, sizeof(line), spriteData);
 		while (fgets(line, sizeof(line), spriteData) != NULL) {
 			token = strtok_r(line, "	", &saveptr);
+			spriteId = atoi(token);
 			if (spriteId == id) {
 				return ParseSprite(line);
 			}
@@ -954,7 +954,47 @@ char *LoadText(int id) {
 	while (fgets(line, sizeof(line), translationData) != NULL) {
 		token = strtok_r(line, "	", &saveptr);
 		textId = atoi(token);
-		if (textId == id) return line;
+		if (textId == id) {
+			char *result = strdup(line);
+			if (result == NULL) return "ERROR";
+			return result;
+		}
+	}
+	return "ERROR";
+}
+char *LoadTextFormatChar(int id, char value) {
+	char line[256];
+	char *token;
+	char *saveptr;
+	int textId = 0;
+	rewind(translationData);
+	while (fgets(line, sizeof(line), translationData) != NULL) {
+		token = strtok_r(line, "	", &saveptr);
+		textId = atoi(token);
+		if (textId == id) {
+			sprintf(line, line, value);
+			char *result = strdup(line);
+			if (result == NULL) return "ERROR";
+			return result;
+		}
+	}
+	return "ERROR";
+}
+char *LoadTextFormatInt(int id, int value) {
+	char line[256];
+	char *token;
+	char *saveptr;
+	int textId = 0;
+	rewind(translationData);
+	while (fgets(line, sizeof(line), translationData) != NULL) {
+		token = strtok_r(line, "	", &saveptr);
+		textId = atoi(token);
+		if (textId == id) {
+			sprintf(line, line, value);
+			char *result = strdup(line);
+			if (result == NULL) return "ERROR";
+			return result;
+		}
 	}
 	return "ERROR";
 }
@@ -1051,6 +1091,9 @@ Entity *LoadEnemy(int id) {
 		}
 	}
 	return enemy;
+}
+void UnloadEntity(Entity **entity) {
+
 }
 void PlaySecSound(int id) {
 	id = id % SOUND_SIZE;

@@ -789,6 +789,8 @@ Sprite *LoadSingleSprite(int id) {
 			token = strtok_r(line, "	", &saveptr);
 			spriteId = atoi(token);
 			if (spriteId == id) {
+				token = strtok_r(line, "	", &saveptr); //To delete the sprite name
+				printf("INFO: SPRITE: Parsing %s\n", token);
 				return ParseSprite(line);
 			}
 		}
@@ -800,8 +802,6 @@ Sprite *ParseSprite(char *line) {
 	char *token;
 	char *saveptr;
 	if (sprite != NULL) {
-		token = strtok_r(line, "	", &saveptr); //To delete the sprite name
-		printf("INFO: SPRITE: Parsing %s\n", token);
 		token = strtok_r(NULL, "	", &saveptr);
 		sprite->textureIndex = atoi(token);
 		token = strtok_r(NULL, "	", &saveptr);
@@ -944,6 +944,7 @@ void UnloadButton(void) {
 			buttons[i] = NULL;
 		}
 	}
+	printf("INFO: BUTTONS: Buttons unloaded correctly\n");
 }
 char *LoadText(int id) {
 	char line[256];

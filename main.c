@@ -194,6 +194,7 @@ struct Technique {
 	char *description;
 	// For when rolling and stuff (?
 	DiceType roll;
+	TechniqueType tech;
 	AttributeType attr;		// Used for bonusses on the roll, save or difficulty
 	// Costs, money and HP are the commonest
 	int costMoney;
@@ -203,19 +204,20 @@ struct Technique {
 	DiceType diceSide;
 	int diceAmount;
 	int flatBonus;
+	bool ignoreArmor;		// If the damage should ignore armor, or if healing should heal HP
 	StatusType status;		// Apply status effect to apply
 	// Spawn entity?
 	bool spawnEntity;
 	bool spawnAsEnemy;
 	int spawnId;
 	// Modify stats
-	int physique[6];
-	int reflex[6];
-	int lore[6];
-	int charisma[6];
-	int damageMultiplayer;
-	int hurtMultiplayer;
-	int healMultiplayer;
+	int physique;
+	int reflex;
+	int lore;
+	int charisma;
+	float damageMultiplayer;
+	float hurtMultiplayer;
+	float healMultiplayer;
 };
 struct Weapon {
 	EquipType type;
@@ -766,16 +768,16 @@ void LoadSprite(const char *spriteSheet) {
 		char line[256];
 		while (fgets(line, sizeof(line), file) != NULL) {
 			if (spritePos >= DRAW_SIZE) {
-				printf("WARNING: SPRITE: Sprites register full.");
+				printf("WARNING: SPRITE: Sprites register full.\n");
 				break;
 			}
 			sprites[spritePos] = ParseSprite(line);
 			spritePos++;
 		}
-		printf("INFO: SPRITE: Sprites loaded from \"%s\" correctly.", spriteSheet);
+		printf("INFO: SPRITE: Sprites loaded from \"%s\" correctly.\n", spriteSheet);
 		fclose(file);
 	}
-	else printf("INFO: SPRITE: Sprite file \"%s\" not available.", spriteSheet);
+	else printf("INFO: SPRITE: Sprite file \"%s\" not available.\n", spriteSheet);
 }
 Sprite *LoadSingleSprite(int id) {
 	rewind(spriteData);
@@ -802,7 +804,7 @@ Sprite *ParseSprite(char *line) {
 	char *token;
 	char *saveptr;
 	if (sprite != NULL) {
-		token = strtok_r(NULL, "	", &saveptr);
+		token = strtok_r(line, "	", &saveptr);
 		sprite->textureIndex = atoi(token);
 		token = strtok_r(NULL, "	", &saveptr);
 		sprite->origin.x = atof(token);
@@ -1175,6 +1177,7 @@ void Accept(void) {
 void Cancel(void) {
 	switch (state) {
 		case STATE_TITLE:
+			Accept();
 			break;
 		case STATE_MAINMENU:
 			break;

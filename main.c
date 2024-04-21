@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 #include <stdlib.h>
 #include <string.h>
 #include <raylib.h>
@@ -34,6 +35,7 @@ typedef enum EquipType EquipType;
 typedef enum DiceType DiceType;
 typedef enum TechniqueType TechniqueType;
 typedef enum AttributeType AttributeType;
+typedef enum EconomyType EconomyType;
 typedef enum StatusType StatusType;
 typedef enum Language Language;
 
@@ -87,14 +89,15 @@ enum DamageType {
 	DMG_SLASHING = 1,
 	DMG_BLUDGEONING = 2,
 	DMG_PIERCING = 3,
-	DMG_FIRE = 4,
-	DMG_ICE = 5,
-	DMG_ACID = 6,
-	DMG_PSYCHIC = 7,
-	DMG_HEALNATURE = 8,
-	DMG_HEALBLOODY = 9,
-	DMG_HEALPSY = 10,
-	DMG_HEALARMOR = 11
+	DMG_BALLISTIC = 4,
+	DMG_FIRE = 5,
+	DMG_ICE = 6,
+	DMG_ACID = 7,
+	DMG_PSYCHIC = 8,
+	DMG_HEALNATURE = 9,
+	DMG_HEALBLOODY = 10,
+	DMG_HEALPSY = 11,
+	DMG_HEALARMOR = 12
 };
 enum EntityType {
 	ENTITY_ENEMY = 0,
@@ -109,29 +112,28 @@ enum DiceType {
 	DICE_D100 = 7,
 	DICE_D20 = 6,
 	DICE_D12 = 5,
-	DICE_2D6 = 9,
 	DICE_D10 = 4,
 	DICE_D8 = 3,
 	DICE_D6 = 2,
 	DICE_D4 = 1,
-	DICE_SAVED100 = 15,
-	DICE_SAVED20 = 14,
-	DICE_SAVED12 = 13,
-	DICE_SAVE2D6 = 16,
-	DICE_SAVED10 = 12,
-	DICE_SAVED8 = 11,
-	DICE_SAVED6 = 10,
+	DICE_SAVED100 = 14,
+	DICE_SAVED20 = 13,
+	DICE_SAVED12 = 12,
+	DICE_SAVED10 = 11,
+	DICE_SAVED8 = 10,
+	DICE_SAVED6 = 9,
 	DICE_SAVED4 = 8
 };
 enum TechniqueType {
-	TECH_ATTACK,
-	TECH_CHECK,
-	TECH_TOME,
-	TECH_SONG,
-	TECH_DRACONIC,
-	TECH_GOREART,
-	TECH_DEMONHAND,
-	TECH_SUMMON
+	TECH_ATTACK = 0,
+	TECH_FEATURE = 1,
+	TECH_CHECK = 2,
+	TECH_TOME = 3,
+	TECH_SONG = 4,
+	TECH_DRACONIC = 5,
+	TECH_GOREART = 6,
+	TECH_DEMONHAND = 7,
+	TECH_SUMMON = 8
 };
 enum AttributeType {	// ATTR % 6 for index
 	ATTR_PHYSIQUE = 0,
@@ -183,6 +185,12 @@ enum StatusType {
 	STATUS_SLEEPING = 20,		// Attacks autohit
 	STATUS_SUFFOCATING = 21		// Deal stress
 };
+enum EconomyType {
+	ECO_ACTION = 0,
+	ECO_BONUS = 1,
+	ECO_REACTION = 2,
+	ECO_OFF = 3
+}
 enum Language {
 	LANG_SPANISH = 0,
 	LANG_ENGLISH = 1,
@@ -193,6 +201,7 @@ struct Technique {
 	char *name;
 	char *description;
 	// For when rolling and stuff (?
+	EconomyType economy;
 	DiceType roll;
 	TechniqueType tech;
 	AttributeType attr;		// Used for bonusses on the roll, save or difficulty
@@ -206,6 +215,8 @@ struct Technique {
 	int flatBonus;
 	bool ignoreArmor;		// If the damage should ignore armor, or if healing should heal HP
 	StatusType status;		// Apply status effect to apply
+	bool targetEnemy[5];
+	bool targetAlly[5];
 	// Spawn entity?
 	bool spawnEntity;
 	bool spawnAsEnemy;
@@ -218,6 +229,9 @@ struct Technique {
 	float damageMultiplayer;
 	float hurtMultiplayer;
 	float healMultiplayer;
+	// Graphical stuff?
+	int spriteId;
+	int animationId;
 };
 struct Weapon {
 	EquipType type;
@@ -290,9 +304,9 @@ struct Player {
 	int lore[6];			// Lore + Arcanum, Beasts, Dream, Dungeons, Nature
 	int charisma[6];		// Charisma + Anima, Authority, Drama, Kinship, Passion
 	// INFO: OTHER STUFF
-	char name[64];
-	char class[32];
-	char description[128];
+	char *name;
+	char *class;
+	char *description;
 	Weapon weapon;
 	Armor armor;
 	Charm charm;
@@ -313,11 +327,12 @@ struct Enemy {
 	int lore;
 	int charisma;
 	// INFO: OTHER STUFF
-	char name[64];
-	char description[128];
+	char *name;
+	char *description;
 	DamageType weakness[5];		// Weakness against certain damage types, x2 damage
 	DamageType resistances[5];	// Resistance against certain damage types, x0.5 damage
 	StatusType inmunities[5];	// Inmunity against status effects
+	Technique tech[10];
 	Sprite *sprite;
 };
 union Entity {
@@ -378,12 +393,17 @@ void DamageEntity(Entity *attacker, Technique tech);
 void KillEntity(Entity *entity);
 void UnloadEntity(Entity **entity);
 // Techniques
-//Technique *
+Technique *LoadTech(int id);
+void UnloadTech(Technique **tech);
 // Equipment
 Equip *LoadEquip(int id);
 void UnloadEquip(Equip *equip);
 // Dice related
 int DiceMean(DiceType dice);
+int DiceRoll(DiceType dice);
+void SetSeed(int seed);
+void SetRandomSeed(void);
+void Random(void);
 //------------------------------------------------------------------------------------
 // INFO: Program main entry point
 //------------------------------------------------------------------------------------
@@ -427,6 +447,7 @@ int upKey = KEY_UP;
 int downKey = KEY_DOWN;
 int extraAKey = KEY_A;
 int extraBKey = KEY_B;
+int randomValue;
 
 int main() {
 	// Initialization
@@ -1001,6 +1022,44 @@ char *LoadTextFormatInt(int id, int value) {
 	}
 	return "ERROR";
 }
+int DiceRoll(DiceType dice) {
+	int roll;
+	switch (dice) {
+		case DICE_D100:
+		case DICE_SAVED100:
+			roll = (randomValue % 100) +  1;
+			break
+		case DICE_D20:
+		case DICE_SAVED20:
+			roll = (randomValue % 20) + 1;
+			break;
+		case DICE_D12:
+		case DICE_SAVED12:
+			roll = (randomValue % 12) + 1;
+			break;
+		case DICE_D10:
+		case DICE_SAVED10:
+			roll = (randomValue % 10) + 1;
+			break;
+		case DICE_D8:
+		case DICE_SAVED8:
+			roll = (randomValue % 8) + 1;
+			break;
+		case DICE_D6:
+		case DICE_SAVED6:
+			roll = (randomValue % 6) + 1;
+			break;
+		case DICE_D4:
+		case DICE_SAVED4:
+			roll = (randomValue % 4) + 1;
+			break;
+		default:
+			roll = 0;
+			break;
+	}
+	RandomValue();
+	return roll;
+}
 int DiceMean(DiceType dice) {
 	switch (dice) {
 		case DICE_D100:
@@ -1009,8 +1068,6 @@ int DiceMean(DiceType dice) {
 		case DICE_D20:
 		case DICE_SAVED20:
 			return 11;
-		case DICE_2D6:
-		case DICE_SAVE2D6:
 		case DICE_D12:
 		case DICE_SAVED12:
 			return 7;
@@ -1029,6 +1086,17 @@ int DiceMean(DiceType dice) {
 		default:
 			return 0;
 	}
+}
+int SetSeed(int seed) {
+	srand(seed);
+	randomValue = rand();
+}
+int SetRandomSeed(void) {
+	srand(time(NULL));
+	randomValue = rand();
+}
+int RandomValue(void) {
+	randomValue = rand();
 }
 void LoadEnemiesFile(FILE **file, const char *enemySheet) {
 	if (*file != NULL) fclose(*file);
@@ -1094,6 +1162,29 @@ Entity *LoadEnemy(int id) {
 		}
 	}
 	return enemy;
+}
+void DamageEntity(Entity *attacker, Technique tech) {
+	switch (tech.attr) {
+		case DMG_SLASHING:
+		case DMG_BLUDGEONING:
+		case DMG_PIERCING:
+		case DMG_BALLISTIC:
+			break;
+		case DMG_FIRE:
+		case DMG_ICE:
+		case DMG_ACID:
+			break;
+		case DMG_PSYCHIC:
+			break;
+		case DMG_HEALNATURE:
+		case DMG_HEALBLOODY:
+		case DMG_HEALPSY:
+			break;
+		case DMG_HEALARMOR:
+			break;
+		default:
+			break;
+	}
 }
 void UnloadEntity(Entity **entity) {
 

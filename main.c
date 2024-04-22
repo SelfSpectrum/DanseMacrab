@@ -190,7 +190,7 @@ enum EconomyType {
 	ECO_BONUS = 1,
 	ECO_REACTION = 2,
 	ECO_OFF = 3
-}
+};
 enum Language {
 	LANG_SPANISH = 0,
 	LANG_ENGLISH = 1,
@@ -408,7 +408,7 @@ void UnloadEquip(Equip *equip);
 int DiceMean(DiceType dice);
 int DiceRoll(DiceType dice);
 void SetSeed(int seed);
-void SetRandomSeed(void);
+void SetTimeSeed(void);
 void Random(void);
 //------------------------------------------------------------------------------------
 // INFO: Program main entry point
@@ -1034,7 +1034,7 @@ int DiceRoll(DiceType dice) {
 		case DICE_D100:
 		case DICE_SAVED100:
 			roll = (randomValue % 100) +  1;
-			break
+			break;
 		case DICE_D20:
 		case DICE_SAVED20:
 			roll = (randomValue % 20) + 1;
@@ -1063,7 +1063,7 @@ int DiceRoll(DiceType dice) {
 			roll = 0;
 			break;
 	}
-	RandomValue();
+	Random();
 	return roll;
 }
 int DiceMean(DiceType dice) {
@@ -1093,15 +1093,15 @@ int DiceMean(DiceType dice) {
 			return 0;
 	}
 }
-int SetSeed(int seed) {
+void SetSeed(int seed) {
 	srand(seed);
 	randomValue = rand();
 }
-int SetRandomSeed(void) {
+void SetTimeSeed(void) {
 	srand(time(NULL));
 	randomValue = rand();
 }
-int RandomValue(void) {
+void Random(void) {
 	randomValue = rand();
 }
 void LoadEnemiesFile(FILE **file, const char *enemySheet) {

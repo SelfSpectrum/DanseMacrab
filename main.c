@@ -248,6 +248,8 @@ struct Weapon {
 	int charisma;
 	int hurtMultiplayer;
 	bool canUnequip;		// Useful for cursed weapons
+	// Graphics
+	int spriteId;
 };
 struct Armor {
 	EquipType type;
@@ -264,6 +266,8 @@ struct Armor {
 	int charisma;
 	int hurtMultiplayer;
 	bool canUnequip;		// Useful for cursed armors
+	// Graphics
+	int spriteId;
 };
 struct Charm {
 	EquipType type;
@@ -282,6 +286,8 @@ struct Charm {
 	int charisma;
 	int hurtMultiplayer;
 	bool canUnequip;		// Useful for cursed charms
+	// Graphics
+	int spriteId;
 };
 union Equip {
 	Weapon weapon;

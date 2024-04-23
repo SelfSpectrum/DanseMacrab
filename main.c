@@ -226,6 +226,7 @@ struct Technique {
 	int reflex;
 	int lore;
 	int charisma;
+	int rollBonus;
 	float damageMultiplayer;
 	float hurtMultiplayer;
 	float healMultiplayer;

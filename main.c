@@ -198,8 +198,8 @@ enum Language {
 };
 
 struct Technique {
-	char *name;
-	char *description;
+	int name;
+	int description;
 	// For when rolling and stuff (?
 	EconomyType economy;
 	DiceType roll;
@@ -212,13 +212,13 @@ struct Technique {
 	// Value pool, could be used for damage or healing
 	DiceType diceSide;
 	int diceAmount;
+	bool applyBonuses;
 	int flatBonus;
 	bool ignoreArmor;		// If the damage should ignore armor, or if healing should heal HP
 	StatusType status;		// Apply status effect to apply
 	bool targetEnemy[5];
 	bool targetAlly[5];
 	// Spawn entity?
-	bool spawnEntity;
 	bool spawnAsEnemy;
 	int spawnId;
 	// Modify stats
@@ -237,8 +237,8 @@ struct Technique {
 struct Weapon {
 	EquipType type;
 	// Important stuff, what really makes the weapon unique
-	char name[64];
-	char description[256];
+	int name;
+	int description;
 	int cost;
 	Technique attack;
 	Technique tech;
@@ -255,8 +255,8 @@ struct Weapon {
 struct Armor {
 	EquipType type;
 	// Important stuff, what really makes the armor unique
-	char name[64];
-	char description[256];
+	int name;
+	int description;
 	int cost;
 	int armor;
 	Technique tech;
@@ -273,8 +273,8 @@ struct Armor {
 struct Charm {
 	EquipType type;
 	// Important stuff, what really makes the charm unique
-	char name[64];
-	char description[256];
+	int name;
+	int description;
 	int cost;
 	int health;
 	int armor;
@@ -311,9 +311,9 @@ struct Player {
 	int lore[6];			// Lore + Arcanum, Beasts, Dream, Dungeons, Nature
 	int charisma[6];		// Charisma + Anima, Authority, Drama, Kinship, Passion
 	// INFO: OTHER STUFF
-	char *name;
-	char *class;
-	char *description;
+	int name;
+	int class;
+	int description;
 	Weapon weapon;
 	Armor armor;
 	Charm charm;
@@ -334,8 +334,8 @@ struct Enemy {
 	int lore;
 	int charisma;
 	// INFO: OTHER STUFF
-	char *name;
-	char *description;
+	int name;
+	int description;
 	DamageType weakness[5];		// Weakness against certain damage types, x2 damage
 	DamageType resistances[5];	// Resistance against certain damage types, x0.5 damage
 	StatusType inmunities[5];	// Inmunity against status effects

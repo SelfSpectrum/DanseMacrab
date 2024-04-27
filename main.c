@@ -280,6 +280,7 @@ struct Charm {
 	int armor;
 	int stress;
 	StatusType inmunity;		// To what status effect the charm grants inmunity
+	Technique tech;
 	// Stat modifier
 	int physique;
 	int reflex;
@@ -400,11 +401,11 @@ void DamageEntity(Entity *attacker, Technique tech);
 void KillEntity(Entity *entity);
 void UnloadEntity(Entity **entity);
 // Techniques
-Technique *LoadTech(int id);
-void UnloadTech(Technique **tech);
+Technique LoadTech(int id);
 // Equipment
-Equip *LoadEquip(int id);
-void UnloadEquip(Equip *equip);
+Equip LoadWeapon(int id);
+Equip LoadArmor(int id);
+Equip LoadCharm(int id);
 // Dice related
 int DiceMean(DiceType dice);
 int DiceRoll(DiceType dice);
@@ -1195,6 +1196,18 @@ void DamageEntity(Entity *attacker, Technique tech) {
 }
 void UnloadEntity(Entity **entity) {
 
+}
+Equip LoadWeapon(int id) {
+	Equip weapon;
+	return weapon;
+}
+Equip LoadArmor(int id) {
+	Equip armor;
+	return armor;
+}
+Equip LoadCharm(int id) {
+	Equip charm;
+	return charm
 }
 void PlaySecSound(int id) {
 	id = id % SOUND_SIZE;

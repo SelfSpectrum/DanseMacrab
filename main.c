@@ -1199,10 +1199,86 @@ void UnloadEntity(Entity **entity) {
 }
 Equip LoadWeapon(int id) {
 	Equip weapon;
+	weapon.type = EQUIP_WEAPON;
+	int weaponId;
+	char line[256];
+	char *token;
+	char *saveptr;
+	rewind(weaponData);
+	fgets(line, sizeof(line), weaponData) != NULL {
+	while (fgets(line, sizeof(line), weaponData) != NULL) {
+		token = strtok_r(line, "	", &saveptr);
+		weaponId = atoi(token);
+		if (weaponId == id) {
+			token = strtok_r(NULL, "	", &saveptr);
+			weapon.name = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			weapon.description = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			weapon.spriteId = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			weapon.canUnequip = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			weapon.cost = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			weapon.attack = LoadTech(atoi(token));
+			token = strtok_r(NULL, "	", &saveptr);
+			weapon.tech = LoadTech(atoi(token));
+			token = strtok_r(NULL, "	", &saveptr);
+			weapon.physique = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			weapon.reflex = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			weapon.lore = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			weapon.charisma = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			weapon.hurtMultiplayer = atoi(token);
+			return weapon;
+		}
+	}
 	return weapon;
 }
 Equip LoadArmor(int id) {
 	Equip armor;
+	armor.type = EQUIP_ARMOR;
+	int armorId;
+	char line[256];
+	char *token;
+	char *saveptr;
+	rewind(armorData);
+	fgets(line, sizeof(line), armorData) != NULL {
+	while (fgets(line, sizeof(line), armorData) != NULL) {
+		token = strtok_r(line, "	", &saveptr);
+		armorId = atoi(token);
+		if (armorId == id) {
+			token = strtok_r(NULL, "	", &saveptr);
+			armor.name = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			armor.description = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			armor.spriteId = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			armor.canUnequip = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			armor.cost = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			armor.armor = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			armor.tech = LoadTech(atoi(token));
+			token = strtok_r(NULL, "	", &saveptr);
+			armor.physique = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			armor.reflex = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			armor.lore = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			armor.charisma = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			armor.hurtMultiplayer = atoi(token);
+			return armor;
+		}
+	}
 	return armor;
 }
 Equip LoadCharm(int id) {

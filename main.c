@@ -317,7 +317,7 @@ struct Player {
 	Weapon weapon;
 	Armor armor;
 	Charm charm;
-	Sprite *sprite;
+	int spriteId;
 };
 struct Enemy {
 	EntityType type;
@@ -340,15 +340,17 @@ struct Enemy {
 	DamageType resistances[5];	// Resistance against certain damage types, x0.5 damage
 	StatusType inmunities[5];	// Inmunity against status effects
 	Technique tech[10];
-	Sprite *sprite;
+	int techAmount;
+	int multiattack;
+	int spriteId;
 };
 union Entity {
 	Enemy enemy;
 	Player player;
 };
 struct Combat {
-	Entity *enemy[5];
-	Entity *playable[5];
+	Entity enemy[5];
+	Entity playable[5];
 	int turn;
 };
 // INFO: GFX functions
@@ -393,12 +395,11 @@ void Crossfade();						// TODO
 // INFO: Entities functions
 void LoadEnemiesFile(FILE **file, const char *enemySheet);
 void LoadEnemiesOnCombat(FILE *file, int id);
-Entity *LoadEnemy(int id);
+Entity LoadEnemy(int id);
 void LoadPlayer(const char *playerSheet);
 void MoveEntity(Entity *entity, int position);
-void DamageEntity(Entity *attacker, Technique tech);
+void DamageEntity(Entity attacker, Technique tech);
 void KillEntity(Entity *entity);
-void UnloadEntity(Entity **entity);
 // Techniques
 Technique LoadTech(int id);
 // Equipment
@@ -1131,46 +1132,59 @@ void LoadEnemiesOnCombat(FILE *file, int id) {
 		i++;
 	}
 }
-Entity *LoadEnemy(int id) {
+Entity LoadEnemy(int id) {
 	Entity *enemy = (Entity *) malloc(sizeof(Entity));
+	enemy.enemy.type = ENTITY_ENEMY;
 	if (enemy != NULL) {
 		char line[512];
 		char *saveptr;
 		char *token;
+		char *tech;
 		int enemyId;
 		while (fgets(line, sizeof(line), enemyData) != NULL) {
 			token = strtok_r(line, "	", &saveptr);
 			enemyId = atoi(token);
 			if (enemyId == id) {
-				enemy->enemy.type = ENTITY_ENEMY;
 				token = strtok_r(NULL, "	", &saveptr);
-				enemy->enemy.name = atoi(token);
+				enemy.enemy.name = atoi(token);
 				token = strtok_r(NULL, "	", &saveptr);
-				enemy->enemy.description = atoi(token);
+				enemy.enemy.description = atoi(token);
 				token = strtok_r(NULL, "	", &saveptr);
-				enemy->enemy.sprite = LoadSingleSprite(atoi(token));
+				enemy.enemy.spriteId = atoi(token);
 				token = strtok_r(NULL, "	", &saveptr);
-				enemy->enemy.physique = atoi(token);
+				enemy.enemy.physique = atoi(token);
 				token = strtok_r(NULL, "	", &saveptr);
-				enemy->enemy.reflex = atoi(token);
+				enemy.enemy.reflex = atoi(token);
 				token = strtok_r(NULL, "	", &saveptr);
-				enemy->enemy.lore = atoi(token);
+				enemy.enemy.lore = atoi(token);
 				token = strtok_r(NULL, "	", &saveptr);
-				enemy->enemy.charisma = atoi(token);
+				enemy.enemy.charisma = atoi(token);
 				token = strtok_r(NULL, "	", &saveptr);
-				enemy->enemy.size = atoi(token);
+				enemy.enemy.size = atoi(token);
 				token = strtok_r(NULL, "	", &saveptr);
-				enemy->enemy.maxHealth = DiceMean((DiceType) enemy->enemy.size) * atoi(token) + enemy->enemy.physique * atoi(token);
-				enemy->enemy.health = enemy->enemy.maxHealth;
+				enemy.enemy.maxHealth = DiceMean((DiceType) enemy->enemy.size) * atoi(token) + enemy->enemy.physique * atoi(token);
+				enemy.enemy.health = enemy->enemy.maxHealth;
 				token = strtok_r(NULL, "	", &saveptr);
-				enemy->enemy.maxStress = atoi(token);
-				enemy->enemy.stress = enemy->enemy.maxStress;
+				enemy.enemy.maxStress = atoi(token);
+				enemy.enemy.stress = enemy->enemy.maxStress;
+				token = strtok_r(NULL, "	", &saveptr);
+				enemy.enemy.multiattack = atoi(token);
+				// Loading techniques
+				token = strtok_r(NULL, "	", &saveptr);
+				enemy.enemy.techAmount = 0;
+				tech = strtok_r(token, ",", &saveptr);
+				while (token != NULL) {
+					enemy.enemy.tech[enemy.enemy.techAmount] = LoadTech(atoi(tech));
+					tech = strtok_r(NULL, ",", &saveptr);
+					enemy.enemy.techAmount++;
+				}
+				return enemy;
 			}
 		}
 	}
 	return enemy;
 }
-void DamageEntity(Entity *attacker, Technique tech) {
+void DamageEntity(Entity attacker, Technique tech) {
 	switch (tech.attr) {
 		case DMG_SLASHING:
 		case DMG_BLUDGEONING:
@@ -1192,9 +1206,6 @@ void DamageEntity(Entity *attacker, Technique tech) {
 		default:
 			break;
 	}
-}
-void UnloadEntity(Entity **entity) {
-
 }
 Technique LoadTech(int id) {
 	Technique tech;

@@ -219,7 +219,6 @@ struct Technique {
 	bool targetEnemy[5];
 	bool targetAlly[5];
 	// Spawn entity?
-	bool spawnAsEnemy;
 	int spawnId;
 	// Modify stats
 	int physique;
@@ -1145,9 +1144,9 @@ Entity *LoadEnemy(int id) {
 			if (enemyId == id) {
 				enemy->enemy.type = ENTITY_ENEMY;
 				token = strtok_r(NULL, "	", &saveptr);
-				strcpy(enemy->enemy.name, LoadText(atoi(token)));
+				enemy->enemy.name = atoi(token);
 				token = strtok_r(NULL, "	", &saveptr);
-				strcpy(enemy->enemy.description, LoadText(atoi(token)));
+				enemy->enemy.description = atoi(token);
 				token = strtok_r(NULL, "	", &saveptr);
 				enemy->enemy.sprite = LoadSingleSprite(atoi(token));
 				token = strtok_r(NULL, "	", &saveptr);
@@ -1197,43 +1196,132 @@ void DamageEntity(Entity *attacker, Technique tech) {
 void UnloadEntity(Entity **entity) {
 
 }
+Technique LoadTech(int id) {
+	Technique tech;
+	int techId;
+	char line[256];
+	char *token;
+	char *saveptr;
+	rewind(techData);
+	fgets(line, sizeof(line), techData);
+	while (fgets(line, sizeof(line), techData)) {
+		token = strtok_r(line, "	", &saveptr);
+		techId = atoi(token);
+		if (techId == id) {
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.name = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.description = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.spriteId = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.animationId = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.economy = (EconomyType) atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.roll = (DiceType) atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.tech = (TechniqueType) atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.attr = (AttributeType) atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.costMoney = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.costHP = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.costStress = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.diceSide = (DiceType) atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.applyBonuses = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.diceAmount = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.flatBonus = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.ignoreArmor = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.status = (StatusType) atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.targetEnemy[0] = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.targetEnemy[1] = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.targetEnemy[2] = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.targetEnemy[3] = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.targetEnemy[4] = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.targetAlly[0] = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.targetAlly[1] = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.targetAlly[2] = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.targetAlly[3] = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.targetAlly[4] = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.spawnId = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.physique = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.reflex = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.lore = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.charisma = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.rollBonus = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.damageMultiplayer = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.hurtMultiplayer = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			tech.healMultiplayer = atoi(token);
+			return tech;
+		}
+	}
+	return tech;
+}
 Equip LoadWeapon(int id) {
 	Equip weapon;
-	weapon.type = EQUIP_WEAPON;
+	weapon.weapon.type = EQUIP_WEAPON;
 	int weaponId;
 	char line[256];
 	char *token;
 	char *saveptr;
 	rewind(weaponData);
-	fgets(line, sizeof(line), weaponData) != NULL {
+	fgets(line, sizeof(line), weaponData);
 	while (fgets(line, sizeof(line), weaponData) != NULL) {
 		token = strtok_r(line, "	", &saveptr);
 		weaponId = atoi(token);
 		if (weaponId == id) {
 			token = strtok_r(NULL, "	", &saveptr);
-			weapon.name = atoi(token);
+			weapon.weapon.name = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			weapon.description = atoi(token);
+			weapon.weapon.description = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			weapon.spriteId = atoi(token);
+			weapon.weapon.spriteId = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			weapon.canUnequip = atoi(token);
+			weapon.weapon.canUnequip = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			weapon.cost = atoi(token);
+			weapon.weapon.cost = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			weapon.attack = LoadTech(atoi(token));
+			weapon.weapon.attack = LoadTech(atoi(token));
 			token = strtok_r(NULL, "	", &saveptr);
-			weapon.tech = LoadTech(atoi(token));
+			weapon.weapon.tech = LoadTech(atoi(token));
 			token = strtok_r(NULL, "	", &saveptr);
-			weapon.physique = atoi(token);
+			weapon.weapon.physique = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			weapon.reflex = atoi(token);
+			weapon.weapon.reflex = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			weapon.lore = atoi(token);
+			weapon.weapon.lore = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			weapon.charisma = atoi(token);
+			weapon.weapon.charisma = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			weapon.hurtMultiplayer = atoi(token);
+			weapon.weapon.hurtMultiplayer = atoi(token);
 			return weapon;
 		}
 	}
@@ -1241,41 +1329,41 @@ Equip LoadWeapon(int id) {
 }
 Equip LoadArmor(int id) {
 	Equip armor;
-	armor.type = EQUIP_ARMOR;
+	armor.armor.type = EQUIP_ARMOR;
 	int armorId;
 	char line[256];
 	char *token;
 	char *saveptr;
 	rewind(armorData);
-	fgets(line, sizeof(line), armorData) != NULL {
+	fgets(line, sizeof(line), armorData);
 	while (fgets(line, sizeof(line), armorData) != NULL) {
 		token = strtok_r(line, "	", &saveptr);
 		armorId = atoi(token);
 		if (armorId == id) {
 			token = strtok_r(NULL, "	", &saveptr);
-			armor.name = atoi(token);
+			armor.armor.name = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			armor.description = atoi(token);
+			armor.armor.description = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			armor.spriteId = atoi(token);
+			armor.armor.spriteId = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			armor.canUnequip = atoi(token);
+			armor.armor.canUnequip = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			armor.cost = atoi(token);
+			armor.armor.cost = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			armor.armor = atoi(token);
+			armor.armor.armor = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			armor.tech = LoadTech(atoi(token));
+			armor.armor.tech = LoadTech(atoi(token));
 			token = strtok_r(NULL, "	", &saveptr);
-			armor.physique = atoi(token);
+			armor.armor.physique = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			armor.reflex = atoi(token);
+			armor.armor.reflex = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			armor.lore = atoi(token);
+			armor.armor.lore = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			armor.charisma = atoi(token);
+			armor.armor.charisma = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			armor.hurtMultiplayer = atoi(token);
+			armor.armor.hurtMultiplayer = atoi(token);
 			return armor;
 		}
 	}
@@ -1283,7 +1371,51 @@ Equip LoadArmor(int id) {
 }
 Equip LoadCharm(int id) {
 	Equip charm;
-	return charm
+	charm.charm.type = EQUIP_CHARM;
+	int charmId;
+	char line[256];
+	char *token;
+	char *saveptr;
+	rewind(charmData);
+	fgets(line, sizeof(line), charmData);
+	while (fgets(line, sizeof(line), charmData) != NULL) {
+		token = strtok_r(line, "	", &saveptr);
+		charmId = atoi(token);
+		if (charmId == id) {
+			token = strtok_r(NULL, "	", &saveptr);
+			charm.charm.name = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			charm.charm.description = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			charm.charm.spriteId = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			charm.charm.canUnequip = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			charm.charm.cost = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			charm.charm.health = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			charm.charm.armor = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			charm.charm.stress = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			charm.charm.inmunity = (StatusType) atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			charm.charm.tech = LoadTech(atoi(token));
+			token = strtok_r(NULL, "	", &saveptr);
+			charm.charm.physique = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			charm.charm.reflex = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			charm.charm.lore = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			charm.charm.charisma = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			charm.charm.hurtMultiplayer = atoi(token);
+			return charm;
+		}
+	}
+	return charm;
 }
 void PlaySecSound(int id) {
 	id = id % SOUND_SIZE;

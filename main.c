@@ -336,9 +336,9 @@ struct Enemy {
 	// INFO: OTHER STUFF
 	int name;
 	int description;
-	DamageType weakness[5];		// Weakness against certain damage types, x2 damage
-	DamageType resistances[5];	// Resistance against certain damage types, x0.5 damage
-	StatusType inmunities[5];	// Inmunity against status effects
+	DamageType weakness[2];		// Weakness against certain damage types, x2 damage
+	DamageType resistances[2];	// Resistance against certain damage types, x0.5 damage
+	StatusType inmunities[2];	// Inmunity against status effects
 	Technique tech[10];
 	int techAmount;
 	int multiattack;
@@ -1167,6 +1167,14 @@ Entity LoadEnemy(int id) {
 				token = strtok_r(NULL, "	", &saveptr);
 				enemy.enemy.maxStress = atoi(token);
 				enemy.enemy.stress = enemy->enemy.maxStress;
+				token = strtok_r(NULL, "	", &saveptr);
+				enemy.enemy.weakness[0] = (DamageType) atoi(token);
+				token = strtok_r(NULL, "	", &saveptr);
+				enemy.enemy.weakness[1] = (DamageType) atoi(token);
+				token = strtok_r(NULL, "	", &saveptr);
+				enemy.enemy.resistances[0] = (DamageType) atoi(token);
+				token = strtok_r(NULL, "	", &saveptr);
+				enemy.enemy.resistances[1] = (DamageType) atoi(token);
 				token = strtok_r(NULL, "	", &saveptr);
 				enemy.enemy.multiattack = atoi(token);
 				// Loading techniques

@@ -198,6 +198,7 @@ enum Language {
 };
 
 struct Technique {
+	int id;
 	int name;
 	int description;
 	// For when rolling and stuff (?
@@ -239,8 +240,8 @@ struct Weapon {
 	int name;
 	int description;
 	int cost;
-	Technique attack;
-	Technique tech;
+	int attack;
+	int tech;
 	// Stats modifier
 	int physique;
 	int reflex;
@@ -258,7 +259,7 @@ struct Armor {
 	int description;
 	int cost;
 	int armor;
-	Technique tech;
+	int tech;
 	// Stats modifier
 	int physique;
 	int reflex;
@@ -279,7 +280,7 @@ struct Charm {
 	int armor;
 	int stress;
 	StatusType inmunity;		// To what status effect the charm grants inmunity
-	Technique tech;
+	int tech;
 	// Stat modifier
 	int physique;
 	int reflex;
@@ -317,6 +318,8 @@ struct Player {
 	Weapon weapon;
 	Armor armor;
 	Charm charm;
+	Technique tech[20];
+	int techAmount;
 	int spriteId;
 };
 struct Enemy {
@@ -402,6 +405,7 @@ void DamageEntity(Entity attacker, Technique tech);
 void KillEntity(Entity *entity);
 // Techniques
 Technique LoadTech(int id);
+void PlayerLoadTech(Entity *player);
 // Equipment
 Equip LoadWeapon(int id);
 Equip LoadArmor(int id);
@@ -1227,6 +1231,7 @@ Technique LoadTech(int id) {
 		token = strtok_r(line, "	", &saveptr);
 		techId = atoi(token);
 		if (techId == id) {
+			tech.id = techId;
 			token = strtok_r(NULL, "	", &saveptr);
 			tech.name = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
@@ -1328,9 +1333,9 @@ Equip LoadWeapon(int id) {
 			token = strtok_r(NULL, "	", &saveptr);
 			weapon.weapon.cost = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			weapon.weapon.attack = LoadTech(atoi(token));
+			weapon.weapon.attack = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			weapon.weapon.tech = LoadTech(atoi(token));
+			weapon.weapon.tech = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
 			weapon.weapon.physique = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
@@ -1372,7 +1377,7 @@ Equip LoadArmor(int id) {
 			token = strtok_r(NULL, "	", &saveptr);
 			armor.armor.armor = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			armor.armor.tech = LoadTech(atoi(token));
+			armor.armor.tech = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
 			armor.armor.physique = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
@@ -1420,7 +1425,7 @@ Equip LoadCharm(int id) {
 			token = strtok_r(NULL, "	", &saveptr);
 			charm.charm.inmunity = (StatusType) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			charm.charm.tech = LoadTech(atoi(token));
+			charm.charm.tech = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
 			charm.charm.physique = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);

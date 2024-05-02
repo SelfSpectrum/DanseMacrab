@@ -362,7 +362,7 @@ union Entity {
 };
 struct Combat {
 	Entity *enemy[5];
-	Entity *playable[5];
+	Entity *player[5];
 	int turn;
 };
 // INFO: GFX functions
@@ -390,6 +390,7 @@ void UnloadButton(void);
 char *LoadText(int id);			// To load a text line with the corresponding translation
 char *LoadTextFormatChar(int id, char value);
 char *LoadTextFormatInt(int id, int value);
+void UnloadText();						//TODO
 // INFO: Input functions
 void Accept(void);
 void Cancel(void);
@@ -409,12 +410,13 @@ Entity *LoadEnemy(int id);
 Entity *LoadPlayer(int id);
 void MoveEntity(Entity *entity, int position);
 void DamageEntity(Entity attacker, Technique tech);
-void KillEntity(Entity *entity);
-void UnloadEntity(Entity **Entity);
+void KillEntity(Entity *entity);				//TODO
+void UnloadCombat(void);
+void UnloadEntity(Entity **Entity, int position);
 void DrawCombat(void);
 // Techniques
 Technique LoadTech(int id);
-void PlayerLoadTech(Entity *player);
+void PlayerLoadTech(Entity *player);				//TODO
 // Equipment
 Equip LoadWeapon(int id);
 Equip LoadArmor(int id);
@@ -499,7 +501,14 @@ int main() {
 
 	animsData = fopen("./resources/anims/animations.tsv", "r");
 	spriteData = fopen("./resources/gfx/sprites.tsv", "r");
+	charmData = fopen("./resources/combat/charms.tsv", "r");
+	armorData = fopen("./resources/combat/armors.tsv", "r");
+	weaponData = fopen("./resources/combat/weapons.tsv", "r");
+	techData = fopen("./resources/combat/tech.tsv", "r");
+	characterData = fopen("./resources/combat/characters.tsv", "r");
 	enemyData = fopen("./resources/combat/enemies.tsv", "r");
+	dialogData = fopen("./resources/text/dialog.tsv", "r");
+	translationData = fopen("./resources/text/english.tsv", "r");
 
 	textures[0] = LoadTexture("./resources/gfx/bigSprites00.png");
 	textures[3] = LoadTexture("./resources/gfx/cards.png");
@@ -596,6 +605,7 @@ int main() {
 	UnloadRenderTexture(target);
 	UnloadSprite();
 	UnloadButton();
+	UnloadCombat();
 	UnloadAnimation();
 	UnloadMusicStream(music);   // Unload music stream buffers from RAM
 
@@ -605,7 +615,14 @@ int main() {
 
 	if (animsData != NULL) fclose(animsData);
 	if (spriteData != NULL) fclose(spriteData);
+	if (charmData != NULL) fclose(charmData);
+	if (armorData != NULL) fclose(armorData);
+	if (weaponData != NULL) fclose(weaponData);
+	if (techData != NULL) fclose(techData);
+	if (characterData != NULL) fclose(characterData);
 	if (enemyData != NULL) fclose(enemyData);
+	if (dialogData != NULL) fclose(dialogData);
+	if (translationData != NULL) fclose(translationData);
 
 	CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
 	CloseWindow();              // Close window and OpenGL context
@@ -1133,19 +1150,19 @@ void LoadEnemiesOnCombat(FILE *file, int id) {
 		if (i == id) {
 			token = strtok_r(line, "	", &saveptr);
 			combat.enemy[0] = LoadEnemy(atoi(token));
-			if (token[0] != '0') combat.enemy[0].enemy.position = 0;
+			if (token[0] != '0') combat.enemy[0]->enemy.position = 0;
 			token = strtok_r(NULL, "	", &saveptr);
 			combat.enemy[1] = LoadEnemy(atoi(token));
-			if (token[0] != '0') combat.enemy[1].enemy.position = 1;
+			if (token[0] != '0') combat.enemy[1]->enemy.position = 1;
 			token = strtok_r(NULL, "	", &saveptr);
 			combat.enemy[2] = LoadEnemy(atoi(token));
-			if (token[0] != '0') combat.enemy[2].enemy.position = 2;
+			if (token[0] != '0') combat.enemy[2]->enemy.position = 2;
 			token = strtok_r(NULL, "	", &saveptr);
 			combat.enemy[3] = LoadEnemy(atoi(token));
-			if (token[0] != '0') combat.enemy[3].enemy.position = 0;
+			if (token[0] != '0') combat.enemy[3]->enemy.position = 0;
 			token = strtok_r(NULL, "	", &saveptr);
 			combat.enemy[4] = LoadEnemy(atoi(token));
-			if (token[0] != '0') combat.enemy[4].enemy.position = 0;
+			if (token[0] != '0') combat.enemy[4]->enemy.position = 0;
 		}
 		i++;
 	}
@@ -1240,21 +1257,38 @@ void DamageEntity(Entity attacker, Technique tech) {
 void KillEntity(Entity *entity) {
 	//idk
 }
-void UnloadEntity(Entity **entity) {
-	int pos;
-	if ((*entity)->enemy.type == ENTITY_ENEMY) {
-		pos = (*entity)->enemy.position;
-		free((*entity)->enemy.sprite);
-		free((*entity)->enemy);
-		entity[pos] = NULL;
+void UnloadCombat(void) {
+	int i;
+	for (i = 0; i < 5; i++) {
+		UnloadEntity(ENTITY_ENEMY, i);
+		UnloadEntity(ENTITY_PLAYER, i);
+	}
+	printf("INFO: COMBAT: Combat unloaded successfully.\n");
+}
+void UnloadEntity(EntityType type, int position) {
+	switch (type) {
+		case ENTITY_ENEMY:
+			if (combat.enemy[position] == NULL) return;
+			free(combat.enemy[position]->enemy.sprite);
+			free(combat.enemy[position]);
+			combat.enemy[position] = NULL;
+			return;
+		case ENTITY_PLAYER:
+			if (combat.player[position] == NULL) return;
+			free(combat.player[position]->player.sprite);
+			free(combat.player[position]);
+			combat.player[position] = NULL;
+			return;
 	}
 }
 void DrawCombat(void) {
 	int i;
 	Sprite *sprite;
 	for (i = 0; i < 5; i++) {
-		sprite = combat.enemy[i]->sprite;
-		DrawTexturePro(textures[sprite->textureIndex], sprite->origin, sprite->dest, sprite->position + (Vector2) { -64 * combat.enemy[i]->position, 0 }, sprite->rotation, globalColor);
+		sprite = combat.enemy[i]->enemy.sprite;
+		DrawTexturePro(textures[sprite->textureIndex], sprite->origin, sprite->dest, Vector2Add(sprite->position, (Vector2) { -64 * combat.enemy[i]->enemy.position, 0 }), sprite->rotation, globalColor);
+		sprite = combat.playable[i]->player.sprite;
+		DrawTexturePro(textures[sprite->textureIndex], sprite->origin, sprite->dest, Vector2Add(sprite->position, (Vector2) { -64 * combat.playable[i]->player.position, 0 }), sprite->rotation, globalColor);
 	}
 }
 Technique LoadTech(int id) {

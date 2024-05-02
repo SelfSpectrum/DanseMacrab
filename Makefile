@@ -384,7 +384,8 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 # Compile only a certain file
 raylibc:
 	$(CC) -o $(PROJECT_NAME)$(EXT) $(file) $(CFLAGS) $(INCLUDE_PATHS) $(LDFLAGS) $(LDLIBS) -D$(PLATFORM)
-
+win:
+	$(CC) -o $(PROJECT_NAME).exe $(file) $(CFLAGS) $(INCLUDE_PATHS) $(LDFLAGS) $(LDLIBS) -D$(PLATFORM)
 # Clean everything
 clean:
 ifeq ($(PLATFORM),PLATFORM_DESKTOP)

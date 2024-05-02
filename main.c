@@ -109,6 +109,7 @@ enum EquipType {
 	EQUIP_CHARM = 2
 };
 enum DiceType {
+	DICE_NONE = 0,
 	DICE_D100 = 7,
 	DICE_D20 = 6,
 	DICE_D12 = 5,
@@ -196,7 +197,6 @@ enum Language {
 	LANG_ENGLISH = 1,
 	LANG_RUSSIAN = 2
 };
-
 struct Technique {
 	int id;
 	int name;
@@ -311,6 +311,10 @@ struct Player {
 	int reflex[6];			// Reflex + Accuracy, Acrobatics, Mischief, Perception, Touch
 	int lore[6];			// Lore + Arcanum, Beasts, Dream, Dungeons, Nature
 	int charisma[6];		// Charisma + Anima, Authority, Drama, Kinship, Passion
+	int phyBonus;
+	int refBonus;
+	int lorBonus;
+	int chaBonus;
 	// INFO: OTHER STUFF
 	int name;
 	int class;
@@ -320,10 +324,11 @@ struct Player {
 	Charm charm;
 	Technique tech[20];
 	int techAmount;
-	int spriteId;
+	Sprite *sprite;
 };
 struct Enemy {
 	EntityType type;
+	int id;
 	int position;
 	int size;
 	// INFO: VITALS
@@ -336,6 +341,10 @@ struct Enemy {
 	int reflex;
 	int lore;
 	int charisma;
+	int phyBonus;
+	int refBonus;
+	int lorBonus;
+	int chaBonus;
 	// INFO: OTHER STUFF
 	int name;
 	int description;
@@ -345,15 +354,15 @@ struct Enemy {
 	Technique tech[10];
 	int techAmount;
 	int multiattack;
-	int spriteId;
+	Sprite *sprite;
 };
 union Entity {
 	Enemy enemy;
 	Player player;
 };
 struct Combat {
-	Entity enemy[5];
-	Entity playable[5];
+	Entity *enemy[5];
+	Entity *playable[5];
 	int turn;
 };
 // INFO: GFX functions
@@ -372,8 +381,6 @@ Sprite *ParseSprite(char *line);
 void DrawSprite(Shader shader);
 void UnloadSprite(void);
 void UnloadSingleSprite(Sprite **sprite);
-// Related with combat
-void LoadCombat(const char *combatSheet);
 // Buttons stuff
 void LoadButton(const char *buttonSheet);
 Button *ParseButton(char *line);
@@ -398,11 +405,13 @@ void Crossfade();						// TODO
 // INFO: Entities functions
 void LoadEnemiesFile(FILE **file, const char *enemySheet);
 void LoadEnemiesOnCombat(FILE *file, int id);
-Entity LoadEnemy(int id);
-void LoadPlayer(const char *playerSheet);
+Entity *LoadEnemy(int id);
+Entity *LoadPlayer(int id);
 void MoveEntity(Entity *entity, int position);
 void DamageEntity(Entity attacker, Technique tech);
 void KillEntity(Entity *entity);
+void UnloadEntity(Entity **Entity);
+void DrawCombat(void);
 // Techniques
 Technique LoadTech(int id);
 void PlayerLoadTech(Entity *player);
@@ -428,7 +437,7 @@ int sfxPos = 0;							// INFO: Universal position to locate one "free" sfxAlias
 Sprite *sprites[DRAW_SIZE] = { NULL };				// INFO: What and where to render
 int spritePos = 0;
 Color globalColor = { 255, 255, 255, 255 };			// INFO: Global color used to render the white lines in all textures as colors
-Combat combat = { { NULL }, { NULL } };				// INFO: Data from position, entities and stuff for combat
+Combat combat = { { 0 }, { 0 } };				// INFO: Data from position, entities and stuff for combat
 // ----------------------------------------------------------------------------------------
 // INFO: Files to load global data
 // ----------------------------------------------------------------------------------------
@@ -1123,78 +1132,87 @@ void LoadEnemiesOnCombat(FILE *file, int id) {
 	while (fgets(line, sizeof(line), file) != NULL) {
 		if (i == id) {
 			token = strtok_r(line, "	", &saveptr);
-			if (token[0] != '0') combat.enemy[0] = LoadEnemy(atoi(token));
+			combat.enemy[0] = LoadEnemy(atoi(token));
+			if (token[0] != '0') combat.enemy[0].enemy.position = 0;
 			token = strtok_r(NULL, "	", &saveptr);
-			if (token[0] != '0') combat.enemy[1] = LoadEnemy(atoi(token));
+			combat.enemy[1] = LoadEnemy(atoi(token));
+			if (token[0] != '0') combat.enemy[1].enemy.position = 1;
 			token = strtok_r(NULL, "	", &saveptr);
-			if (token[0] != '0') combat.enemy[2] = LoadEnemy(atoi(token));
+			combat.enemy[2] = LoadEnemy(atoi(token));
+			if (token[0] != '0') combat.enemy[2].enemy.position = 2;
 			token = strtok_r(NULL, "	", &saveptr);
-			if (token[0] != '0') combat.enemy[3] = LoadEnemy(atoi(token));
+			combat.enemy[3] = LoadEnemy(atoi(token));
+			if (token[0] != '0') combat.enemy[3].enemy.position = 0;
 			token = strtok_r(NULL, "	", &saveptr);
-			if (token[0] != '0') combat.enemy[4] = LoadEnemy(atoi(token));
+			combat.enemy[4] = LoadEnemy(atoi(token));
+			if (token[0] != '0') combat.enemy[4].enemy.position = 0;
 		}
 		i++;
 	}
 }
-Entity LoadEnemy(int id) {
+Entity *LoadEnemy(int id) {
+	if (id == 0) return NULL;
 	Entity *enemy = (Entity *) malloc(sizeof(Entity));
-	enemy.enemy.type = ENTITY_ENEMY;
-	if (enemy != NULL) {
-		char line[512];
-		char *saveptr;
-		char *token;
-		char *tech;
-		int enemyId;
-		while (fgets(line, sizeof(line), enemyData) != NULL) {
-			token = strtok_r(line, "	", &saveptr);
-			enemyId = atoi(token);
-			if (enemyId == id) {
-				token = strtok_r(NULL, "	", &saveptr);
-				enemy.enemy.name = atoi(token);
-				token = strtok_r(NULL, "	", &saveptr);
-				enemy.enemy.description = atoi(token);
-				token = strtok_r(NULL, "	", &saveptr);
-				enemy.enemy.spriteId = atoi(token);
-				token = strtok_r(NULL, "	", &saveptr);
-				enemy.enemy.physique = atoi(token);
-				token = strtok_r(NULL, "	", &saveptr);
-				enemy.enemy.reflex = atoi(token);
-				token = strtok_r(NULL, "	", &saveptr);
-				enemy.enemy.lore = atoi(token);
-				token = strtok_r(NULL, "	", &saveptr);
-				enemy.enemy.charisma = atoi(token);
-				token = strtok_r(NULL, "	", &saveptr);
-				enemy.enemy.size = atoi(token);
-				token = strtok_r(NULL, "	", &saveptr);
-				enemy.enemy.maxHealth = DiceMean((DiceType) enemy->enemy.size) * atoi(token) + enemy->enemy.physique * atoi(token);
-				enemy.enemy.health = enemy->enemy.maxHealth;
-				token = strtok_r(NULL, "	", &saveptr);
-				enemy.enemy.maxStress = atoi(token);
-				enemy.enemy.stress = enemy->enemy.maxStress;
-				token = strtok_r(NULL, "	", &saveptr);
-				enemy.enemy.weakness[0] = (DamageType) atoi(token);
-				token = strtok_r(NULL, "	", &saveptr);
-				enemy.enemy.weakness[1] = (DamageType) atoi(token);
-				token = strtok_r(NULL, "	", &saveptr);
-				enemy.enemy.resistances[0] = (DamageType) atoi(token);
-				token = strtok_r(NULL, "	", &saveptr);
-				enemy.enemy.resistances[1] = (DamageType) atoi(token);
-				token = strtok_r(NULL, "	", &saveptr);
-				enemy.enemy.multiattack = atoi(token);
-				// Loading techniques
-				token = strtok_r(NULL, "	", &saveptr);
-				enemy.enemy.techAmount = 0;
-				tech = strtok_r(token, ",", &saveptr);
-				while (token != NULL) {
-					enemy.enemy.tech[enemy.enemy.techAmount] = LoadTech(atoi(tech));
-					tech = strtok_r(NULL, ",", &saveptr);
-					enemy.enemy.techAmount++;
-				}
-				return enemy;
+	enemy->enemy.type = ENTITY_ENEMY;
+	enemy->enemy.phyBonus = 0;
+	enemy->enemy.refBonus = 0;
+	enemy->enemy.lorBonus = 0;
+	enemy->enemy.chaBonus = 0;
+	char line[512];
+	char *saveptr;
+	char *token;
+	char *tech;
+	int enemyId;
+	while (fgets(line, sizeof(line), enemyData) != NULL) {
+		token = strtok_r(line, "	", &saveptr);
+		enemyId = atoi(token);
+		if (enemyId == id) {
+			enemy->enemy.id = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.name = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.description = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.sprite = LoadSingleSprite(atoi(token));
+			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.physique = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.reflex = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.lore = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.charisma = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.size = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.maxHealth = DiceMean((DiceType) enemy->enemy.size) * atoi(token) + enemy->enemy.physique * atoi(token);
+			enemy->enemy.health = enemy->enemy.maxHealth;
+			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.maxStress = atoi(token);
+			enemy->enemy.stress = enemy->enemy.maxStress;
+			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.weakness[0] = (DamageType) atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.weakness[1] = (DamageType) atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.resistances[0] = (DamageType) atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.resistances[1] = (DamageType) atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.multiattack = atoi(token);
+			// Loading techniques
+			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.techAmount = 0;
+			tech = strtok_r(token, ",", &saveptr);
+			while (token != NULL) {
+				enemy->enemy.tech[enemy->enemy.techAmount] = LoadTech(atoi(tech));
+				tech = strtok_r(NULL, ",", &saveptr);
+				enemy->enemy.techAmount++;
 			}
+			return enemy;
 		}
 	}
-	return enemy;
+	return NULL;
 }
 void DamageEntity(Entity attacker, Technique tech) {
 	switch (tech.attr) {
@@ -1217,6 +1235,26 @@ void DamageEntity(Entity attacker, Technique tech) {
 			break;
 		default:
 			break;
+	}
+}
+void KillEntity(Entity *entity) {
+	//idk
+}
+void UnloadEntity(Entity **entity) {
+	int pos;
+	if ((*entity)->enemy.type == ENTITY_ENEMY) {
+		pos = (*entity)->enemy.position;
+		free((*entity)->enemy.sprite);
+		free((*entity)->enemy);
+		entity[pos] = NULL;
+	}
+}
+void DrawCombat(void) {
+	int i;
+	Sprite *sprite;
+	for (i = 0; i < 5; i++) {
+		sprite = combat.enemy[i]->sprite;
+		DrawTexturePro(textures[sprite->textureIndex], sprite->origin, sprite->dest, sprite->position + (Vector2) { -64 * combat.enemy[i]->position, 0 }, sprite->rotation, globalColor);
 	}
 }
 Technique LoadTech(int id) {

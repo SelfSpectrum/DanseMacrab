@@ -323,7 +323,9 @@ struct Player {
 	Armor armor;
 	Charm charm;
 	Technique tech[20];
+	Technique equipedTech[10];
 	int techAmount;
+	int equipedTechAmount;
 	Sprite *sprite;
 };
 struct Enemy {
@@ -412,7 +414,7 @@ void MoveEntity(Entity *entity, int position);
 void DamageEntity(Entity attacker, Technique tech);
 void KillEntity(Entity *entity);				//TODO
 void UnloadCombat(void);
-void UnloadEntity(Entity **Entity, int position);
+void UnloadEntity(EntityType type, int position);
 void DrawCombat(void);
 // Techniques
 Technique LoadTech(int id);
@@ -1231,6 +1233,21 @@ Entity *LoadEnemy(int id) {
 	}
 	return NULL;
 }
+Entity *LoadPlayer(int id) {
+	if (id == 0) return NULL;
+	Entity *player = (Entity *) malloc(sizeof(Entity));
+	player->player.type = ENTITY_PLAYER;
+	player->player.phyBonus = 0;
+	player->player.refBonus = 0;
+	player->player.lorBonus = 0;
+	player->player.chaBonus = 0;
+	char line[512];
+	char *saveptr;
+	char *token;
+	char *tech;
+	int playerId;
+	return player;
+}
 void DamageEntity(Entity attacker, Technique tech) {
 	switch (tech.attr) {
 		case DMG_SLASHING:
@@ -1287,8 +1304,8 @@ void DrawCombat(void) {
 	for (i = 0; i < 5; i++) {
 		sprite = combat.enemy[i]->enemy.sprite;
 		DrawTexturePro(textures[sprite->textureIndex], sprite->origin, sprite->dest, Vector2Add(sprite->position, (Vector2) { -64 * combat.enemy[i]->enemy.position, 0 }), sprite->rotation, globalColor);
-		sprite = combat.playable[i]->player.sprite;
-		DrawTexturePro(textures[sprite->textureIndex], sprite->origin, sprite->dest, Vector2Add(sprite->position, (Vector2) { -64 * combat.playable[i]->player.position, 0 }), sprite->rotation, globalColor);
+		sprite = combat.player[i]->player.sprite;
+		DrawTexturePro(textures[sprite->textureIndex], sprite->origin, sprite->dest, Vector2Add(sprite->position, (Vector2) { -64 * combat.player[i]->player.position, 0 }), sprite->rotation, globalColor);
 	}
 }
 Technique LoadTech(int id) {

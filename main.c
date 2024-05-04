@@ -1182,6 +1182,8 @@ Entity *LoadEnemy(int id) {
 	char *token;
 	char *tech;
 	int enemyId;
+	rewind(enemyData);
+	fgets(line, sizeof(line), enemyData);
 	while (fgets(line, sizeof(line), enemyData) != NULL) {
 		token = strtok_r(line, "	", &saveptr);
 		enemyId = atoi(token);
@@ -1237,6 +1239,8 @@ Entity *LoadPlayer(int id) {
 	if (id == 0) return NULL;
 	Entity *player = (Entity *) malloc(sizeof(Entity));
 	player->player.type = ENTITY_PLAYER;
+	player->player.demonTally = 0;
+	player->player.accumulatedDamage = 0;
 	player->player.phyBonus = 0;
 	player->player.refBonus = 0;
 	player->player.lorBonus = 0;
@@ -1246,6 +1250,15 @@ Entity *LoadPlayer(int id) {
 	char *token;
 	char *tech;
 	int playerId;
+	rewind(characterData);
+	fgets(line, sizeof(line), characterData);
+	while (fgets(line, sizeof(line), characterData)) {
+		token = strtok_r(line, "	", &saveptr);
+		playerId = atoi(token);
+		if (playerId == id) {
+			token = strtok_r(line, "	", &saveptr);
+		}
+	}
 	return player;
 }
 void DamageEntity(Entity attacker, Technique tech) {

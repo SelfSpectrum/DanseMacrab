@@ -38,6 +38,7 @@ typedef enum AttributeType AttributeType;
 typedef enum EconomyType EconomyType;
 typedef enum StatusType StatusType;
 typedef enum Language Language;
+typedef enum Feature Feature;
 
 struct Sprite {
 	int textureIndex;
@@ -197,6 +198,40 @@ enum Language {
 	LANG_ENGLISH = 1,
 	LANG_RUSSIAN = 2
 };
+enum Feature {
+	// Berserk
+	FEAT_SELFSTEEM = 0,
+	FEAT_BEASTHORNS = 1,
+	FEAT_EMOTIONSCENT = 2,
+	FEAT_DARKVISION = 3,
+	// Blue Mage
+	FEAT_TOME = 16,
+	FEAT_DECODER = 17,
+	FEAT_DETECTMAGIC = 18,
+	FEAT_PATHFINDER = 19,
+	// Dragoon
+	FEAT_DRAGONSPEECH = 32,
+	FEAT_DRACONIC = 33,
+	FEAT_SNAKEBLOOD = 34,
+	FEAT_DETECTSUPERNATURAL = 35,
+	// Fang
+	FEAT_STRESSRITUAL = 48,
+	FEAT_STRESSMARKS = 49,
+	FEAT_SCARRED = 50,
+	FEAT_SCARSOFEXPERIENCE = 51,
+	// Moon Child
+	FEAT_LUCKY = 64,
+	FEAT_FAVOROFLUCK = 65,
+	FEAT_DETECTDANGER = 66,
+	FEAT_SECRETDOOR = 67,
+	// Red Mage
+	FEAT_BLODDYLEARNING = 80,
+	FEAT_LIPREADING = 81,
+	FEAT_LIFEABSORTION = 82,
+	FEAT_BLOODUNLEASHED = 83,
+	// Songbird Maiden
+	FEAT_SONGS = 96
+}
 struct Technique {
 	int id;
 	int name;

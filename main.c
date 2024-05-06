@@ -232,7 +232,7 @@ enum Feature {
 	// Songbird Maiden
 	FEAT_SONGS = 96,
 	FEAT_EARTHLYSONG = 97,
-	FEAT_BLESSING = 98,
+	FEAT_BLESS = 98,
 	FEAT_FAREWELL = 99,
 	// Sorcerer
 	FEAT_WISH = 112,
@@ -277,7 +277,22 @@ enum Feature {
 	FEAT_SKELLYDOMINION = 242,
 	FEAT_UNDEADHUNTER = 243,
 	// Princess
-	FEAT_ANIMALCOMUNICATION = 256
+	FEAT_ANIMALCOMUNICATION = 256,
+	FEAT_ROYALWEAPON = 257,
+	FEAT_LOYALSQUIRE = 258,
+	FEAT_LUXURIOUSGEM = 259,
+	// Experiment X09
+	FEAT_PSYCHIC = 272,
+	// Jinx
+	FEAT_JINXIMP = 288,
+	FEAT_BANE = 289,
+	FEAT_BANEFULHEALTH = 290,
+	FEAT_JINXEDKNOWLEDGE = 291,
+	// White Mage
+	FEAT_GOREARTS = 304,
+	FEAT_HEARTBEAT = 305,
+	FEAT_HEALTHYINSIDES = 306,
+	FEAT_DESPERATESTRIKES = 307
 }
 struct Technique {
 	int id;
@@ -404,9 +419,11 @@ struct Player {
 	Weapon weapon;
 	Armor armor;
 	Charm charm;
+	Feature features[16];
+	int featuresAmount;
 	Technique tech[20];
-	Technique equipedTech[10];
 	int techAmount;
+	Technique equipedTech[10];
 	int equipedTechAmount;
 	Sprite *sprite;
 };

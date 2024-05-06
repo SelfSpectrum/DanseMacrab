@@ -395,8 +395,10 @@ union Equip {
 };
 struct Player {
 	EntityType type;
+	int id;
 	int position;
 	// INFO: VITALS
+	DiceType hitDice;
 	int maxHealth;
 	int health;
 	int maxStress;
@@ -522,6 +524,7 @@ void PlayerLoadTech(Entity *player);				//TODO
 Equip LoadWeapon(int id);
 Equip LoadArmor(int id);
 Equip LoadCharm(int id);
+void SetProficiency(Entity *player, int id);
 // Dice related
 int DiceMean(DiceType dice);
 int DiceRoll(DiceType dice);
@@ -1276,6 +1279,7 @@ Entity *LoadEnemy(int id) {
 	enemy->enemy.refBonus = 0;
 	enemy->enemy.lorBonus = 0;
 	enemy->enemy.chaBonus = 0;
+	enemy->enemy.techAmount = 0;
 	char line[512];
 	char *saveptr;
 	char *token;
@@ -1322,7 +1326,6 @@ Entity *LoadEnemy(int id) {
 			enemy->enemy.multiattack = atoi(token);
 			// Loading techniques
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.techAmount = 0;
 			tech = strtok_r(token, ",", &saveptr);
 			while (token != NULL) {
 				enemy->enemy.tech[enemy->enemy.techAmount] = LoadTech(atoi(tech));
@@ -1338,6 +1341,8 @@ Entity *LoadPlayer(int id) {
 	if (id == 0) return NULL;
 	Entity *player = (Entity *) malloc(sizeof(Entity));
 	player->player.type = ENTITY_PLAYER;
+	player->player.maxStress = 3;
+	player->player.stress = 0;
 	player->player.demonTally = 0;
 	player->player.accumulatedDamage = 0;
 	player->player.phyBonus = 0;
@@ -1349,13 +1354,57 @@ Entity *LoadPlayer(int id) {
 	char *token;
 	char *tech;
 	int playerId;
+	int i;
+	for (i = 0; i < 6; i++) {
+		player->player.physique[i] = 0;
+		player->player.reflex[i] = 0;
+		player->player.lore[i] = 0;
+		player->player.charisma[i] = 0;
+	}
 	rewind(characterData);
 	fgets(line, sizeof(line), characterData);
 	while (fgets(line, sizeof(line), characterData)) {
 		token = strtok_r(line, "	", &saveptr);
 		playerId = atoi(token);
 		if (playerId == id) {
+			player->player.id = playerId;
 			token = strtok_r(line, "	", &saveptr);
+			player->player.name = atoi(token);
+			token = strtok_r(line, "	", &saveptr);
+			player->player.description = atoi(token);
+			token = strtok_r(line, "	", &saveptr);
+			player->player.sprite = LoadSprite(atoi(token));
+			token = strtok_r(line, "	", &saveptr);
+			player->player.physique[0] = atoi(token);
+			token = strtok_r(line, "	", &saveptr);
+			player->player.reflex[0] = atoi(token);
+			token = strtok_r(line, "	", &saveptr);
+			player->player.lore[0] = atoi(token);
+			token = strtok_r(line, "	", &saveptr);
+			player->player.charisma[0] = atoi(token);
+			token = strtok_r(line, "	", &saveptr);
+			SetProficiency(player, atoi(token));
+			token = strtok_r(line, "	", &saveptr);
+			SetProficiency(player, atoi(token));
+			token = strtok_r(line, "	", &saveptr);
+			SetProficiency(player, atoi(token));
+			token = strtok_r(line, "	", &saveptr);
+			player->player.hitDice = (DiceType) atoi(token);
+			player->player.maxHealth = DiceMean(player->player.hitDice) + player->player.physique[0];
+			player->player.health = player->player.maxHealth;
+			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(line, "	", &saveptr);
+			while (token != NULL) {
+				enemy->enemy.tech[enemy->enemy.techAmount] = LoadTech(atoi(tech));
+				tech = strtok_r(NULL, ",", &saveptr);
+				enemy->enemy.techAmount++;
+			}
+			return player;
 		}
 	}
 	return player;
@@ -1641,6 +1690,31 @@ Equip LoadCharm(int id) {
 		}
 	}
 	return charm;
+}
+void SetProficiency(Entity *player, int id) {
+	switch (id) {
+		case 1: player->player.physique[1] = 1; break;
+		case 2: player->player.physique[2] = 1; break;
+		case 3: player->player.physique[3] = 1; break;
+		case 4: player->player.physique[4] = 1; break;
+		case 5: player->player.physique[5] = 1; break;
+		case 7: player->player.reflex[1] = 1; break;
+		case 8: player->player.reflex[2] = 1; break;
+		case 9: player->player.reflex[3] = 1; break;
+		case 10: player->player.reflex[4] = 1; break;
+		case 11: player->player.reflex[5] = 1; break;
+		case 13: player->player.lore[1] = 1; break;
+		case 14: player->player.lore[2] = 1; break;
+		case 15: player->player.lore[3] = 1; break;
+		case 16: player->player.lore[4] = 1; break;
+		case 17: player->player.lore[5] = 1; break;
+		case 19: player->player.charisma[1] = 1; break;
+		case 20: player->player.charisma[2] = 1; break;
+		case 21: player->player.charisma[3] = 1; break;
+		case 22: player->player.charisma[4] = 1; break;
+		case 23: player->player.charisma[5] = 1; break;
+		default: break;
+	}
 }
 void PlaySecSound(int id) {
 	id = id % SOUND_SIZE;

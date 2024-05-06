@@ -293,7 +293,7 @@ enum Feature {
 	FEAT_HEARTBEAT = 305,
 	FEAT_HEALTHYINSIDES = 306,
 	FEAT_DESPERATESTRIKES = 307
-}
+};
 struct Technique {
 	int id;
 	int name;
@@ -418,9 +418,12 @@ struct Player {
 	int name;
 	int class;
 	int description;
-	Weapon weapon;
-	Armor armor;
-	Charm charm;
+	Equip weapon;
+	Equip armor;
+	Equip charm;
+	DamageType weakness;		// Weakness against certain damage types, x2 damage
+	DamageType resistance;		// Resistance against certain damage types, x0.5 damage
+	StatusType inmunity;		// Inmunity against status effects
 	Feature features[16];
 	int featuresAmount;
 	Technique tech[20];
@@ -466,6 +469,7 @@ union Entity {
 struct Combat {
 	Entity *enemy[5];
 	Entity *player[5];
+	Equip inventory[20];
 	int turn;
 };
 // INFO: GFX functions
@@ -524,7 +528,8 @@ void PlayerLoadTech(Entity *player);				//TODO
 Equip LoadWeapon(int id);
 Equip LoadArmor(int id);
 Equip LoadCharm(int id);
-void SetProficiency(Entity *player, int id);
+void SetProficiency(Entity *player, AttributeType attr);
+void SetFeature(Entity *player, Feature feature);
 // Dice related
 int DiceMean(DiceType dice);
 int DiceRoll(DiceType dice);
@@ -1349,10 +1354,13 @@ Entity *LoadPlayer(int id) {
 	player->player.refBonus = 0;
 	player->player.lorBonus = 0;
 	player->player.chaBonus = 0;
+	player->player.featuresAmount = 0;
+	player->player.techAmount = 0;
+	player->player.equipedTechAmount = 0;
 	char line[512];
 	char *saveptr;
 	char *token;
-	char *tech;
+	char *feature;
 	int playerId;
 	int i;
 	for (i = 0; i < 6; i++) {
@@ -1373,7 +1381,7 @@ Entity *LoadPlayer(int id) {
 			token = strtok_r(line, "	", &saveptr);
 			player->player.description = atoi(token);
 			token = strtok_r(line, "	", &saveptr);
-			player->player.sprite = LoadSprite(atoi(token));
+			player->player.sprite = LoadSingleSprite(atoi(token));
 			token = strtok_r(line, "	", &saveptr);
 			player->player.physique[0] = atoi(token);
 			token = strtok_r(line, "	", &saveptr);
@@ -1383,26 +1391,33 @@ Entity *LoadPlayer(int id) {
 			token = strtok_r(line, "	", &saveptr);
 			player->player.charisma[0] = atoi(token);
 			token = strtok_r(line, "	", &saveptr);
-			SetProficiency(player, atoi(token));
+			SetProficiency(player, (AttributeType) atoi(token));
 			token = strtok_r(line, "	", &saveptr);
-			SetProficiency(player, atoi(token));
+			SetProficiency(player, (AttributeType) atoi(token));
 			token = strtok_r(line, "	", &saveptr);
-			SetProficiency(player, atoi(token));
+			SetProficiency(player, (AttributeType) atoi(token));
 			token = strtok_r(line, "	", &saveptr);
 			player->player.hitDice = (DiceType) atoi(token);
 			player->player.maxHealth = DiceMean(player->player.hitDice) + player->player.physique[0];
 			player->player.health = player->player.maxHealth;
 			token = strtok_r(line, "	", &saveptr);
+			player->player.weakness = (DamageType) atoi(token);
 			token = strtok_r(line, "	", &saveptr);
+			player->player.resistance = (DamageType) atoi(token);
 			token = strtok_r(line, "	", &saveptr);
+			player->player.inmunity = (StatusType) atoi(token);
 			token = strtok_r(line, "	", &saveptr);
+			player->player.weapon = LoadWeapon(atoi(token));
 			token = strtok_r(line, "	", &saveptr);
+			player->player.armor = LoadArmor(atoi(token));
 			token = strtok_r(line, "	", &saveptr);
+			player->player.charm = LoadCharm(atoi(token));
 			token = strtok_r(line, "	", &saveptr);
+			feature = strtok_r(token, ",", &saveptr);
 			while (token != NULL) {
-				enemy->enemy.tech[enemy->enemy.techAmount] = LoadTech(atoi(tech));
-				tech = strtok_r(NULL, ",", &saveptr);
-				enemy->enemy.techAmount++;
+				SetFeature(player, (Feature) atoi(feature));
+				feature = strtok_r(NULL, ",", &saveptr);
+				player->player.featuresAmount++;
 			}
 			return player;
 		}
@@ -1691,30 +1706,38 @@ Equip LoadCharm(int id) {
 	}
 	return charm;
 }
-void SetProficiency(Entity *player, int id) {
-	switch (id) {
-		case 1: player->player.physique[1] = 1; break;
-		case 2: player->player.physique[2] = 1; break;
-		case 3: player->player.physique[3] = 1; break;
-		case 4: player->player.physique[4] = 1; break;
-		case 5: player->player.physique[5] = 1; break;
-		case 7: player->player.reflex[1] = 1; break;
-		case 8: player->player.reflex[2] = 1; break;
-		case 9: player->player.reflex[3] = 1; break;
-		case 10: player->player.reflex[4] = 1; break;
-		case 11: player->player.reflex[5] = 1; break;
-		case 13: player->player.lore[1] = 1; break;
-		case 14: player->player.lore[2] = 1; break;
-		case 15: player->player.lore[3] = 1; break;
-		case 16: player->player.lore[4] = 1; break;
-		case 17: player->player.lore[5] = 1; break;
-		case 19: player->player.charisma[1] = 1; break;
-		case 20: player->player.charisma[2] = 1; break;
-		case 21: player->player.charisma[3] = 1; break;
-		case 22: player->player.charisma[4] = 1; break;
-		case 23: player->player.charisma[5] = 1; break;
+void SetProficiency(Entity *player, AttributeType attr) {
+	switch (attr) {
+		case ATTR_ATHLETICS: player->player.physique[1] = 1; break;
+		case ATTR_CONSTITUTION: player->player.physique[2] = 1; break;
+		case ATTR_MEDICINE: player->player.physique[3] = 1; break;
+		case ATTR_MELEE: player->player.physique[4] = 1; break;
+		case ATTR_VIBES: player->player.physique[5] = 1; break;
+		case ATTR_ACCURACY: player->player.reflex[1] = 1; break;
+		case ATTR_ACROBATICS: player->player.reflex[2] = 1; break;
+		case ATTR_MISCHIEF: player->player.reflex[3] = 1; break;
+		case ATTR_PERCEPTION: player->player.reflex[4] = 1; break;
+		case ATTR_TOUCH: player->player.reflex[5] = 1; break;
+		case ATTR_ARCANUM: player->player.lore[1] = 1; break;
+		case ATTR_BEASTS: player->player.lore[2] = 1; break;
+		case ATTR_DREAMS: player->player.lore[3] = 1; break;
+		case ATTR_DUNGEONS: player->player.lore[4] = 1; break;
+		case ATTR_NATURE: player->player.lore[5] = 1; break;
+		case ATTR_ANIMA: player->player.charisma[1] = 1; break;
+		case ATTR_AUTHORITY: player->player.charisma[2] = 1; break;
+		case ATTR_DRAMA: player->player.charisma[3] = 1; break;
+		case ATTR_KINSHIP: player->player.charisma[4] = 1; break;
+		case ATTR_PASSION: player->player.charisma[5] = 1; break;
 		default: break;
 	}
+}
+void SetFeature(Entity *player, Feature feature) {
+	switch (feature) {
+		default:
+			break;
+	}
+	player->player.features[player->player.featuresAmount];
+	player->player.featuresAmount++;
 }
 void PlaySecSound(int id) {
 	id = id % SOUND_SIZE;

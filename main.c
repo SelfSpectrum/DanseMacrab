@@ -31,6 +31,7 @@ typedef union Equip Equip;
 typedef enum GameState GameState;
 typedef enum DamageType DamageType;
 typedef enum EntityType EntityType;
+typedef enum EnemyType EnemyType;
 typedef enum EquipType EquipType;
 typedef enum DiceType DiceType;
 typedef enum TechniqueType TechniqueType;
@@ -103,6 +104,16 @@ enum DamageType {
 enum EntityType {
 	ENTITY_ENEMY = 0,
 	ENTITY_PLAYER = 1
+};
+enum EnemyType {
+	ENEMY_BEAST = 0,
+	ENEMY_DEMON = 1,
+	ENEMY_DRAGON = 2,
+	ENEMY_FASCIST = 3,
+	ENEMY_GRUDGE = 4,
+	ENEMY_MUTANT = 5,
+	ENEMY_NIGHTMARE = 6,
+	ENEMY_UNDEAD = 7
 };
 enum EquipType {
 	EQUIP_WEAPON = 0,
@@ -414,6 +425,7 @@ struct Player {
 	int refBonus;
 	int lorBonus;
 	int chaBonus;
+	int enemyBonus[8];
 	// INFO: OTHER STUFF
 	int name;
 	int class;
@@ -454,6 +466,7 @@ struct Enemy {
 	// INFO: OTHER STUFF
 	int name;
 	int description;
+	EnemyType enemy;
 	DamageType weakness[2];		// Weakness against certain damage types, x2 damage
 	DamageType resistances[2];	// Resistance against certain damage types, x0.5 damage
 	StatusType inmunities[2];	// Inmunity against status effects
@@ -470,6 +483,7 @@ struct Combat {
 	Entity *enemy[5];
 	Entity *player[5];
 	Equip inventory[20];
+	int inventoryAmount;
 	int turn;
 };
 // INFO: GFX functions
@@ -1304,6 +1318,8 @@ Entity *LoadEnemy(int id) {
 			token = strtok_r(NULL, "	", &saveptr);
 			enemy->enemy.sprite = LoadSingleSprite(atoi(token));
 			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.enemy = (EnemyType) atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
 			enemy->enemy.physique = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
 			enemy->enemy.reflex = atoi(token);
@@ -1369,6 +1385,7 @@ Entity *LoadPlayer(int id) {
 		player->player.lore[i] = 0;
 		player->player.charisma[i] = 0;
 	}
+	for (i = 0; i < 8; i++) player->player.enemyBonus[i] = 0;
 	rewind(characterData);
 	fgets(line, sizeof(line), characterData);
 	while (fgets(line, sizeof(line), characterData)) {
@@ -1708,35 +1725,93 @@ Equip LoadCharm(int id) {
 }
 void SetProficiency(Entity *player, AttributeType attr) {
 	switch (attr) {
-		case ATTR_ATHLETICS: player->player.physique[1] = 1; break;
-		case ATTR_CONSTITUTION: player->player.physique[2] = 1; break;
-		case ATTR_MEDICINE: player->player.physique[3] = 1; break;
-		case ATTR_MELEE: player->player.physique[4] = 1; break;
-		case ATTR_VIBES: player->player.physique[5] = 1; break;
-		case ATTR_ACCURACY: player->player.reflex[1] = 1; break;
-		case ATTR_ACROBATICS: player->player.reflex[2] = 1; break;
-		case ATTR_MISCHIEF: player->player.reflex[3] = 1; break;
-		case ATTR_PERCEPTION: player->player.reflex[4] = 1; break;
-		case ATTR_TOUCH: player->player.reflex[5] = 1; break;
-		case ATTR_ARCANUM: player->player.lore[1] = 1; break;
-		case ATTR_BEASTS: player->player.lore[2] = 1; break;
-		case ATTR_DREAMS: player->player.lore[3] = 1; break;
-		case ATTR_DUNGEONS: player->player.lore[4] = 1; break;
-		case ATTR_NATURE: player->player.lore[5] = 1; break;
-		case ATTR_ANIMA: player->player.charisma[1] = 1; break;
-		case ATTR_AUTHORITY: player->player.charisma[2] = 1; break;
-		case ATTR_DRAMA: player->player.charisma[3] = 1; break;
-		case ATTR_KINSHIP: player->player.charisma[4] = 1; break;
-		case ATTR_PASSION: player->player.charisma[5] = 1; break;
-		default: break;
+		case ATTR_ATHLETICS:
+			player->player.physique[1] += 2;
+			break;
+		case ATTR_CONSTITUTION:
+			player->player.physique[2] += 2;
+			break;
+		case ATTR_MEDICINE:
+			player->player.physique[3] += 2;
+			break;
+		case ATTR_MELEE:
+			player->player.physique[4] += 2;
+			break;
+		case ATTR_VIBES:
+			player->player.physique[5] += 2;
+			break;
+		case ATTR_ACCURACY:
+			player->player.reflex[1] += 2;
+			break;
+		case ATTR_ACROBATICS:
+			player->player.reflex[2] += 2;
+			break;
+		case ATTR_MISCHIEF:
+			player->player.reflex[3] += 2;
+			break;
+		case ATTR_PERCEPTION:
+			player->player.reflex[4] += 2;
+			break;
+		case ATTR_TOUCH:
+			player->player.reflex[5] += 2;
+			break;
+		case ATTR_ARCANUM:
+			player->player.lore[1] += 2;
+			break;
+		case ATTR_BEASTS:
+			player->player.lore[2] += 2;
+			break;
+		case ATTR_DREAMS:
+			player->player.lore[3] += 2;
+			break;
+		case ATTR_DUNGEONS:
+			player->player.lore[4] += 2;
+			break;
+		case ATTR_NATURE:
+			player->player.lore[5] += 2;
+			break;
+		case ATTR_ANIMA:
+			player->player.charisma[1] += 2;
+			break;
+		case ATTR_AUTHORITY:
+			player->player.charisma[2] += 2;
+			break;
+		case ATTR_DRAMA:
+			player->player.charisma[3] += 2;
+			break;
+		case ATTR_KINSHIP:
+			player->player.charisma[4] += 2;
+			break;
+		case ATTR_PASSION:
+			player->player.charisma[5] += 2;
+			break;
+		default:
+			break;
 	}
 }
 void SetFeature(Entity *player, Feature feature) {
 	switch (feature) {
+		case FEAT_DEMONHANDS:
+			//TODO: Add 5? random demon hands techniques
+			break;
+		case FEAT_PASSIONFUL:
+			player->player.charisma[5] += 1;
+			break;
+		case FEAT_DEMONHUNTER:
+			player->player.enemyBonus[(int) ENEMY_DEMON] += 1;
+			break;
+		case FEAT_BORNFORMISCHIEF:
+			SetProficiency(player, ATTR_MISCHIEF);
+			break;
+		case FEAT_UNDEADHUNTER:
+			player->player.enemyBonus[(int) ENEMY_UNDEAD] += 1;
+			break;
+		case FEAT_LUXURIOUSGEM:
+			player->player.charm = LoadCharm(1);
 		default:
 			break;
 	}
-	player->player.features[player->player.featuresAmount];
+	player->player.features[player->player.featuresAmount] = feature;
 	player->player.featuresAmount++;
 }
 void PlaySecSound(int id) {

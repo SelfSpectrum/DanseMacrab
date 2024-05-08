@@ -1,5 +1,6 @@
 ID	Inglés
 1	Press %c to start
+2	dummy
 200	Once upon a time, two gods fought each other in your sky.
 201	The god of love...
 202	And the god of death...
@@ -36,18 +37,807 @@ ID	Inglés
 233	You fool...
 234	Death is long forgotten.
 235	You may call me Unseelie.
-236	Rin.
+236	I'm Rin.
 237	Very good Rin.
 238	Now...
 239	Let me read you what the future departs...
+240	dummy
+241	dummy
+242	dummy
+243	dummy
+244	dummy
+245	dummy
+246	dummy
+247	dummy
+248	dummy
+249	dummy
+250	dummy
+251	dummy
+252	dummy
+253	dummy
+254	dummy
+255	dummy
+256	dummy
+257	dummy
+258	dummy
+259	dummy
+260	dummy
+261	dummy
+262	dummy
+263	dummy
+264	dummy
+265	dummy
+266	dummy
+267	dummy
+268	dummy
+269	dummy
+270	dummy
+271	dummy
+272	dummy
+273	dummy
+274	dummy
+275	dummy
+276	dummy
+277	dummy
+278	dummy
+279	dummy
+280	dummy
+281	dummy
+282	dummy
+283	dummy
+284	dummy
+285	dummy
+286	dummy
+287	dummy
+288	dummy
+289	dummy
+290	dummy
+291	dummy
+292	dummy
+293	dummy
+294	dummy
+295	dummy
+296	dummy
+297	dummy
+298	dummy
+299	dummy
+300	dummy
+301	dummy
+302	dummy
+303	dummy
+304	dummy
+305	dummy
+306	dummy
+307	dummy
+308	dummy
+309	dummy
+310	dummy
+311	dummy
+312	dummy
+313	dummy
+314	dummy
+315	dummy
+316	dummy
+317	dummy
+318	dummy
+319	dummy
+320	dummy
+321	dummy
+322	dummy
+323	dummy
+324	dummy
+325	dummy
+326	dummy
+327	dummy
+328	dummy
+329	dummy
+330	dummy
+331	dummy
+332	dummy
+333	dummy
+334	dummy
+335	dummy
+336	dummy
+337	dummy
+338	dummy
+339	dummy
+340	dummy
+341	dummy
+342	dummy
+343	dummy
+344	dummy
+345	dummy
+346	dummy
+347	dummy
+348	dummy
+349	dummy
+350	dummy
+351	dummy
+352	dummy
+353	dummy
+354	dummy
+355	dummy
+800	Rin
+801	dummy
 1000	Crabber
-1001	Egg Crabby
+1001	Crabber
 1002	Crabby
-1003	Crabberer
-1004	Marked Crabber
-1005	Sharpie
-1006	Gun Crab
+1003	Crabby
+1004	Egg Medium
+1005	Egg Medium
+1006	Urchin
 1007	Urchin
-1200	Crabber fun and  informative description
-1201	Egg Crabby fun and informative description
-1202	Crabby fun and informative description
+1008	High & Bass
+1009	High & Bass
+1010	Madness Bearer
+1011	Madness Bearer
+1012	Small Risk
+1013	Crab with a gun
+1014	Crabberer
+1015	Crabberer
+1016	Sharpie
+1017	Sharpie
+1018	Marked Crabber
+1019	Marked Crabber
+1020	Panic Betrayer
+1021	Panic Betrayer
+1022	Burnout
+1023	Burnout
+1024	Noxious Puncher
+1025	Noxious Puncher
+1026	Lightning Snap
+1027	Lightning Snap
+1028	Carcinous
+1029	Carcinous
+1030	Horse
+1031	Horse
+1032	Armored Horse
+1033	Armored Horse
+1034	Cultist Neophyte
+1035	Cultist Neophyte
+1036	Cultist Disciple
+1037	Cultist Disciple
+1038	Cultist Priest
+1039	Cultist Priest
+1040	Cultist Animator
+1041	Cultist Animator
+1042	Cultist Master
+1043	Cultist Master
+1044	Marked Crabberer
+1045	Marked Crabberer
+1046	Évariste
+1047	Cultist transformed
+1048	dummy
+1049	dummy
+1050	dummy
+1051	dummy
+1052	dummy
+1053	dummy
+1054	dummy
+1055	dummy
+1056	dummy
+1057	dummy
+1058	dummy
+1059	dummy
+1060	dummy
+1061	dummy
+1062	dummy
+1063	dummy
+1064	dummy
+1065	dummy
+1066	dummy
+1067	dummy
+1068	dummy
+1069	dummy
+2000	Rusty Katana
+2001	A rusty old katana, used by you long ago. Have seen better days, but still accomplishes it's purpouse.
+2002	Old Wooden Hammer
+2003	An old wooden hammer, perhaps used time ago for making mochi, hard to really know.
+2004	Training Staff
+2005	dummy
+2006	Outworn Revolver
+2007	dummy
+2008	Broken Fans
+2009	dummy
+2010	Fishing Spear
+2011	dummy
+2012	Old Dagger
+2013	dummy
+2014	Nunchuks
+2015	dummy
+2016	Musket
+2017	dummy
+2018	Blunderbuss
+2019	dummy
+2020	Flint Pistol
+2021	dummy
+2022	Hand Cannon
+2023	dummy
+2024	Katana
+2025	dummy
+2026	Kusarikama
+2027	dummy
+2028	Caestus
+2029	dummy
+2030	Butcher's Hammer
+2031	dummy
+2032	Eels' Staff
+2033	dummy
+2034	dummy
+2035	dummy
+2036	dummy
+2037	dummy
+2038	dummy
+2039	dummy
+2040	dummy
+2041	dummy
+2042	dummy
+2043	dummy
+2044	dummy
+2045	dummy
+2200	Basic Rin Armor
+2201	Basic Rin Armor
+2202	dummy
+2203	dummy
+2204	dummy
+2205	dummy
+2206	dummy
+2207	dummy
+2400	Luxurious Gem
+2401	dummy
+2402	dummy
+2403	dummy
+2404	dummy
+2405	dummy
+2406	dummy
+2407	dummy
+3000	Front Slash
+3001	Cut through against the front target, dealing 1d6 + %d slashing damage.
+3002	Quick Slash
+3003	Quickly slash against the front, right and left target, dealing 1d6 slashing damage.
+3004	Defensive Posture
+3005	Hold a defensive stand, gaining %d as shield.
+3006	Evasive Posture
+3007	Hold an evasive stand, gaining %d as shield.
+3008	Hard Swipe
+3009	dummy
+3010	Heavy Bonk
+3011	dummy
+3012	dummy
+3013	dummy
+3014	dummy
+3015	dummy
+3016	dummy
+3017	dummy
+3018	dummy
+3019	dummy
+3020	dummy
+3021	dummy
+3022	dummy
+3023	dummy
+3024	dummy
+3025	dummy
+3026	dummy
+3027	dummy
+3028	dummy
+3029	dummy
+3030	dummy
+3031	dummy
+3032	dummy
+3033	dummy
+3034	dummy
+3035	dummy
+3036	dummy
+3037	dummy
+3038	dummy
+3039	dummy
+3040	dummy
+3041	dummy
+3042	dummy
+3043	dummy
+3044	dummy
+3045	dummy
+3046	dummy
+3047	dummy
+3048	dummy
+3049	dummy
+3050	dummy
+3051	dummy
+3052	dummy
+3053	dummy
+3054	dummy
+3055	dummy
+3056	dummy
+3057	dummy
+3058	dummy
+3059	dummy
+3060	dummy
+3061	dummy
+3062	dummy
+3063	dummy
+3064	dummy
+3065	dummy
+3066	dummy
+3067	dummy
+3068	dummy
+3069	dummy
+3070	dummy
+3071	dummy
+3072	dummy
+3073	dummy
+3074	dummy
+3075	dummy
+3076	dummy
+3077	dummy
+3078	dummy
+3079	dummy
+3080	dummy
+3081	dummy
+3082	dummy
+3083	dummy
+3084	dummy
+3085	dummy
+3086	dummy
+3087	dummy
+3088	dummy
+3089	dummy
+3090	dummy
+3091	dummy
+3092	dummy
+3093	dummy
+3094	dummy
+3095	dummy
+3096	dummy
+3097	dummy
+3098	dummy
+3099	dummy
+3100	dummy
+3101	dummy
+3102	dummy
+3103	dummy
+3104	dummy
+3105	dummy
+3106	dummy
+3107	dummy
+3108	dummy
+3109	dummy
+3110	dummy
+3111	dummy
+3112	dummy
+3113	dummy
+3114	dummy
+3115	dummy
+3116	dummy
+3117	dummy
+3118	dummy
+3119	dummy
+3120	dummy
+3121	dummy
+3122	dummy
+3123	dummy
+3124	dummy
+3125	dummy
+3126	dummy
+3127	dummy
+3128	dummy
+3129	dummy
+3130	dummy
+3131	dummy
+3132	dummy
+3133	dummy
+3134	dummy
+3135	dummy
+3136	dummy
+3137	dummy
+3138	dummy
+3139	dummy
+3140	dummy
+3141	dummy
+3142	dummy
+3143	dummy
+3144	dummy
+3145	dummy
+3146	dummy
+3147	dummy
+3148	dummy
+3149	dummy
+3150	dummy
+3151	dummy
+3152	dummy
+3153	dummy
+3154	dummy
+3155	dummy
+3156	dummy
+3157	dummy
+3158	dummy
+3159	dummy
+3160	dummy
+3161	dummy
+3162	dummy
+3163	dummy
+3164	dummy
+3165	dummy
+3166	dummy
+3167	dummy
+3168	dummy
+3169	dummy
+3170	dummy
+3171	dummy
+3172	dummy
+3173	dummy
+3174	dummy
+3175	dummy
+3176	dummy
+3177	dummy
+3178	dummy
+3179	dummy
+3180	dummy
+3181	dummy
+3182	dummy
+3183	dummy
+3184	dummy
+3185	dummy
+3186	dummy
+3187	dummy
+3188	dummy
+3189	dummy
+3190	dummy
+3191	dummy
+3192	dummy
+3193	dummy
+3194	dummy
+3195	dummy
+3196	dummy
+3197	dummy
+3198	dummy
+3199	dummy
+3200	dummy
+3201	dummy
+3202	dummy
+3203	dummy
+3204	dummy
+3205	dummy
+3206	dummy
+3207	dummy
+3208	dummy
+3209	dummy
+3210	dummy
+3211	dummy
+3212	dummy
+3213	dummy
+3214	dummy
+3215	dummy
+3216	dummy
+3217	dummy
+3218	dummy
+3219	dummy
+3220	dummy
+3221	dummy
+3222	dummy
+3223	dummy
+3224	dummy
+3225	dummy
+3226	dummy
+3227	dummy
+3228	dummy
+3229	dummy
+3230	dummy
+3231	dummy
+3232	dummy
+3233	dummy
+3234	dummy
+3235	dummy
+3236	dummy
+3237	dummy
+3238	dummy
+3239	dummy
+3240	dummy
+3241	dummy
+3242	dummy
+3243	dummy
+3244	dummy
+3245	dummy
+3246	dummy
+3247	dummy
+3248	dummy
+3249	dummy
+3250	dummy
+3251	dummy
+3252	dummy
+3253	dummy
+3254	dummy
+3255	dummy
+3256	dummy
+3257	dummy
+3258	dummy
+3259	dummy
+3260	dummy
+3261	dummy
+3262	dummy
+3263	dummy
+3264	dummy
+3265	dummy
+3266	dummy
+3267	dummy
+3268	dummy
+3269	dummy
+3270	dummy
+3271	dummy
+3272	dummy
+3273	dummy
+3274	dummy
+3275	dummy
+3276	dummy
+3277	dummy
+3278	dummy
+3279	dummy
+3280	dummy
+3281	dummy
+3282	dummy
+3283	dummy
+3284	dummy
+3285	dummy
+3286	dummy
+3287	dummy
+3288	dummy
+3289	dummy
+3290	dummy
+3291	dummy
+3292	dummy
+3293	dummy
+3294	dummy
+3295	dummy
+3296	dummy
+3297	dummy
+3298	dummy
+3299	dummy
+3300	dummy
+3301	dummy
+3302	dummy
+3303	dummy
+3304	dummy
+3305	dummy
+3306	dummy
+3307	dummy
+3308	dummy
+3309	dummy
+3310	dummy
+3311	dummy
+3312	dummy
+3313	dummy
+3314	dummy
+3315	dummy
+3316	dummy
+3317	dummy
+3318	dummy
+3319	dummy
+3320	dummy
+3321	dummy
+3322	dummy
+3323	dummy
+3324	dummy
+3325	dummy
+3326	dummy
+3327	dummy
+3328	dummy
+3329	dummy
+3330	dummy
+3331	dummy
+3332	dummy
+3333	dummy
+3334	dummy
+3335	dummy
+3336	dummy
+3337	dummy
+3338	dummy
+3339	dummy
+3340	dummy
+3341	dummy
+3342	dummy
+3343	dummy
+3344	dummy
+3345	dummy
+3346	dummy
+3347	dummy
+3348	dummy
+3349	dummy
+3350	dummy
+3351	dummy
+3352	dummy
+3353	dummy
+3354	dummy
+3355	dummy
+3356	dummy
+3357	dummy
+3358	dummy
+3359	dummy
+3360	dummy
+3361	dummy
+3362	dummy
+3363	dummy
+3364	dummy
+3365	dummy
+3366	dummy
+3367	dummy
+3368	dummy
+3369	dummy
+3370	dummy
+3371	dummy
+3372	dummy
+3373	dummy
+3374	dummy
+3375	dummy
+3376	dummy
+3377	dummy
+3378	dummy
+3379	dummy
+3380	dummy
+3381	dummy
+3382	dummy
+3383	dummy
+3384	dummy
+3385	dummy
+3386	dummy
+3387	dummy
+3388	dummy
+3389	dummy
+3390	dummy
+3391	dummy
+3392	dummy
+3393	dummy
+3394	dummy
+3395	dummy
+3396	dummy
+3397	dummy
+3398	Hideous Claw
+3399	Pich with violence against the front target, dealing 1d8 + %d slashing damage.
+3400	Cross Pierce Claw
+3401	Pich with violence against the right and left target, dealing 1d6 + %d piercing damage.
+3402	Keep the Cycle
+3403	In a grotesque ritual, with unsettling movements, lay a Small Egg if enough space is free.
+3404	Caustic Insides
+3405	Puke out your old self against the front target, dealing 1d12 + %d acid damage.
+3406	Salty Tears
+3407	Cry to freak out the front target, reducing all their roll bonuses by 1.
+3408	Small Claw
+3409	Soft pinch against the front target, dealing 1d4 + %d slashing damage.
+3410	Rise and Shine
+3411	Break the egg, step into this new world, rise and shine little one! Welcome to hell. 
+3412	Body Slam
+3413	dummy
+3414	Ice Rime
+3415	dummy
+3416	Fire Bolt
+3417	dummy
+3418	Repression
+3419	dummy
+3420	Frostbite
+3421	dummy
+3422	Charm
+3423	dummy
+3424	Swipe to the Right
+3425	dummy
+3426	Swipe to the Left
+3427	dummy
+3428	Break the Cycle
+3429	dummy
+3430	dummy
+3431	dummy
+3432	dummy
+3433	dummy
+3434	dummy
+3435	dummy
+3436	dummy
+3437	dummy
+3438	dummy
+3439	dummy
+3440	dummy
+3441	dummy
+3442	dummy
+3443	dummy
+3444	dummy
+3445	dummy
+3446	dummy
+3447	dummy
+3448	dummy
+3449	dummy
+3450	dummy
+3451	dummy
+3452	dummy
+3453	dummy
+3454	dummy
+3455	dummy
+3456	dummy
+3457	dummy
+3458	dummy
+3459	dummy
+3460	dummy
+3461	dummy
+3462	dummy
+3463	dummy
+3464	dummy
+3465	dummy
+3466	dummy
+3467	dummy
+3468	dummy
+3469	dummy
+3470	dummy
+3471	dummy
+3472	dummy
+3473	dummy
+3474	dummy
+3475	dummy
+3476	dummy
+3477	dummy
+3478	dummy
+3479	dummy
+3480	dummy
+3481	dummy
+3482	dummy
+3483	dummy
+3484	dummy
+3485	dummy
+3486	dummy
+3487	dummy
+3488	dummy
+3489	dummy
+3490	dummy
+3491	dummy
+3492	dummy
+3493	dummy
+3494	dummy
+3495	dummy
+3496	dummy
+3497	dummy
+3498	dummy
+3499	dummy
+3500	dummy
+3501	dummy
+3502	dummy
+3503	dummy
+3504	dummy
+3505	dummy
+3506	dummy
+3507	dummy
+3508	dummy
+3509	dummy
+3510	dummy
+3511	dummy
+3512	dummy
+3513	dummy
+3514	dummy
+3515	dummy
+3516	dummy
+3517	dummy
+3518	dummy
+3519	dummy
+3520	dummy
+3521	dummy
+3522	dummy
+3523	dummy
+3524	dummy
+3525	dummy
+3526	dummy
+3527	dummy
+3528	dummy
+3529	dummy
+3530	dummy
+3531	dummy
+3532	dummy
+3533	dummy
+3534	dummy
+3535	dummy
+3536	dummy
+3537	dummy
+3538	dummy
+3539	dummy
+3540	dummy
+3541	dummy
+3542	dummy
+3543	dummy
+3544	dummy
+3545	dummy
+3546	dummy
+3547	dummy
+3548	dummy
+3549	dummy

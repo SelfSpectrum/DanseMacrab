@@ -428,7 +428,9 @@ struct Player {
 	int enemyBonus[8];
 	// INFO: OTHER STUFF
 	int name;
+	int surname;
 	int class;
+	int nomGuerre;
 	int description;
 	Equip weapon;
 	Equip armor;
@@ -1395,6 +1397,12 @@ Entity *LoadPlayer(int id) {
 			player->player.id = playerId;
 			token = strtok_r(line, "	", &saveptr);
 			player->player.name = atoi(token);
+			token = strtok_r(line, "	", &saveptr);
+			player->player.surname = atoi(token);
+			token = strtok_r(line, "	", &saveptr);
+			player->player.class = atoi(token);
+			token = strtok_r(line, "	", &saveptr);
+			player->player.nomGuerre = atoi(token);
 			token = strtok_r(line, "	", &saveptr);
 			player->player.description = atoi(token);
 			token = strtok_r(line, "	", &saveptr);

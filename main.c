@@ -762,14 +762,15 @@ Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 of
 		if (FileExists(animSheet)) {				// If the file has problems to open, lack of memory won't be a problem, I hope
 			char line[256];					// Line from the file that contains all the struct data
 			FILE *file = fopen(animSheet, "r");
-			fgets(line, sizeof(line), file);
-			ParseAnimable(line, anim);
-			printf("INFO: ANIMABLE: Animable loaded succesfully\n");
-			anim->currentFrame = 0;
-			anim->data = file;
-			anim->repeat = repeat;
-			anim->index = index;
-			anim->offset = offset;
+			if (fgets(line, sizeof(line), file) != NULL) {
+				ParseAnimable(line, anim);
+				printf("INFO: ANIMABLE: Animable loaded succesfully\n");
+				anim->currentFrame = 0;
+				anim->data = file;
+				anim->repeat = repeat;
+				anim->index = index;
+				anim->offset = offset;
+			}
 		}
 		else printf("INFO: ANIMABLE: Error opening the animation file %s!\n", animSheet);
 	}
@@ -865,16 +866,16 @@ void UpdateAnimable(Animable *anim) {
 		anim->currentFrame++;
 		if (anim->currentFrame >= anim->frame) {
 			if (anim->frame != 0) {
-				fgets(line, sizeof(line), anim->data);
-				//printf("INFO: ANIMABLE: Next animable line loaded.\n");
-				ParseAnimable(line, anim);
-				//printf("INFO: ANIMABLE: Next animable line parsed.\n");
+				if (fgets(line, sizeof(line), anim->data) != NULL) {
+					//printf("INFO: ANIMABLE: Next animable line loaded.\n");
+					ParseAnimable(line, anim);
+					//printf("INFO: ANIMABLE: Next animable line parsed.\n");
+				}
 			}
 			else if (anim->repeat) {
 				anim->currentFrame = 0;
 				rewind(anim->data);
-				fgets(line, sizeof(line), anim->data);
-				ParseAnimable(line, anim);
+				if (fgets(line, sizeof(line), anim->data) != NULL) ParseAnimable(line, anim);
 			}
 			else UnloadAnimable(anim);
 		}
@@ -914,7 +915,7 @@ void LoadAnimation(int id, Vector2 offset) {
 	char *saveptr;
 	bool repeat;
 	rewind(animsData);
-	fgets(line, sizeof(line), animsData);
+	if (fgets(line, sizeof(line), animsData) == NULL) return;
 	while (fgets(line, sizeof(line), animsData) != NULL) {
 		if (i == id) {
 			token = strtok_r(line, "	", &saveptr);
@@ -970,7 +971,7 @@ Sprite *LoadSingleSprite(int id) {
 		char *token;
 		char *saveptr;
 		int spriteId = 0;
-		fgets(line, sizeof(line), spriteData);
+		if (fgets(line, sizeof(line), spriteData) == NULL) return NULL;
 		while (fgets(line, sizeof(line), spriteData) != NULL) {
 			token = strtok_r(line, "	", &saveptr);
 			spriteId = atoi(token);
@@ -1138,6 +1139,7 @@ char *LoadText(int id) {
 	char *saveptr;
 	int textId = 0;
 	rewind(translationData);
+	if (fgets(line, sizeof(line), translationData) != NULL) return NULL;
 	while (fgets(line, sizeof(line), translationData) != NULL) {
 		token = strtok_r(line, "	", &saveptr);
 		textId = atoi(token);

@@ -36,14 +36,14 @@ ID	Inglés
 232	So it'll be!
 233	You fool...
 234	Death is long forgotten.
-235	You may call me Unseelie.
-236	I'm Rin.
-237	Very good Rin.
-238	Now...
-239	Let me read you what the future departs...
-240	dummy
-241	dummy
-242	dummy
+235	And I've been searching for you...
+236	Rin...
+237	You know me?!
+238	What do you know about me?!
+239	Some sort of fate brought me to you.
+240	Do not dissapoint me.
+241	Now...
+242	Let me read you what the future departs...
 243	dummy
 244	dummy
 245	dummy
@@ -158,7 +158,181 @@ ID	Inglés
 354	dummy
 355	dummy
 800	Rin
-801	dummy
+801	Takahashi
+802	Red Mage
+803	Mahou
+804	
+805	
+806	
+807	
+808	
+809	
+810	Alina
+811	Enescu
+812	Sorcerer
+813	Moldavian
+814	
+815	
+816	
+817	
+818	
+819	
+820	Irina
+821	Yashnikova
+822	Black Dog
+823	Plohaya
+824	
+825	
+826	
+827	
+828	
+829	
+830	Enkhjargal
+831	Tseren
+832	Unseelie
+833	Galou
+834	
+835	
+836	
+837	
+838	
+839	
+840	Kiyoko
+841	Suzuki
+842	White Mage
+843	
+844	
+845	
+846	
+847	
+848	
+849	
+850	Haruka
+851	Sato
+852	Songbird Maiden
+853	
+854	
+855	
+856	
+857	
+858	
+859	
+860	Shinjiro
+861	Yamamoto
+862	Volfe Knight
+863	
+864	
+865	
+866	
+867	
+868	
+869	
+870	Daichi
+871	Ishikawa
+872	Jinx
+873	
+874	
+875	
+876	
+877	
+878	
+879	
+880	A
+881	
+882	Tiefling
+883	Nanashi
+884	
+885	
+886	
+887	
+888	
+889	
+890	Eleanor
+891	-
+892	Experiment X09
+893	
+894	
+895	
+896	
+897	
+898	
+899	
+900	Valessa
+901	-
+902	Princess
+903	Major
+904	
+905	
+906	
+907	
+908	
+909	
+910	Wei
+911	Li
+912	Necromancer
+913	Zhong Kui
+914	
+915	
+916	
+917	
+918	
+919	
+920	
+921	
+922	
+923	
+924	
+925	
+926	
+927	
+928	
+929	
+930	
+931	
+932	
+933	
+934	
+935	
+936	
+937	
+938	
+939	
+940	
+941	
+942	
+943	
+944	
+945	
+946	
+947	
+948	
+949	
+950	
+951	
+952	
+953	
+954	
+955	
+956	
+957	
+958	
+959	
+960	
+961	
+962	
+963	
+964	
+965	
+966	
+967	
+968	
+969	
+970	
+971	
+972	
+973	
+974	
+975	
 1000	Crabber
 1001	Crabber
 1002	Crabby
@@ -275,14 +449,22 @@ ID	Inglés
 2043	dummy
 2044	dummy
 2045	dummy
-2200	Basic Rin Armor
+2200	Dirty Clothes
 2201	Basic Rin Armor
-2202	dummy
-2203	dummy
-2204	dummy
-2205	dummy
-2206	dummy
-2207	dummy
+2202	Old Cape
+2203	Alina Basic armor
+2204	Stained Uniform
+2205	Irinas Armor
+2206	Tattered Clothing
+2207	Enkhjagal armor
+2208	Ceremonial Robes
+2209	Kiyoko armor
+2210	Traditional Clothes
+2211	Haruka armor
+2212	Rusty Armor
+2213	Shinjiro armor
+2214	
+2215	Daichi armor
 2400	Luxurious Gem
 2401	dummy
 2402	dummy

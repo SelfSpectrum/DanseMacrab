@@ -12,6 +12,7 @@
 #define SFXALIAS_SIZE 8
 #define DRAW_SIZE 16
 #define BUTTON_SIZE 8
+#define STR_SIZE 8
 
 // INFO: Let's set some structs to work with along the gaem
 //------------------------------------------------------------------------------------
@@ -99,7 +100,8 @@ enum DamageType {
 	DMG_HEALNATURE = 9,
 	DMG_HEALBLOODY = 10,
 	DMG_HEALPSY = 11,
-	DMG_HEALARMOR = 12
+	DMG_HEALARMOR = 12,
+	DMG_TRUE = 13
 };
 enum EntityType {
 	ENTITY_ENEMY = 0,

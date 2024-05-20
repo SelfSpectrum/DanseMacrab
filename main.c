@@ -12,7 +12,7 @@
 #define SFXALIAS_SIZE 8
 #define DRAW_SIZE 16
 #define BUTTON_SIZE 8
-#define STR_SIZE 8
+#define MSG_SIZE 8
 
 // INFO: Let's set some structs to work with along the gaem
 //------------------------------------------------------------------------------------
@@ -23,6 +23,7 @@ typedef struct Weapon Weapon;
 typedef struct Armor Armor;
 typedef struct Charm Charm;
 typedef struct Technique Technique;
+typedef struct Message Message;
 typedef struct Sprite Sprite;
 typedef struct Animable Animable;
 typedef struct Combat Combat;
@@ -42,6 +43,10 @@ typedef enum StatusType StatusType;
 typedef enum Language Language;
 typedef enum Feature Feature;
 
+struct Text {
+	char *string;
+	Vector2 position;
+};
 struct Sprite {
 	int textureIndex;
 	Rectangle origin;
@@ -512,10 +517,9 @@ Button *ParseButton(char *line);
 void DrawButton(Shader shader);
 void UnloadButton(void);
 // Text and translations and stuff
-char *LoadText(int id);			// To load a text line with the corresponding translation
-char *LoadTextFormatChar(int id, char value);
-char *LoadTextFormatInt(int id, int value);
-void UnloadText();						//TODO
+void LoadMessage(int id);			// To load a text line with the corresponding translation
+void RenderMessage(void);
+void UnloadMessage(void);
 // INFO: Input functions
 void Accept(void);
 void Cancel(void);
@@ -566,7 +570,8 @@ int sfxPos = 0;							// INFO: Universal position to locate one "free" sfxAlias
 Sprite *sprites[DRAW_SIZE] = { NULL };				// INFO: What and where to render
 int spritePos = 0;
 Color globalColor = { 255, 255, 255, 255 };			// INFO: Global color used to render the white lines in all textures as colors
-Combat combat = { { 0 }, { 0 } };				// INFO: Data from position, entities and stuff for combat
+Combat combat = { { NULL }, { NULL } };				// INFO: Data from position, entities and stuff for combat
+Message *messages[MSG_SIZE] { NULL };
 // ----------------------------------------------------------------------------------------
 // INFO: Files to load global data
 // ----------------------------------------------------------------------------------------
@@ -1135,7 +1140,7 @@ void UnloadButton(void) {
 	}
 	printf("INFO: BUTTONS: Buttons unloaded correctly\n");
 }
-char *LoadText(int id) {
+void LoadMessage(int id) {
 	char line[256];
 	char *token;
 	char *saveptr;
@@ -1153,41 +1158,10 @@ char *LoadText(int id) {
 	}
 	return "ERROR";
 }
-char *LoadTextFormatChar(int id, char value) {
-	char line[256];
-	char *token;
-	char *saveptr;
-	int textId = 0;
-	rewind(translationData);
-	while (fgets(line, sizeof(line), translationData) != NULL) {
-		token = strtok_r(line, "	", &saveptr);
-		textId = atoi(token);
-		if (textId == id) {
-			sprintf(line, line, value);
-			char *result = strdup(line);
-			if (result == NULL) return "ERROR";
-			return result;
-		}
-	}
-	return "ERROR";
+void RenderMessage(void) {
+	//
 }
-char *LoadTextFormatInt(int id, int value) {
-	char line[256];
-	char *token;
-	char *saveptr;
-	int textId = 0;
-	rewind(translationData);
-	while (fgets(line, sizeof(line), translationData) != NULL) {
-		token = strtok_r(line, "	", &saveptr);
-		textId = atoi(token);
-		if (textId == id) {
-			sprintf(line, line, value);
-			char *result = strdup(line);
-			if (result == NULL) return "ERROR";
-			return result;
-		}
-	}
-	return "ERROR";
+void UnloadMessage(void) {
 }
 int DiceRoll(DiceType dice) {
 	int roll;

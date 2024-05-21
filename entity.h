@@ -1,5 +1,7 @@
-// INFO: Let's set some structs to work with along the gaem
-//------------------------------------------------------------------------------------
+#ifndef ENTITY_H
+#define ENTITY_H
+
+#include "graphic.h"
 
 typedef struct Player Player;
 typedef struct Enemy Enemy;
@@ -7,6 +9,7 @@ typedef struct Weapon Weapon;
 typedef struct Armor Armor;
 typedef struct Charm Charm;
 typedef struct Technique Technique;
+typedef struct Combat Combat;
 typedef enum DamageType DamageType;
 typedef enum EntityType EntityType;
 typedef enum EnemyType EnemyType;
@@ -16,6 +19,7 @@ typedef enum TechniqueType TechniqueType;
 typedef enum AttributeType AttributeType;
 typedef enum EconomyType EconomyType;
 typedef enum StatusType StatusType;
+typedef enum Feature Feature;
 typedef union Entity Entity;
 typedef union Equip Equip;
 
@@ -445,3 +449,5 @@ int DiceRoll(DiceType dice);
 void SetSeed(int seed);
 void SetTimeSeed(void);
 void Random(void);
+
+#endif		// ENTITY_H

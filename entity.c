@@ -1,5 +1,3 @@
-#include "entity.h"
-
 void LoadEnemiesFile(FILE **file, const char *enemySheet) {
 	if (*file != NULL) fclose(*file);
 	if (FileExists(enemySheet)) *file = fopen(enemySheet, "r");

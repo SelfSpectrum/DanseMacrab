@@ -27,51 +27,17 @@ enum GameState {
 };
 
 // INFO: Input functions
-void Accept(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray);
-void Cancel(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray);
-void Start(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray);
-void Select(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray);
-void Menu(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray);
+void Accept(GameState *state, Sprite **spritesArray, Animable **animsArray, Button **buttonsArray);
+void Cancel(GameState *state, Sprite **spritesArray, Animable **animsArray, Button **buttonsArray);
+void Start(GameState *state, Sprite **spritesArray, Animable **animsArray, Button **buttonsArray);
+void Select(GameState *state, Sprite **spritesArray, Animable **animsArray, Button **buttonsArray);
+void Menu(int rightKey, int leftKey, int downKey, int upKey);
 void ChangeSelection(void);
-void SetState(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray);
+void SetState(GameState newState, GameState *state, Sprite **spritesArray, Animable **animsArray, Button **buttonsArray);
 // INFO: SFX functions
 void PlaySecSound(int id);
 void LowPassFilter(void *buffer, unsigned int frames);		// TODO
 void Crossfade();						// TODO
-
-//------------------------------------------------------------------------------------
-// INFO: Program main entry point
-//------------------------------------------------------------------------------------
-
-Animable *anims[ANIM_SIZE] = { NULL };				// INFO: Animation handling and rendering
-Sound sounds[SOUND_SIZE];					// INFO: Here I hold all the sounds used in the game
-Sound sfxAlias[SFXALIAS_SIZE];					// INFO: Used to reproduce several sounds at once
-int sfxPos = 0;							// INFO: Universal position to locate one "free" sfxAlias
-Sprite *sprites[DRAW_SIZE] = { NULL };				// INFO: What and where to render
-int spritePos = 0;
-Color globalColor = { 255, 255, 255, 255 };			// INFO: Global color used to render the white lines in all textures as colors
-Combat combat = { { NULL }, { NULL } };				// INFO: Data from position, entities and stuff for combat
-Message *messages[MSG_SIZE] = { NULL };
-int messagePos;
-
-// ----------------------------------------------------------------------------------------
-// INFO: Variables for button work, they're a lot
-// ----------------------------------------------------------------------------------------
-Button *buttons[BUTTON_SIZE] = { NULL };			// INFO: Set of buttons. Ideal to load per state
-int buttonAmount = 0;						// INFO: Useful when needed to wrap around the buttons
-int buttonPosition = 0;
-int buttonSkip = 0;
-int startKey = KEY_ENTER;
-int selectKey = KEY_BACKSPACE;
-int acceptKey = KEY_Z;
-int cancelKey = KEY_X;
-int leftKey = KEY_LEFT;
-int rightKey = KEY_RIGHT;
-int upKey = KEY_UP;
-int downKey = KEY_DOWN;
-int extraAKey = KEY_A;
-int extraBKey = KEY_B;
-int randomValue;
 
 int main() {
 	//-------------------------------------------------------------
@@ -127,6 +93,34 @@ int main() {
 	textures[5] = LoadTexture("./resources/gfx/abilities.png");
 	textures[6] = LoadTexture("./resources/gfx/attacks.png");
 	textures[7] = LoadTexture("./resources/gfx/entities.png");
+	Animable *anims[ANIM_SIZE] = { NULL };	// INFO: Animation handling and rendering
+	Sprite *sprites[DRAW_SIZE] = { NULL };	// INFO: What and where to render
+	Message *messages[MSG_SIZE] = { NULL };
+	Color globalColor = { 255, 255, 255, 255 };	// INFO: Global color used to render the white lines in all textures as colors
+	int spritePos = 0;
+	int messagePos = 0;
+	int animCount = 0;
+	int texCount = 0;
+	int sfxCount = 0;
+
+	//-------------------------------------------------------------
+	// Variables for button work, they're a lot
+	//-------------------------------------------------------------
+	
+	Button *buttons[BUTTON_SIZE] = { NULL };
+	int buttonAmount = 0;
+	int buttonPos = 0;
+	int buttonSkip = 0;
+	int startKey = KEY_ENTER;
+	int selectKey = KEY_BACKSPACE;
+	int acceptKey = KEY_Z;
+	int cancelKey = KEY_X;
+	int leftKey = KEY_LEFT;
+	int rightKey = KEY_RIGHT;
+	int upKey = KEY_UP;
+	int downKey = KEY_DOWN;
+	int extraAKey = KEY_A;
+	int extraBKey = KEY_B;
 
 	Shader shader = LoadShader(0, "contour.fs");
 
@@ -139,6 +133,10 @@ int main() {
 	InitAudioDevice();
 	Music music = LoadMusicStream("./resources/sfx/title.mp3");
 	music.looping = true;
+
+	Sound sounds[SOUND_SIZE];	// INFO: Here I hold all the sounds used in the game
+	Sound sfxAlias[SFXALIAS_SIZE];	// INFO: Used to reproduce several sounds at once
+	int sfxPos = 0;			// INFO: Universal position to locate one "free" sfxAlias
 	sounds[0] = LoadSound("./resources/sfx/pressStart.mp3");
 	sounds[1] = LoadSound("./resources/sfx/buttonSelect.wav");
 	sounds[2] = LoadSound("./resources/sfx/buttonCancel.wav");
@@ -146,23 +144,27 @@ int main() {
 	PlayMusicStream(music);
 	SetMusicVolume(music, 1.0f);
 
-	int animCount;
-	int texCount;
-	int sfxCount;
+	int randomValue;
 
-	SetState(STATE_TITLE);
+	SetState(STATE_TITLE, sprites, anims, buttons);
 	
+	//-------------------------------------------------------------
+	// Files to load data
+	//-------------------------------------------------------------
+	
+	Combat combat = { { NULL }, { NULL } };// INFO: Data from position, entities and stuff for combat
 	//combat.playable[2] = LoadEntity("", ENTITY_PLAYER); TODO
 
-	SetTargetFPS(60);           // INFO: Set our game to run at 60 frames-per-second
+	SetTargetFPS(60);// INFO: Set our game to run at 60 frames-per-second
 
-	// INFO: Main game loop
-	//--------------------------------------------------------------------------------------
 	while (!exitWindow) {
-// INFO: Update: This is for calculations and events which do not affect Texture or Drawing in a direct way
-//----------------------------------------------------------------------------------
-		UpdateMusicStream(music);	// Update music buffer with new stream data
-		if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) exitWindowRequested = true;	// Detect if X-button or KEY_ESCAPE have been pressed to close window
+
+		//-------------------------------------------------------------
+		// INFO: Update: This is for calculations and events which do not affect Texture or Drawing in a direct way
+		//-------------------------------------------------------------
+
+		UpdateMusicStream(music);// Update music buffer with new stream data
+		if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) exitWindowRequested = true;// Detect if X-button or KEY_ESCAPE have been pressed to close window
 		if (exitWindowRequested) {
 			// A request for close window has been issued, we can save data before closing or just show a message asking for confirmation
 			if (IsKeyPressed(acceptKey) || IsKeyPressed(startKey)) exitWindow = true;
@@ -176,13 +178,16 @@ int main() {
 			for (texCount = 0; texCount < TEX_SIZE; texCount++) {
 				SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), textures[texCount]);
 			}
-			if (IsKeyPressed(startKey)) Start();
-			if (IsKeyPressed(acceptKey)) Accept();
-			if (IsKeyPressed(cancelKey)) Cancel();
+			if (IsKeyPressed(startKey)) Start(state, &state, sprites, anims, buttons);
+			if (IsKeyPressed(acceptKey)) Accept(state, &state, sprites, anims, buttons);
+			if (IsKeyPressed(cancelKey)) Cancel(state, &state, sprites, anims, buttons);
 			Menu();
 		}
-// INFO: Texture: In this texture mode I create an smaller version of the game which is later rescaled in the draw mode
-//----------------------------------------------------------------------------------
+
+		//-------------------------------------------------------------
+		// INFO: Texture: In this texture mode I create an smaller version of the game which is later rescaled in the draw mode
+		//-------------------------------------------------------------
+
 		BeginTextureMode(target);
 			ClearBackground(BLACK);
 			BeginMode2D(worldSpaceCamera);
@@ -206,8 +211,11 @@ int main() {
 				}
 			EndMode2D();
 		EndTextureMode();
-// INFO: Draw: Take the texture in lower resolution and rescale it to a bigger res, all this while preserving pixel perfect
-//----------------------------------------------------------------------------------
+
+		//-------------------------------------------------------------
+		// INFO: Draw: Take the texture in lower resolution and rescale it to a bigger res, all this while preserving pixel perfect
+		//-------------------------------------------------------------
+
 		BeginDrawing();
 			ClearBackground(RED);
 			BeginMode2D(screenSpaceCamera);
@@ -216,8 +224,7 @@ int main() {
 			DrawFPS(10, 10);
 		EndDrawing();
 	}
-// INFO: De-Initialization
-//--------------------------------------------------------------------------------------
+
 	StopMusicStream(music);
 	UnloadShader(shader);
 	UnloadRenderTexture(target);
@@ -257,7 +264,7 @@ void PlaySecSound(int id) {
 	PlaySound(sfxAlias[sfxPos]);
 	sfxPos = (sfxPos + 1) % SFXALIAS_SIZE;
 }
-void Menu(void) {
+void Menu(int rightKey, int leftKey, int downKey, int upKey) {
 	if (buttonAmount > 0) {
 		if (IsKeyPressed(rightKey)) {
 			buttons[buttonPosition]->selected = false;
@@ -286,8 +293,8 @@ void ChangeSelection(void) {
 	else if (buttonPosition > (buttonAmount - 1)) buttonPosition -= buttonAmount;
 	buttons[buttonPosition]->selected = true;
 }
-void Start(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
-	switch (state) {
+void Start(GameState *state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
+	switch (&state) {
 		case STATE_TITLE:
 			Accept(state, spritesArray, animsArray, buttonsArray);
 			break;
@@ -295,24 +302,25 @@ void Start(GameState state, Sprite **spritesArray, Animable **animsArray, Button
 			break;
 	}
 }
-void Select(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
-	switch (state) {
+void Select(GameState *state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
+	switch (&state) {
 		default:
 			break;
 	}
 }
-void Accept(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
-	switch (state) {
+void Accept(GameState *state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
+	switch (&state) {
 		case STATE_TITLE:
 			PlaySecSound(0);
-			SetState(STATE_FIGHT);		// TODO: Change this when combat is done
+			SetState(STATE_FIGHT, state, spritesArray, animsArray, buttonsArray);// TODO: Change this when combat is done
+			break;
 		case STATE_MAINMENU:
 			break;
 		case STATE_FIGHT:
 			switch (buttonPosition) {
 				case 0:
 					PlaySecSound(1);
-					SetState(STATE_ATTACKMENU);
+					SetState(STATE_ATTACKMENU, state, spritesArray, animsArray, buttonsArray);
 					break;
 				default:
 					PlaySecSound(3);
@@ -326,10 +334,10 @@ void Accept(GameState state, Sprite **spritesArray, Animable **animsArray, Butto
 			break;
 	}
 }
-void Cancel(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
+void Cancel(GameState *state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
 	switch (state) {
 		case STATE_TITLE:
-			Accept();
+			Accept(state, spritesArray, animsArray, buttonsArray);
 			break;
 		case STATE_MAINMENU:
 			break;
@@ -341,11 +349,11 @@ void Cancel(GameState state, Sprite **spritesArray, Animable **animsArray, Butto
 			break;
 	}
 }
-void SetState(GameState newState, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
+void SetState(GameState newState, GameState *state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
 	UnloadSprite(spritesArray);
 	UnloadAnimation(animsArray);
 	UnloadButton(buttonsArray);
-	state = newState;
+	&state = newState;
 	switch (state) {
 		case STATE_TITLE:
 			LoadSprite("./resources/layout/mainTitle.tsv");

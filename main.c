@@ -43,9 +43,13 @@ typedef enum StatusType StatusType;
 typedef enum Language Language;
 typedef enum Feature Feature;
 
-struct Text {
+struct Message {
 	char *string;
+	int id;
 	Vector2 position;
+	Vector2 origin;
+	float rotation;
+	float fontSize;
 };
 struct Sprite {
 	int textureIndex;
@@ -503,31 +507,31 @@ void DrawAnimable(Animable *anim, Shader shader);
 void UnloadAnimable(Animable *anim);
 // Animations
 void LoadAnimation(int id, Vector2 offset);
-void UnloadAnimation(void);
+void UnloadAnimation(Animable **animationArray);
 // Sprite work
 void LoadSprite(const char *spriteSheet);
 Sprite *LoadSingleSprite(int id);
 Sprite *ParseSprite(char *line);
 void DrawSprite(Shader shader);
-void UnloadSprite(void);
+void UnloadSprite(Sprite **spriteArray);
 void UnloadSingleSprite(Sprite **sprite);
 // Buttons stuff
 void LoadButton(const char *buttonSheet);
 Button *ParseButton(char *line);
 void DrawButton(Shader shader);
-void UnloadButton(void);
+void UnloadButton(Button **buttonArray);
 // Text and translations and stuff
-void LoadMessage(int id);			// To load a text line with the corresponding translation
-void RenderMessage(void);
-void UnloadMessage(void);
+Message *LoadMessage(int id);			// To load a text line with the corresponding translation
+void RenderMessage(Font font);
+void UnloadMessage(Message **message);
 // INFO: Input functions
-void Accept(void);
-void Cancel(void);
-void Start(void);
-void Select(void);
-void Menu(void);
+void Accept(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray);
+void Cancel(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray);
+void Start(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray);
+void Select(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray);
+void Menu(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray);
 void ChangeSelection(void);
-void SetState(GameState newState);
+void SetState(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray);
 // INFO: SFX functions
 void PlaySecSound(int id);
 void LowPassFilter(void *buffer, unsigned int frames);		// TODO
@@ -540,8 +544,8 @@ Entity *LoadPlayer(int id);
 void MoveEntity(Entity *entity, int position);
 void DamageEntity(Entity attacker, Technique tech);
 void KillEntity(Entity *entity);				//TODO
-void UnloadCombat(void);
-void UnloadEntity(EntityType type, int position);
+void UnloadCombat(Combat *combat);
+void UnloadEntity(EntityType type, Combat *combat, int position);
 void DrawCombat(void);
 // Techniques
 Technique LoadTech(int id);
@@ -561,7 +565,6 @@ void Random(void);
 //------------------------------------------------------------------------------------
 // INFO: Program main entry point
 //------------------------------------------------------------------------------------
-GameState state = STATE_TITLE;					// INFO: Contains the current state of the game
 Animable *anims[ANIM_SIZE] = { NULL };				// INFO: Animation handling and rendering
 Texture2D textures[TEX_SIZE];					// INFO: Here I hold all the texture used in the game
 Sound sounds[SOUND_SIZE];					// INFO: Here I hold all the sounds used in the game
@@ -571,7 +574,9 @@ Sprite *sprites[DRAW_SIZE] = { NULL };				// INFO: What and where to render
 int spritePos = 0;
 Color globalColor = { 255, 255, 255, 255 };			// INFO: Global color used to render the white lines in all textures as colors
 Combat combat = { { NULL }, { NULL } };				// INFO: Data from position, entities and stuff for combat
-Message *messages[MSG_SIZE] { NULL };
+Message *messages[MSG_SIZE] = { NULL };
+int messagePos;
+Font fontDefault;
 // ----------------------------------------------------------------------------------------
 // INFO: Files to load global data
 // ----------------------------------------------------------------------------------------
@@ -623,6 +628,8 @@ int main() {
 	
 	//bool runGame = true;		// To know if the game should run, useful if the loading of a file fails
 
+	GameState state = STATE_TITLE;					// INFO: Contains the current state of the game
+
 	Camera2D worldSpaceCamera = { {0, 0}, {0, 0}, 0.0f, 1.0f };
 	Camera2D screenSpaceCamera = { {0, 0}, {0, 0}, 0.0f, 1.0f };
 
@@ -630,6 +637,8 @@ int main() {
 	Rectangle sourceRec = { 0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height };
 	Rectangle destRec = { -virtualRatio, -virtualRatio , screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
 	Vector2 origin = { 0.0f, 0.0f };
+
+	fontDefault = LoadFont("./resources/fonts/pixelperfect.ttf");
 
 	animsData = fopen("./resources/anims/animations.tsv", "r");
 	spriteData = fopen("./resources/gfx/sprites.tsv", "r");
@@ -735,10 +744,12 @@ int main() {
 	StopMusicStream(music);
 	UnloadShader(shader);
 	UnloadRenderTexture(target);
-	UnloadSprite();
-	UnloadButton();
-	UnloadCombat();
-	UnloadAnimation();
+	UnloadFont(fontDefault);
+	UnloadSprite(sprites);
+	UnloadButton(buttons);
+	UnloadCombat(&combat);
+	UnloadAnimation(anims);
+	UnloadMessage(messages);
 	UnloadMusicStream(music);   // Unload music stream buffers from RAM
 
 	for (texCount = 0; texCount < TEX_SIZE; texCount++) UnloadTexture(textures[texCount]);
@@ -945,11 +956,12 @@ void LoadAnimation(int id, Vector2 offset) {
 		i++;
 	}
 }
-void UnloadAnimation(void) {
+void UnloadAnimation(Animable **animationArray) {
 	int i;
 	for (i = 0; i < ANIM_SIZE; i++) {
-		if (anims[i] != NULL) {
-			UnloadAnimable(anims[i]);
+		if (animationArray[i] != NULL) {
+			UnloadAnimable(animationArray[i]);
+			animationArray[i] = NULL;
 		}
 	}
 	printf("INFO: ANIMATION: Animable array data unloaded.\n");
@@ -1040,12 +1052,12 @@ void DrawSprite(Shader shader) {
 		}
 	}
 }
-void UnloadSprite(void) {
+void UnloadSprite(Sprite **spriteArray) {
 	int i;
 	for (i = 0; i <= spritePos; i++) {
-		if (sprites[i] != NULL) {
-			free(sprites[i]);
-			sprites[i] = NULL;
+		if (spriteArray[i] != NULL) {
+			free(spriteArray[i]);
+			spriteArray[i] = NULL;
 		}
 	}
 	spritePos = 0;
@@ -1129,39 +1141,42 @@ void DrawButton(Shader shader) {
 		}
 	}
 }
-void UnloadButton(void) {
+void UnloadButton(Button **buttonArray) {
 	int i;
 	buttonAmount = 0;
 	for (i = 0; i < BUTTON_SIZE; i++) {
-		if (buttons[i] != NULL) {
-			free(buttons[i]);
-			buttons[i] = NULL;
+		if (buttonArray[i] != NULL) {
+			free(buttonArray[i]);
+			buttonArray[i] = NULL;
 		}
 	}
 	printf("INFO: BUTTONS: Buttons unloaded correctly\n");
 }
-void LoadMessage(int id) {
-	char line[256];
+Message *LoadMessage(int id) {
+	Message *message = (Message *) malloc(sizeof(Message));
+	if (message == NULL) return NULL;
+	message->id = id;
+	char line[512];
 	char *token;
 	char *saveptr;
 	int textId = 0;
 	rewind(translationData);
-	if (fgets(line, sizeof(line), translationData) != NULL) return NULL;
+	if (fgets(line, sizeof(line), translationData) != NULL) return message;
 	while (fgets(line, sizeof(line), translationData) != NULL) {
 		token = strtok_r(line, "	", &saveptr);
 		textId = atoi(token);
 		if (textId == id) {
-			char *result = strdup(line);
-			if (result == NULL) return "ERROR";
-			return result;
+			token = strtok_r(NULL, "	", &saveptr);
+			strcpy(message->string, token);
+			return message;
 		}
 	}
-	return "ERROR";
+	return message;
 }
-void RenderMessage(void) {
+void RenderMessage(Font font) {
 	//
 }
-void UnloadMessage(void) {
+void UnloadMessage(Message **message) {
 }
 int DiceRoll(DiceType dice) {
 	int roll;
@@ -1453,27 +1468,27 @@ void DamageEntity(Entity attacker, Technique tech) {
 void KillEntity(Entity *entity) {
 	//idk
 }
-void UnloadCombat(void) {
+void UnloadCombat(Combat *combat) {
 	int i;
 	for (i = 0; i < 5; i++) {
-		UnloadEntity(ENTITY_ENEMY, i);
-		UnloadEntity(ENTITY_PLAYER, i);
+		UnloadEntity(ENTITY_ENEMY, combat, i);
+		UnloadEntity(ENTITY_PLAYER, combat, i);
 	}
 	printf("INFO: COMBAT: Combat unloaded successfully.\n");
 }
-void UnloadEntity(EntityType type, int position) {
+void UnloadEntity(EntityType type, Combat *combat, int position) {
 	switch (type) {
 		case ENTITY_ENEMY:
-			if (combat.enemy[position] == NULL) return;
-			free(combat.enemy[position]->enemy.sprite);
-			free(combat.enemy[position]);
-			combat.enemy[position] = NULL;
+			if (combat->enemy[position] == NULL) return;
+			free(combat->enemy[position]->enemy.sprite);
+			free(combat->enemy[position]);
+			combat->enemy[position] = NULL;
 			return;
 		case ENTITY_PLAYER:
-			if (combat.player[position] == NULL) return;
-			free(combat.player[position]->player.sprite);
-			free(combat.player[position]);
-			combat.player[position] = NULL;
+			if (combat->player[position] == NULL) return;
+			free(combat->player[position]->player.sprite);
+			free(combat->player[position]);
+			combat->player[position] = NULL;
 			return;
 	}
 }
@@ -1836,22 +1851,22 @@ void ChangeSelection(void) {
 	else if (buttonPosition > (buttonAmount - 1)) buttonPosition -= buttonAmount;
 	buttons[buttonPosition]->selected = true;
 }
-void Start(void) {
+void Start(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
 	switch (state) {
 		case STATE_TITLE:
-			Accept();
+			Accept(state, spritesArray, animsArray, buttonsArray);
 			break;
 		default:
 			break;
 	}
 }
-void Select(void) {
+void Select(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
 	switch (state) {
 		default:
 			break;
 	}
 }
-void Accept(void) {
+void Accept(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
 	switch (state) {
 		case STATE_TITLE:
 			PlaySecSound(0);
@@ -1876,7 +1891,7 @@ void Accept(void) {
 			break;
 	}
 }
-void Cancel(void) {
+void Cancel(GameState state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
 	switch (state) {
 		case STATE_TITLE:
 			Accept();
@@ -1891,10 +1906,10 @@ void Cancel(void) {
 			break;
 	}
 }
-void SetState(GameState newState) {
-	UnloadSprite();
-	UnloadAnimation();
-	UnloadButton();
+void SetState(GameState newState, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
+	UnloadSprite(spritesArray);
+	UnloadAnimation(animsArray);
+	UnloadButton(buttonsArray);
 	state = newState;
 	switch (state) {
 		case STATE_TITLE:

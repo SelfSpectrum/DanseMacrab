@@ -16,6 +16,7 @@
 #define MSG_SIZE 8
 
 typedef enum GameState GameState;
+typedef struct StateData StateData;
 
 enum GameState {
 	STATE_TITLE,
@@ -25,15 +26,35 @@ enum GameState {
 	STATE_ATTACKMENU,
 	STATE_DEBUG
 };
+struct StateData {
+	GameState state;
+	bool exitWindowRequested;	// Flag to request window to exit
+	bool exitWindow;		// Flag to set window to exit
+	//bool runGame;			// To know if the game should run, useful if the loading of a file fails
+	int buttonAmount;
+	int buttonPosition;
+	int buttonSkip;
+	int startKey;
+	int selectKey;
+	int acceptKey;
+	int cancelKey;
+	int leftKey;
+	int rightKey;
+	int upKey;
+	int downKey;
+	int extraAKey;
+	int extraBKey;
+	int randomValue;
+};
 
 // INFO: Input functions
-void Accept(GameState *state, Sprite **spritesArray, Animable **animsArray, Button **buttonsArray);
-void Cancel(GameState *state, Sprite **spritesArray, Animable **animsArray, Button **buttonsArray);
-void Start(GameState *state, Sprite **spritesArray, Animable **animsArray, Button **buttonsArray);
-void Select(GameState *state, Sprite **spritesArray, Animable **animsArray, Button **buttonsArray);
-void Menu(int rightKey, int leftKey, int downKey, int upKey);
-void ChangeSelection(void);
-void SetState(GameState newState, GameState *state, Sprite **spritesArray, Animable **animsArray, Button **buttonsArray);
+void Accept(StateData *state, Sprite **sprites, Animable **anims, Button **buttons);
+void Cancel(StateData *state, Sprite **sprites, Animable **anims, Button **buttons);
+void Start(StateData *state, Sprite **sprites, Animable **anims, Button **buttons);
+void Select(StateData *state, Sprite **sprites, Animable **anims, Button **buttons);
+void Menu(StateData *state, Button **buttons);
+void ChangeSelection(StateData *state, Button **buttons);
+void SetState(GameState newState, StateData *state, Sprite **sprites, Animable **anims, Button **buttons);
 // INFO: SFX functions
 void PlaySecSound(int id);
 void LowPassFilter(void *buffer, unsigned int frames);		// TODO
@@ -56,16 +77,6 @@ int main() {
 	Rectangle destRec = { -virtualRatio, -virtualRatio , screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
 	Vector2 origin = { 0.0f, 0.0f };
 	InitWindow(screenWidth, screenHeight, "Danse Macrab");
-
-	//-------------------------------------------------------------
-	// Game Inputs and State
-	//-------------------------------------------------------------
-	
-	SetExitKey(KEY_NULL);       // INFO: Disable KEY_ESCAPE to close window, X-button still works
-	bool exitWindowRequested = false;	// Flag to request window to exit
-	bool exitWindow = false;		// Flag to set window to exit
-	//bool runGame = true;	// To know if the game should run, useful if the loading of a file fails
-	GameState state = STATE_TITLE;	// INFO: Contains the current state of the game
 
 	//-------------------------------------------------------------
 	// Files to load data
@@ -108,19 +119,6 @@ int main() {
 	//-------------------------------------------------------------
 	
 	Button *buttons[BUTTON_SIZE] = { NULL };
-	int buttonAmount = 0;
-	int buttonPos = 0;
-	int buttonSkip = 0;
-	int startKey = KEY_ENTER;
-	int selectKey = KEY_BACKSPACE;
-	int acceptKey = KEY_Z;
-	int cancelKey = KEY_X;
-	int leftKey = KEY_LEFT;
-	int rightKey = KEY_RIGHT;
-	int upKey = KEY_UP;
-	int downKey = KEY_DOWN;
-	int extraAKey = KEY_A;
-	int extraBKey = KEY_B;
 
 	Shader shader = LoadShader(0, "contour.fs");
 
@@ -144,9 +142,30 @@ int main() {
 	PlayMusicStream(music);
 	SetMusicVolume(music, 1.0f);
 
-	int randomValue;
-
-	SetState(STATE_TITLE, sprites, anims, buttons);
+	//-------------------------------------------------------------
+	// Game Inputs and State
+	//-------------------------------------------------------------
+	
+	StateData state;
+	state.state = STATE_TITLE;	// INFO: Contains the current state of the game
+	state.exitWindowRequested = false;	// Flag to request window to exit
+	state.exitWindow = false;		// Flag to set window to exit
+	//state.runGame = true;	// To know if the game should run, useful if the loading of a file fails
+	state.buttonAmount = 0;
+	state.buttonPos = 0;
+	state.buttonSkip = 0;
+	state.startKey = KEY_ENTER;
+	state.selectKey = KEY_BACKSPACE;
+	state.acceptKey = KEY_Z;
+	state.cancelKey = KEY_X;
+	state.leftKey = KEY_LEFT;
+	state.rightKey = KEY_RIGHT;
+	state.upKey = KEY_UP;
+	state.downKey = KEY_DOWN;
+	state.extraAKey = KEY_A;
+	state.extraBKey = KEY_B;
+	SetState(STATE_TITLE, &state, sprites, anims, buttons);
+	SetExitKey(KEY_NULL);       // INFO: Disable KEY_ESCAPE to close window, X-button still works
 	
 	//-------------------------------------------------------------
 	// Files to load data
@@ -164,11 +183,11 @@ int main() {
 		//-------------------------------------------------------------
 
 		UpdateMusicStream(music);// Update music buffer with new stream data
-		if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) exitWindowRequested = true;// Detect if X-button or KEY_ESCAPE have been pressed to close window
+		if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) state.exitWindowRequested = true;// Detect if X-button or KEY_ESCAPE have been pressed to close window
 		if (exitWindowRequested) {
 			// A request for close window has been issued, we can save data before closing or just show a message asking for confirmation
-			if (IsKeyPressed(acceptKey) || IsKeyPressed(startKey)) exitWindow = true;
-			else if (IsKeyPressed(cancelKey)) exitWindowRequested = false;
+			if (IsKeyPressed(state.acceptKey) || IsKeyPressed(state.startKey)) state.exitWindow = true;
+			else if (IsKeyPressed(state.cancelKey)) state.exitWindowRequested = false;
 		}
 		else {
 			//UpdateAnimable(test, shader);
@@ -178,10 +197,10 @@ int main() {
 			for (texCount = 0; texCount < TEX_SIZE; texCount++) {
 				SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), textures[texCount]);
 			}
-			if (IsKeyPressed(startKey)) Start(state, &state, sprites, anims, buttons);
-			if (IsKeyPressed(acceptKey)) Accept(state, &state, sprites, anims, buttons);
-			if (IsKeyPressed(cancelKey)) Cancel(state, &state, sprites, anims, buttons);
-			Menu();
+			if (IsKeyPressed(state.startKey)) Start(&state, sprites, anims, buttons);
+			if (IsKeyPressed(state.acceptKey)) Accept(&state, sprites, anims, buttons);
+			if (IsKeyPressed(state.cancelKey)) Cancel(&state, sprites, anims, buttons);
+			Menu(&state, buttons);
 		}
 
 		//-------------------------------------------------------------
@@ -257,44 +276,44 @@ int main() {
 	return 0;
 }
 
-void PlaySecSound(int id) {
+void PlaySecSound(int id, Sound *sfxAlias, Sound *sounds) {
 	id = id % SOUND_SIZE;
 	UnloadSoundAlias(sfxAlias[sfxPos]);
 	sfxAlias[sfxPos] = LoadSoundAlias(sounds[id]);
 	PlaySound(sfxAlias[sfxPos]);
 	sfxPos = (sfxPos + 1) % SFXALIAS_SIZE;
 }
-void Menu(int rightKey, int leftKey, int downKey, int upKey) {
-	if (buttonAmount > 0) {
-		if (IsKeyPressed(rightKey)) {
-			buttons[buttonPosition]->selected = false;
-			buttonPosition++;
-			ChangeSelection();
+void Menu(StateData *state, Button **buttons) {
+	if (state->buttonAmount > 0) {
+		if (IsKeyPressed(state->rightKey)) {
+			buttons[state->buttonPosition]->selected = false;
+			state->buttonPosition++;
+			ChangeSelection(state, buttons);
 		}
-		if (IsKeyPressed(leftKey)) {
-			buttons[buttonPosition]->selected = false;
-			buttonPosition--;
-			ChangeSelection();
+		if (IsKeyPressed(state->leftKey)) {
+			buttons[state->buttonPosition]->selected = false;
+			state->buttonPosition--;
+			ChangeSelection(state, buttons);
 		}
-		if (IsKeyPressed(downKey)) {
-			buttons[buttonPosition]->selected = false;
-			buttonPosition += buttonSkip;
-			ChangeSelection();
+		if (IsKeyPressed(state->downKey)) {
+			buttons[state->buttonPosition]->selected = false;
+			state->buttonPosition += state->buttonSkip;
+			ChangeSelection(state, buttons);
 		}
-		if (IsKeyPressed(upKey)) {
-			buttons[buttonPosition]->selected = false;
-			buttonPosition -= buttonSkip;
-			ChangeSelection();
+		if (IsKeyPressed(state->upKey)) {
+			buttons[state->buttonPosition]->selected = false;
+			state->buttonPosition -= state->buttonSkip;
+			ChangeSelection(state, buttons);
 		}
 	}
 }
-void ChangeSelection(void) {
-	if (buttonPosition < 0) buttonPosition += buttonAmount;
-	else if (buttonPosition > (buttonAmount - 1)) buttonPosition -= buttonAmount;
-	buttons[buttonPosition]->selected = true;
+void ChangeSelection(StateData *state, Button **buttons) {
+	if (state->buttonPosition < 0) state->buttonPosition += state->buttonAmount;
+	else if (state->buttonPosition > (state->buttonAmount - 1)) state->buttonPosition -= state->buttonAmount;
+	buttons[state->buttonPosition]->selected = true;
 }
-void Start(GameState *state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
-	switch (&state) {
+void Start(StateData *state, Sprite **spritesArray, Animable **animsArray, Button **buttonsArray) {
+	switch (state->state) {
 		case STATE_TITLE:
 			Accept(state, spritesArray, animsArray, buttonsArray);
 			break;
@@ -302,14 +321,14 @@ void Start(GameState *state, Sprite **spritesArray, Animable **animsArray, Butto
 			break;
 	}
 }
-void Select(GameState *state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
-	switch (&state) {
+void Select(StateData *state, Sprite **spritesArray, Animable **animsArray, Button **buttonsArray) {
+	switch (state->state) {
 		default:
 			break;
 	}
 }
-void Accept(GameState *state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
-	switch (&state) {
+void Accept(StateData *state, Sprite **spritesArray, Animable **animsArray, Button **buttonsArray) {
+	switch (state->state) {
 		case STATE_TITLE:
 			PlaySecSound(0);
 			SetState(STATE_FIGHT, state, spritesArray, animsArray, buttonsArray);// TODO: Change this when combat is done
@@ -317,7 +336,7 @@ void Accept(GameState *state, Sprite **spritesArray, Animable **animsArray, Butt
 		case STATE_MAINMENU:
 			break;
 		case STATE_FIGHT:
-			switch (buttonPosition) {
+			switch (state->buttonPosition) {
 				case 0:
 					PlaySecSound(1);
 					SetState(STATE_ATTACKMENU, state, spritesArray, animsArray, buttonsArray);
@@ -334,8 +353,8 @@ void Accept(GameState *state, Sprite **spritesArray, Animable **animsArray, Butt
 			break;
 	}
 }
-void Cancel(GameState *state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
-	switch (state) {
+void Cancel(StateData *state, Sprite **spritesArray, Animable **animsArray, Button **buttonsArray) {
+	switch (state->state) {
 		case STATE_TITLE:
 			Accept(state, spritesArray, animsArray, buttonsArray);
 			break;
@@ -343,18 +362,18 @@ void Cancel(GameState *state, Sprite **spritesArray, Animable **animsArray, Butt
 			break;
 		case STATE_ATTACKMENU:
 			PlaySecSound(2);
-			SetState(STATE_FIGHT);
+			SetState(STATE_FIGHT, state, spritesArray, animsArray, buttonsArray);
 			break;
 		default:
 			break;
 	}
 }
-void SetState(GameState newState, GameState *state, Sprite **spritesArray, Animable **animsArray, Button *buttonsArray) {
-	UnloadSprite(spritesArray);
-	UnloadAnimation(animsArray);
-	UnloadButton(buttonsArray);
-	&state = newState;
-	switch (state) {
+void SetState(GameState newState, StateData *state, Sprite **sprites, Animable **anims, Button **buttons) {
+	UnloadSprite(sprites);
+	UnloadAnimation(anims);
+	UnloadButton(buttons);
+	state->state = newState;
+	switch (state->state) {
 		case STATE_TITLE:
 			LoadSprite("./resources/layout/mainTitle.tsv");
 			LoadAnimation(1, (Vector2) { 0 });
@@ -364,8 +383,8 @@ void SetState(GameState newState, GameState *state, Sprite **spritesArray, Anima
 			break;
 		case STATE_FIGHT:
 			LoadButton("./resources/layout/fightButtons.tsv");
-			ChangeSelection();
-			buttonSkip = 2;
+			ChangeSelection(state, buttons);
+			state->buttonSkip = 2;
 			break;
 		default:
 			break;

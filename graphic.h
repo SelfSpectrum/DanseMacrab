@@ -46,7 +46,6 @@ struct Animable {
 	int currentFrame;// Current frame of animation
 	int index;
 	FILE *data;               // File that contains the animation data
-	//Texture2D texture;      // INFO: Deprecated: Texture from where the sample will come
 	int textureIndex;         // Index in the Texture array from where the sample will come
 	Quaternion origin;        // Rectangle of origin to get the texture sample
 	Quaternion dest;          // Rectangle of destination to place the texture sample
@@ -67,29 +66,28 @@ enum Language {
 };
 
 // INFO: GFX functions
-Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 offset);
+void LoadAnimable(FILE *animsData, Animable **anims, Vector2 offset, int *animAmount, int ANIM_SIZE, int id);
+Animable *LoadSingleAnimable(const char *animSheet, bool repeat, int index, Vector2 offset);
 void ParseAnimable(char *line, Animable *anim);
-void UpdateAnimable(Animable *anim);
-void DrawAnimable(Animable **anim, Texture2D *textures, int *animAmount, Shader shader, Color color);
-void UnloadAnimable(Animable *anim);
-// Animations
-void LoadAnimation(FILE *animsData, int id, Animable **anims, Vector2 offset);
-void UnloadAnimation(Animable **animationArray);
+void UpdateAnimable(Animable **anims, int *animAmount, int ANIM_SIZE);
+void DrawAnimable(Animable **anims, Texture2D *textures, int *animAmount, Shader shader, Color color);
+void UnloadSingleAnimable(Animable **anims, int *animAmount, int position, int ANIM_SIZE);
+void UnloadAnimable(Animable **animationArray, int *animAmount);
 // Sprite work
 void LoadSprite(const char *spriteSheet, int *spriteAmount, int SPRITE_SIZE);
 Sprite *LoadSingleSprite(FILE *spriteData, int id);
 Sprite *ParseSprite(char *line);
 void DrawSprite(Sprite **sprites, Texture2D *textures, int *spriteAmount, Shader shader, Color color);
 void UnloadSprite(Sprite **sprites, int *spriteAmount);
-void UnloadSingleSprite(Sprite **sprites, int position);
+void UnloadSingleSprite(Sprite **sprites, int *spriteAmount, int position, int SPRITE_SIZE);
 // Buttons stuff
 void LoadButton(const char *buttonSheet, int *buttonAmount);
 Button *ParseButton(char *line);
-void DrawButton(Button **buttonArray, Texture2D *textures, Shader shader, Color color, int BUTTON_SIZE);
-void UnloadButton(Button **buttonArray, int *buttonAmount, int BUTTON_SIZE);
+void DrawButton(Button **buttons, Texture2D *textures, int *buttonAmount, Shader shader, Color color);
+void UnloadButton(Button **buttons, int *buttonAmount);
 // Text and translations and stuff
 Message *LoadMessage(FILE *translationData, int id);			// To load a text line with the corresponding translation
 void RenderMessage(Font font);
-void UnloadMessage(Message **message);
+void UnloadMessage(Message **messages, int *menssageAmount);
 
 #endif			// ENTITY_H

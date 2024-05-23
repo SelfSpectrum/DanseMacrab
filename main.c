@@ -147,7 +147,6 @@ int main() {
 	state.spriteAmount = 0;
 	state.messageAmount = 0;
 
-	int animCount = 0;
 	int texCount = 0;
 	int sfxCount = 0;
 
@@ -180,10 +179,7 @@ int main() {
 			else if (IsKeyPressed(state.cancelKey)) state.exitWindowRequested = false;
 		}
 		else {
-			//UpdateAnimable(test, shader);
-			for (animCount = 0; animCount < ANIM_SIZE; animCount++) {
-				if (state.anims[animCount] != NULL) UpdateAnimable(state.anims[animCount]);
-			}
+			UpdateAnimable(state.anims, &state.animAmount, ANIM_SIZE);
 			for (texCount = 0; texCount < TEX_SIZE; texCount++) {
 				SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), state.textures[texCount]);
 			}
@@ -237,10 +233,10 @@ int main() {
 	UnloadRenderTexture(target);
 	UnloadFont(fontDefault);
 	UnloadSprite(state.sprites, &state.spriteAmount);
-	UnloadButton(state.buttons, &state.buttonAmount, BUTTON_SIZE);
+	UnloadButton(state.buttons, &state.buttonAmount);
 	UnloadCombat(&state.combat);
-	UnloadAnimation(state.anims);
-	UnloadMessage(state.messages);
+	UnloadAnimable(state.anims, &state.animAmount);
+	UnloadMessage(state.messages, &state.messageAmount);
 	UnloadMusicStream(state.music); // Unload music stream buffers from RAM
 
 	for (texCount = 0; texCount < TEX_SIZE; texCount++) UnloadTexture(state.textures[texCount]);
@@ -359,8 +355,8 @@ void Cancel(StateData *state) {
 void SetState(StateData *state, GameState newState) {
 	int i;
 	UnloadSprite(state->sprites, &state->spriteAmount);
-	UnloadAnimation(state->anims);
-	UnloadButton(state->buttons);
+	UnloadAnimable(state->anims, &state->animAmount);
+	UnloadButton(state->buttons, &state->buttonAmount);
 	state->state = newState;
 	switch (state->state) {
 		case STATE_INIT:
@@ -395,7 +391,7 @@ void SetState(StateData *state, GameState newState) {
 			break;
 		case STATE_TITLE:
 			LoadSprite("./resources/layout/mainTitle.tsv", &state->spriteAmount, SPRITE_SIZE);
-			LoadAnimation(state->animsData, 1, state->anims, (Vector2) { 0 });
+			LoadAnimable(state->animsData, state->anims, (Vector2) { 0 }, &state->animAmount, ANIM_SIZE, 1);
 			break;
 		case STATE_MAINMENU:
 			LoadSprite("./resources/layout/mainMenu.tsv", &state->spriteAmount, SPRITE_SIZE);

@@ -193,17 +193,17 @@ void UnloadAnimation(Animable **animationArray) {
 	}
 	printf("INFO: ANIMATION: Animable array data unloaded.\n");
 }
-void LoadSprite(const char *spriteSheet) {
+void LoadSprite(const char *spriteSheet, int *spritePosition, int SPRITE_SIZE) {
 	if (FileExists(spriteSheet)) {
 		FILE *file = fopen(spriteSheet, "r");
 		char line[256];
 		while (fgets(line, sizeof(line), file) != NULL) {
-			if (spritePos >= DRAW_SIZE) {
+			if (*spritePosition >= SPRITE_SIZE) {
 				printf("WARNING: SPRITE: Sprites register full.\n");
 				break;
 			}
-			sprites[spritePos] = ParseSprite(line);
-			spritePos++;
+			sprites[*spritePosition] = ParseSprite(line);
+			*spritePosition++;
 		}
 		printf("INFO: SPRITE: Sprites loaded from \"%s\" correctly.\n", spriteSheet);
 		fclose(file);
@@ -264,9 +264,9 @@ Sprite *ParseSprite(char *line) {
 	}
 	return sprite;
 }
-void DrawSprite(Shader shader) {
+void DrawSprite(Shader shader, Sprite **sprites, int *spritePosition, Color color) {
 	int i;
-	for (i = 0; i <= spritePos; i++) {
+	for (i = 0; i <= *spritePosition; i++) {
 		if (sprites[i] != NULL  ) {
 			if (sprites[i]->shader) BeginShaderMode(shader);
 			DrawTexturePro(textures[sprites[i]->textureIndex],
@@ -274,24 +274,24 @@ void DrawSprite(Shader shader) {
 					sprites[i]->dest,
 					sprites[i]->position,
 					sprites[i]->rotation,
-					globalColor);
+					color);
 			if (sprites[i]->shader) EndShaderMode();
 		}
 	}
 }
-void UnloadSprite(Sprite **spriteArray) {
+void UnloadSprite(Sprite **sprites, int *spritePosition) {
 	int i;
-	for (i = 0; i <= spritePos; i++) {
-		if (spriteArray[i] != NULL) {
-			free(spriteArray[i]);
-			spriteArray[i] = NULL;
+	for (i = 0; i <= *spritePosition; i++) {
+		if (sprites[i] != NULL) {
+			free(sprites[i]);
+			sprites[i] = NULL;
 		}
 	}
-	spritePos = 0;
+	*spritePosition = 0;
 }
-void UnloadSingleSprite(Sprite **sprite) {
-	free(*sprite);
-	*sprite = NULL;
+void UnloadSingleSprite(Sprite **sprites, int position) {
+	free(sprites[position]);
+	sprites[position] = NULL;
 }
 void LoadButton(const char *buttonSheet) {
 	if (FileExists(buttonSheet)) {

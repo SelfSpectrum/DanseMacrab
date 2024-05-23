@@ -69,12 +69,12 @@ void UnloadAnimable(Animable *anim);
 void LoadAnimation(int id, Vector2 offset);
 void UnloadAnimation(Animable **animationArray);
 // Sprite work
-void LoadSprite(const char *spriteSheet);
+void LoadSprite(const char *spriteSheet, int *spritePosition, int SPRITE_SIZE);
 Sprite *LoadSingleSprite(int id);
 Sprite *ParseSprite(char *line);
-void DrawSprite(Shader shader);
-void UnloadSprite(Sprite **spriteArray);
-void UnloadSingleSprite(Sprite **sprite);
+void DrawSprite(Shader shader, Sprite **sprites, int *spritePosition, Color color);
+void UnloadSprite(Sprite **sprites, int *spritePosition);
+void UnloadSingleSprite(Sprite **sprites, int position);
 // Buttons stuff
 void LoadButton(const char *buttonSheet);
 Button *ParseButton(char *line);

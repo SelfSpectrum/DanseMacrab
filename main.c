@@ -147,8 +147,7 @@ int main() {
 	state.spriteAmount = 0;
 	state.messageAmount = 0;
 
-	int texCount = 0;
-	int sfxCount = 0;
+	int i = 0;
 
 	//-------------------------------------------------------------
 	// Audio and Sound
@@ -180,8 +179,8 @@ int main() {
 		}
 		else {
 			UpdateAnimable(state.anims, &state.animAmount, ANIM_SIZE);
-			for (texCount = 0; texCount < TEX_SIZE; texCount++) {
-				SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), state.textures[texCount]);
+			for (i = 0; i < TEX_SIZE; i++) {
+				SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), state.textures[i]);
 			}
 			if (IsKeyPressed(state.startKey)) Start(&state);
 			if (IsKeyPressed(state.acceptKey)) Accept(&state);
@@ -239,9 +238,9 @@ int main() {
 	UnloadMessage(state.messages, &state.messageAmount);
 	UnloadMusicStream(state.music); // Unload music stream buffers from RAM
 
-	for (texCount = 0; texCount < TEX_SIZE; texCount++) UnloadTexture(state.textures[texCount]);
-	for (sfxCount = 0; sfxCount < SFXALIAS_SIZE; sfxCount++) UnloadSoundAlias(state.sfxAlias[sfxCount]);
-	for (sfxCount = 0; sfxCount < SOUND_SIZE; sfxCount++) UnloadSound(state.sounds[sfxCount]);
+	for (i = 0; i < TEX_SIZE; i++) UnloadTexture(state.textures[i]);
+	for (i = 0; i < SFXALIAS_SIZE; i++) UnloadSoundAlias(state.sfxAlias[i]);
+	for (i = 0; i < SOUND_SIZE; i++) UnloadSound(state.sounds[i]);
 
 	if (state.animsData != NULL) fclose(state.animsData);
 	if (state.spriteData != NULL) fclose(state.spriteData);
@@ -390,14 +389,14 @@ void SetState(StateData *state, GameState newState) {
 
 			break;
 		case STATE_TITLE:
-			LoadSprite("./resources/layout/mainTitle.tsv", &state->spriteAmount, SPRITE_SIZE);
+			LoadSprite("./resources/layout/mainTitle.tsv", state->sprites, &state->spriteAmount, SPRITE_SIZE);
 			LoadAnimable(state->animsData, state->anims, (Vector2) { 0 }, &state->animAmount, ANIM_SIZE, 1);
 			break;
 		case STATE_MAINMENU:
-			LoadSprite("./resources/layout/mainMenu.tsv", &state->spriteAmount, SPRITE_SIZE);
+			LoadSprite("./resources/layout/mainMenu.tsv", state->sprites, &state->spriteAmount, SPRITE_SIZE);
 			break;
 		case STATE_FIGHT:
-			LoadButton("./resources/layout/fightButtons.tsv", &state->buttonAmount);
+			LoadButton("./resources/layout/fightButtons.tsv", state->buttons, &state->buttonAmount, BUTTON_SIZE);
 			ChangeSelection(state);
 			state->buttonSkip = 2;
 			break;

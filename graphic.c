@@ -17,14 +17,14 @@ void LoadAnimable(FILE *animsData, Animable **anims, Vector2 offset, int *animAm
 		animId = atoi(token);
 		if (animId == id) {
 			token = strtok_r(NULL, "	", &saveptr);
-			printf("INFO: ANIMATION: Loading %s with ID %d in the %d register\n", token, animId, *animAmount);
+			printf("INFO: ANIMATION: Loading %s with ID %d in the %d register\n", token, animId, (*animAmount));
 			while (token != NULL) {
-				for ( ; *animAmount < ANIM_SIZE; *animAmount++) {
+				for ( ; (*animAmount) < ANIM_SIZE; (*animAmount)++) {
 					token = strtok_r(NULL, "	", &saveptr);
 					printf("INFO: ANIMATION: Direction %s\n", token);
 					repeat = (bool) atoi(strtok_r(NULL, "	", &saveptr));
 					printf("INFO: ANIMATION: Repeat %d\n", repeat);
-					anims[*animAmount] = LoadSingleAnimable(token, repeat, *animAmount, offset);
+					anims[(*animAmount)] = LoadSingleAnimable(token, repeat, *animAmount, offset);
 					token = strtok_r(NULL, "	", &saveptr);
 					break;
 				}
@@ -138,7 +138,7 @@ void ParseAnimable(char *line, Animable *anim) {
 }
 void UpdateAnimable(Animable **anims, int *animAmount, int ANIM_SIZE) {
 	int i;
-	for (i = 0; i < *animAmount; i++) {
+	for (i = 0; i < (*animAmount); i++) {
 		if (anims[i] != NULL) {
 			char line[256];
 			anims[i]->origin = QuaternionAdd(anims[i]->origin, anims[i]->deltaOrigin);
@@ -166,7 +166,7 @@ void UpdateAnimable(Animable **anims, int *animAmount, int ANIM_SIZE) {
 }
 void DrawAnimable(Animable **anims, Texture2D *textures, int *animAmount, Shader shader, Color color) {
 	int i;
-	for (i = 0; i < *animAmount; i++) {
+	for (i = 0; i < (*animAmount); i++) {
 		//printf("%u\n", anim->currentFrame);   // TODO: A good way of view the frame count as debug inside game
 		if (anims[i]->shader) BeginShaderMode(shader);
 		DrawTexturePro(textures[anims[i]->textureIndex],
@@ -180,12 +180,12 @@ void DrawAnimable(Animable **anims, Texture2D *textures, int *animAmount, Shader
 }
 void UnloadAnimable(Animable **anims, int *animAmount) {
 	int i;
-	for (i = 0; i < *animAmount; i++) {
+	for (i = 0; i < (*animAmount); i++) {
 		fclose(anims[i]->data);
 		free(anims[i]);
 		anims[i] = NULL;
 	}
-	*animAmount = 0;
+	(*animAmount) = 0;
 	printf("INFO: ANIMATION: Animable array data unloaded.\n");
 }
 void UnloadSingleAnimable(Animable **anims, int *animAmount, int position, int ANIM_SIZE) {
@@ -196,17 +196,17 @@ void UnloadSingleAnimable(Animable **anims, int *animAmount, int position, int A
 	for (i = 0; i < (ANIM_SIZE - 1); i++)
 		if (anims[i] == NULL) anims[i] = anims[i + 1];
 }
-void LoadSprite(const char *spriteSheet, int *spriteAmount, int SPRITE_SIZE) {
+void LoadSprite(const char *spriteSheet, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE) {
 	if (FileExists(spriteSheet)) {
 		FILE *file = fopen(spriteSheet, "r");
 		char line[256];
 		while (fgets(line, sizeof(line), file) != NULL) {
-			if (*spriteAmount >= SPRITE_SIZE) {
+			if ((*spriteAmount) >= SPRITE_SIZE) {
 				printf("WARNING: SPRITE: Sprites register full.\n");
 				break;
 			}
-			sprites[*spriteAmount] = ParseSprite(line);
-			*spriteAmount++;
+			sprites[(*spriteAmount)] = ParseSprite(line);
+			(*spriteAmount)++;
 		}
 		printf("INFO: SPRITE: Sprites loaded from \"%s\" correctly.\n", spriteSheet);
 		fclose(file);
@@ -269,7 +269,7 @@ Sprite *ParseSprite(char *line) {
 }
 void DrawSprite(Sprite **sprites, Texture2D *textures, int *spriteAmount, Shader shader, Color color) {
 	int i;
-	for (i = 0; i < *spriteAmount; i++) {
+	for (i = 0; i < (*spriteAmount); i++) {
 		if (sprites[i]->shader) BeginShaderMode(shader);
 		DrawTexturePro(textures[sprites[i]->textureIndex],
 				sprites[i]->origin,
@@ -282,11 +282,11 @@ void DrawSprite(Sprite **sprites, Texture2D *textures, int *spriteAmount, Shader
 }
 void UnloadSprite(Sprite **sprites, int *spriteAmount) {
 	int i;
-	for (i = 0; i < *spriteAmount; i++) {
+	for (i = 0; i < (*spriteAmount); i++) {
 		free(sprites[i]);
 		sprites[i] = NULL;
 	}
-	*spriteAmount = 0;
+	(*spriteAmount) = 0;
 	printf("INFO: SPRITE: Sprites unloaded correctly\n");
 }
 void UnloadSingleSprite(Sprite **sprites, int *spriteAmount, int position, int SPRITE_SIZE) {
@@ -296,14 +296,14 @@ void UnloadSingleSprite(Sprite **sprites, int *spriteAmount, int position, int S
 	for (i = 0; i < (SPRITE_SIZE - 1); i++)
 		if (sprites[i] == NULL) sprites[i] = sprites[i + 1];
 }
-void LoadButton(const char *buttonSheet, int *buttonAmount, int BUTTON_SIZE) {
+void LoadButton(const char *buttonSheet, Button **buttons, int *buttonAmount, int BUTTON_SIZE) {
 	if (FileExists(buttonSheet)) {
 		FILE *file = fopen(buttonSheet, "r");
 		char line[256];
 		while (fgets(line, sizeof(line), file) != NULL) {
-			for ( ; *buttonAmount < BUTTON_SIZE; *buttonAmount++) {
-				if (buttons[*buttonAmount] == NULL) {
-					buttons[*buttonAmount] = ParseButton(line);
+			for ( ; (*buttonAmount) < BUTTON_SIZE; (*buttonAmount)++) {
+				if (buttons[(*buttonAmount)] == NULL) {
+					buttons[(*buttonAmount)] = ParseButton(line);
 					break;
 				}
 			}
@@ -356,7 +356,7 @@ Button *ParseButton(char *line) {
 }
 void DrawButton(Button **buttons, Texture2D *textures, int *buttonAmount, Shader shader, Color color) {
 	int i;
-	for (i = 0; i < *buttonAmount; i++) {
+	for (i = 0; i < (*buttonAmount); i++) {
 		if (buttons[i]->shader) BeginShaderMode(shader);
 		DrawTexturePro(textures[buttons[i]->textureIndex],
 				(buttons[i]->selected) ? buttons[i]->originOn : buttons[i]->originOff,
@@ -369,11 +369,11 @@ void DrawButton(Button **buttons, Texture2D *textures, int *buttonAmount, Shader
 }
 void UnloadButton(Button **buttons, int *buttonAmount) {
 	int i;
-	for (i = 0; i < *buttonAmount; i++) {
+	for (i = 0; i < (*buttonAmount); i++) {
 		free(buttons[i]);
 		buttons[i] = NULL;
 	}
-	buttonAmount = 0;
+	(*buttonAmount) = 0;
 	printf("INFO: BUTTONS: Buttons unloaded correctly\n");
 }
 Message *LoadMessage(FILE *translationData, int id) {
@@ -400,5 +400,5 @@ Message *LoadMessage(FILE *translationData, int id) {
 void RenderMessage(Font font) {
 	//
 }
-void UnloadMessage(Message **messages) {
+void UnloadMessage(Message **messages, int *messageAmount) {
 }

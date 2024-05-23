@@ -74,14 +74,14 @@ void DrawAnimable(Animable **anims, Texture2D *textures, int *animAmount, Shader
 void UnloadSingleAnimable(Animable **anims, int *animAmount, int position, int ANIM_SIZE);
 void UnloadAnimable(Animable **animationArray, int *animAmount);
 // Sprite work
-void LoadSprite(const char *spriteSheet, int *spriteAmount, int SPRITE_SIZE);
+void LoadSprite(const char *spriteSheet, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE);
 Sprite *LoadSingleSprite(FILE *spriteData, int id);
 Sprite *ParseSprite(char *line);
 void DrawSprite(Sprite **sprites, Texture2D *textures, int *spriteAmount, Shader shader, Color color);
 void UnloadSprite(Sprite **sprites, int *spriteAmount);
 void UnloadSingleSprite(Sprite **sprites, int *spriteAmount, int position, int SPRITE_SIZE);
 // Buttons stuff
-void LoadButton(const char *buttonSheet, int *buttonAmount);
+void LoadButton(const char *buttonSheet, Button **button, int *buttonAmount, int BUTTON_SIZE);
 Button *ParseButton(char *line);
 void DrawButton(Button **buttons, Texture2D *textures, int *buttonAmount, Shader shader, Color color);
 void UnloadButton(Button **buttons, int *buttonAmount);

@@ -37,5 +37,12 @@ int main() {
     	// Print the generated random number
     	printf("Random number generated with random seed: %d\n", randomNumber);
     }
+    seed = rand();
+    srand(seed);
+    for (i = 0; i < 12; i++) {
+    	printf("Random number generated with seed generated with seed: %d, %d\n", randomNumber, seed);
+    	seed = randomNumber = rand();
+	srand(seed);
+    }
     return 0;
 }

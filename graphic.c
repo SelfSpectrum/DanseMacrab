@@ -1,3 +1,5 @@
+#include "graphic.h"
+
 Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 offset) {
 	// Dynamic allocation since many animables might be created and destroyed in quick successions, don't forget to free later
 	Animable *anim = (Animable *) malloc(sizeof(Animable));	
@@ -126,17 +128,18 @@ void UpdateAnimable(Animable *anim) {
 		}
 	}
 }
-void DrawAnimable(Animable *anim, Shader shader) {
-	if (anim != NULL) {
+void DrawAnimable(Animable **anims, Texture2D *textures, int *animAmount, Shader shader, Color color) {
+	int i;
+	for (i = 0; i < *animAmount; i++) {
 		//printf("%u\n", anim->currentFrame);   // TODO: A good way of view the frame count as debug inside game
-		if (anim->shader) BeginShaderMode(shader);
-		DrawTexturePro(textures[anim->textureIndex],
+		if (anims[i]->shader) BeginShaderMode(shader);
+		DrawTexturePro(textures[anims[i]->textureIndex],
 				(Rectangle) { anim->origin.w, anim->origin.x, anim->origin.y, anim->origin.z },
 				(Rectangle) { anim->dest.w, anim->dest.x, anim->dest.y, anim->dest.z },
 				Vector2Add(anim->position, anim->offset),
 				anim->rotation,
-				globalColor);
-		if (anim->shader) EndShaderMode();
+				color);
+		if (anims[i]->shader) EndShaderMode();
 	}
 }
 void UnloadAnimable(Animable *anim) {
@@ -148,7 +151,7 @@ void UnloadAnimable(Animable *anim) {
 		printf("INFO: ANIMABLE: Animable unloaded succesfully\n");
 	}
 }
-void LoadAnimation(int id, Vector2 offset) {
+void LoadAnimation(FILE *animsData, int id, Animable **anims, Vector2 offset) {
 	if (animsData == NULL) {
 		printf("ERROR: ANIMATION: Error opening animation file\n");
 		return;
@@ -193,24 +196,24 @@ void UnloadAnimation(Animable **animationArray) {
 	}
 	printf("INFO: ANIMATION: Animable array data unloaded.\n");
 }
-void LoadSprite(const char *spriteSheet, int *spritePosition, int SPRITE_SIZE) {
+void LoadSprite(const char *spriteSheet, int *spriteAmount, int SPRITE_SIZE) {
 	if (FileExists(spriteSheet)) {
 		FILE *file = fopen(spriteSheet, "r");
 		char line[256];
 		while (fgets(line, sizeof(line), file) != NULL) {
-			if (*spritePosition >= SPRITE_SIZE) {
+			if (*spriteAmount >= SPRITE_SIZE) {
 				printf("WARNING: SPRITE: Sprites register full.\n");
 				break;
 			}
-			sprites[*spritePosition] = ParseSprite(line);
-			*spritePosition++;
+			sprites[*spriteAmount] = ParseSprite(line);
+			*spriteAmount++;
 		}
 		printf("INFO: SPRITE: Sprites loaded from \"%s\" correctly.\n", spriteSheet);
 		fclose(file);
 	}
 	else printf("INFO: SPRITE: Sprite file \"%s\" not available.\n", spriteSheet);
 }
-Sprite *LoadSingleSprite(int id) {
+Sprite *LoadSingleSprite(FILE *spriteData, int id) {
 	rewind(spriteData);
 	if (spriteData != NULL) {
 		char line[256];
@@ -264,45 +267,41 @@ Sprite *ParseSprite(char *line) {
 	}
 	return sprite;
 }
-void DrawSprite(Shader shader, Sprite **sprites, int *spritePosition, Color color) {
+void DrawSprite(Sprite **sprites, Texture2D *textures, int *spriteAmount, Shader shader, Color color) {
 	int i;
-	for (i = 0; i <= *spritePosition; i++) {
-		if (sprites[i] != NULL  ) {
-			if (sprites[i]->shader) BeginShaderMode(shader);
-			DrawTexturePro(textures[sprites[i]->textureIndex],
-					sprites[i]->origin,
-					sprites[i]->dest,
-					sprites[i]->position,
-					sprites[i]->rotation,
-					color);
-			if (sprites[i]->shader) EndShaderMode();
-		}
+	for (i = 0; i <= *spriteAmount; i++) {
+		if (sprites[i]->shader) BeginShaderMode(shader);
+		DrawTexturePro(textures[sprites[i]->textureIndex],
+				sprites[i]->origin,
+				sprites[i]->dest,
+				sprites[i]->position,
+				sprites[i]->rotation,
+				color);
+		if (sprites[i]->shader) EndShaderMode();
 	}
 }
-void UnloadSprite(Sprite **sprites, int *spritePosition) {
+void UnloadSprite(Sprite **sprites, int *spriteAmount) {
 	int i;
-	for (i = 0; i <= *spritePosition; i++) {
+	for (i = 0; i <= *spriteAmount; i++) {
 		if (sprites[i] != NULL) {
 			free(sprites[i]);
 			sprites[i] = NULL;
 		}
 	}
-	*spritePosition = 0;
+	*spriteAmount = 0;
 }
 void UnloadSingleSprite(Sprite **sprites, int position) {
 	free(sprites[position]);
 	sprites[position] = NULL;
 }
-void LoadButton(const char *buttonSheet) {
+void LoadButton(const char *buttonSheet, int *buttonAmount, int BUTTON_SIZE) {
 	if (FileExists(buttonSheet)) {
 		FILE *file = fopen(buttonSheet, "r");
 		char line[256];
-		int i;
 		while (fgets(line, sizeof(line), file) != NULL) {
-			for (i = 0; i < BUTTON_SIZE; i++) {
-				if (buttons[i] == NULL) {
-					buttons[i] = ParseButton(line);
-					buttonAmount++;
+			for ( ; *buttonAmount < BUTTON_SIZE; *buttonAmount++) {
+				if (buttons[*buttonAmount] == NULL) {
+					buttons[*buttonAmount] = ParseButton(line);
 					break;
 				}
 			}
@@ -353,7 +352,7 @@ Button *ParseButton(char *line) {
 	}
 	return button;
 }
-void DrawButton(Shader shader) {
+void DrawButton(Button **buttons, Texture2D *textures, Shader shader, Color color, int BUTTON_SIZE) {
 	int i;
 	for (i = 0; i < BUTTON_SIZE; i++) {
 		if (buttons[i] != NULL  ) {
@@ -363,12 +362,12 @@ void DrawButton(Shader shader) {
 					buttons[i]->dest,
 					buttons[i]->position,
 					buttons[i]->rotation,
-					globalColor);
+					color);
 			if (buttons[i]->shader) EndShaderMode();
 		}
 	}
 }
-void UnloadButton(Button **buttonArray) {
+void UnloadButton(Button **buttonArray, int *buttonAmount, int BUTTON_SIZE) {
 	int i;
 	buttonAmount = 0;
 	for (i = 0; i < BUTTON_SIZE; i++) {
@@ -379,7 +378,7 @@ void UnloadButton(Button **buttonArray) {
 	}
 	printf("INFO: BUTTONS: Buttons unloaded correctly\n");
 }
-Message *LoadMessage(int id) {
+Message *LoadMessage(FILE *translationData, int id) {
 	Message *message = (Message *) malloc(sizeof(Message));
 	if (message == NULL) return NULL;
 	message->id = id;

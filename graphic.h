@@ -1,6 +1,14 @@
 #ifndef GRAPHIC_H
 #define GRAPHIC_H
 
+#include <stdio.h>
+#include <math.h>
+#include <time.h>
+#include <stdlib.h>
+#include <string.h>
+#include <raylib.h>
+#include <raymath.h>
+
 typedef struct Message Message;
 typedef struct Sprite Sprite;
 typedef struct Animable Animable;
@@ -58,30 +66,29 @@ enum Language {
 	LANG_RUSSIAN = 2
 };
 
-
 // INFO: GFX functions
 Animable *LoadAnimable(const char *animSheet, bool repeat, int index, Vector2 offset);
 void ParseAnimable(char *line, Animable *anim);
 void UpdateAnimable(Animable *anim);
-void DrawAnimable(Animable *anim, Shader shader);
+void DrawAnimable(Animable **anim, Texture2D *textures, int *animAmount, Shader shader, Color color);
 void UnloadAnimable(Animable *anim);
 // Animations
-void LoadAnimation(int id, Vector2 offset);
+void LoadAnimation(FILE *animsData, int id, Animable **anims, Vector2 offset);
 void UnloadAnimation(Animable **animationArray);
 // Sprite work
-void LoadSprite(const char *spriteSheet, int *spritePosition, int SPRITE_SIZE);
-Sprite *LoadSingleSprite(int id);
+void LoadSprite(const char *spriteSheet, int *spriteAmount, int SPRITE_SIZE);
+Sprite *LoadSingleSprite(FILE *spriteData, int id);
 Sprite *ParseSprite(char *line);
-void DrawSprite(Shader shader, Sprite **sprites, int *spritePosition, Color color);
-void UnloadSprite(Sprite **sprites, int *spritePosition);
+void DrawSprite(Sprite **sprites, Texture2D *textures, int *spriteAmount, Shader shader, Color color);
+void UnloadSprite(Sprite **sprites, int *spriteAmount);
 void UnloadSingleSprite(Sprite **sprites, int position);
 // Buttons stuff
-void LoadButton(const char *buttonSheet);
+void LoadButton(const char *buttonSheet, int *buttonAmount);
 Button *ParseButton(char *line);
-void DrawButton(Shader shader);
-void UnloadButton(Button **buttonArray);
+void DrawButton(Button **buttonArray, Texture2D *textures, Shader shader, Color color, int BUTTON_SIZE);
+void UnloadButton(Button **buttonArray, int *buttonAmount, int BUTTON_SIZE);
 // Text and translations and stuff
-Message *LoadMessage(int id);			// To load a text line with the corresponding translation
+Message *LoadMessage(FILE *translationData, int id);			// To load a text line with the corresponding translation
 void RenderMessage(Font font);
 void UnloadMessage(Message **message);
 

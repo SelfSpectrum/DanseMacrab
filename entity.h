@@ -425,29 +425,29 @@ struct Combat {
 // Function Declaration
 
 void LoadEnemiesFile(FILE **file, const char *enemySheet);
-void LoadEnemiesOnCombat(FILE *file, int id);
-Entity *LoadEnemy(int id);
-Entity *LoadPlayer(int id);
+void LoadEnemiesOnCombat(FILE *file, FILE *enemyData, FILE *spriteData, FILE *techData, Combat *combat, int id);
+Entity *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id);
+Entity *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id);
 void MoveEntity(Entity *entity, int position);
 void DamageEntity(Entity attacker, Technique tech);
-void KillEntity(Entity *entity);				//TODO
+void KillEntity(Entity *entity); //TODO
 void UnloadCombat(Combat *combat);
 void UnloadEntity(EntityType type, Combat *combat, int position);
-void DrawCombat(void);
+void DrawCombat(Texture2D *textures, Combat combat, Color color);
 // Techniques
-Technique LoadTech(int id);
-void PlayerLoadTech(Entity *player);				//TODO
+Technique LoadTech(FILE *techData, int id);
+void PlayerLoadTech(FILE *techData, Entity *player); //TODO
 // Equipment
-Equip LoadWeapon(int id);
-Equip LoadArmor(int id);
-Equip LoadCharm(int id);
+Equip LoadWeapon(FILE *weaponData, int id);
+Equip LoadArmor(FILE *armorData, int id);
+Equip LoadCharm(FILE *charmData, int id);
 void SetProficiency(Entity *player, AttributeType attr);
-void SetFeature(Entity *player, Feature feature);
+void SetFeature(FILE *weaponData, FILE *charmData, FILE *tech, Entity *player, Feature feature);
 // Dice related
 int DiceMean(DiceType dice);
-int DiceRoll(DiceType dice);
-void SetSeed(int seed);
-void SetTimeSeed(void);
-void Random(void);
+int DiceRoll(DiceType dice, int *randomValue);
+void SetSeed(int seed, int *randomValue);
+void SetTimeSeed(int *randomValue);
+void Random(int *randomValue);
 
 #endif		// ENTITY_H

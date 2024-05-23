@@ -1,8 +1,10 @@
+#include "entity.h"
+
 void LoadEnemiesFile(FILE **file, const char *enemySheet) {
 	if (*file != NULL) fclose(*file);
 	if (FileExists(enemySheet)) *file = fopen(enemySheet, "r");
 }
-void LoadEnemiesOnCombat(FILE *file, int id) {
+void LoadEnemiesOnCombat(FILE *file, FILE *enemyData, FILE *spriteData, FILE *techData, Combat *combat, int id) {
 	char line[512];
 	char *token;
 	char *saveptr;
@@ -11,25 +13,25 @@ void LoadEnemiesOnCombat(FILE *file, int id) {
 	while (fgets(line, sizeof(line), file) != NULL) {
 		if (i == id) {
 			token = strtok_r(line, "	", &saveptr);
-			combat.enemy[0] = LoadEnemy(atoi(token));
-			if (token[0] != '0') combat.enemy[0]->enemy.position = 0;
+			combat->enemy[0] = LoadEnemy(enemyData, spriteData, techData, atoi(token));
+			if (token[0] != '0') combat->enemy[0]->enemy.position = 0;
 			token = strtok_r(NULL, "	", &saveptr);
-			combat.enemy[1] = LoadEnemy(atoi(token));
-			if (token[0] != '0') combat.enemy[1]->enemy.position = 1;
+			combat->enemy[1] = LoadEnemy(enemyData, spriteData, techData, atoi(token));
+			if (token[0] != '0') combat->enemy[1]->enemy.position = 1;
 			token = strtok_r(NULL, "	", &saveptr);
-			combat.enemy[2] = LoadEnemy(atoi(token));
-			if (token[0] != '0') combat.enemy[2]->enemy.position = 2;
+			combat->enemy[2] = LoadEnemy(enemyData, spriteData, techData, atoi(token));
+			if (token[0] != '0') combat->enemy[2]->enemy.position = 2;
 			token = strtok_r(NULL, "	", &saveptr);
-			combat.enemy[3] = LoadEnemy(atoi(token));
-			if (token[0] != '0') combat.enemy[3]->enemy.position = 0;
+			combat->enemy[3] = LoadEnemy(enemyData, spriteData, techData, atoi(token));
+			if (token[0] != '0') combat->enemy[3]->enemy.position = 3;
 			token = strtok_r(NULL, "	", &saveptr);
-			combat.enemy[4] = LoadEnemy(atoi(token));
-			if (token[0] != '0') combat.enemy[4]->enemy.position = 0;
+			combat->enemy[4] = LoadEnemy(enemyData, spriteData, techData, atoi(token));
+			if (token[0] != '0') combat->enemy[4]->enemy.position = 4;
 		}
 		i++;
 	}
 }
-Entity *LoadEnemy(int id) {
+Entity *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id) {
 	if (id == 0) return NULL;
 	Entity *enemy = (Entity *) malloc(sizeof(Entity));
 	enemy->enemy.type = ENTITY_ENEMY;
@@ -55,7 +57,7 @@ Entity *LoadEnemy(int id) {
 			token = strtok_r(NULL, "	", &saveptr);
 			enemy->enemy.description = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.sprite = LoadSingleSprite(atoi(token));
+			enemy->enemy.sprite = LoadSingleSprite(spriteData, atoi(token));
 			token = strtok_r(NULL, "	", &saveptr);
 			enemy->enemy.enemy = (EnemyType) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
@@ -88,7 +90,7 @@ Entity *LoadEnemy(int id) {
 			token = strtok_r(NULL, "	", &saveptr);
 			tech = strtok_r(token, ",", &saveptr);
 			while (token != NULL) {
-				enemy->enemy.tech[enemy->enemy.techAmount] = LoadTech(atoi(tech));
+				enemy->enemy.tech[enemy->enemy.techAmount] = LoadTech(techData, atoi(tech));
 				tech = strtok_r(NULL, ",", &saveptr);
 				enemy->enemy.techAmount++;
 			}
@@ -97,7 +99,7 @@ Entity *LoadEnemy(int id) {
 	}
 	return NULL;
 }
-Entity *LoadPlayer(int id) {
+Entity *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id) {
 	if (id == 0) return NULL;
 	Entity *player = (Entity *) malloc(sizeof(Entity));
 	player->player.type = ENTITY_PLAYER;
@@ -143,7 +145,7 @@ Entity *LoadPlayer(int id) {
 			token = strtok_r(line, "	", &saveptr);
 			player->player.description = atoi(token);
 			token = strtok_r(line, "	", &saveptr);
-			player->player.sprite = LoadSingleSprite(atoi(token));
+			player->player.sprite = LoadSingleSprite(spriteData, atoi(token));
 			token = strtok_r(line, "	", &saveptr);
 			player->player.physique[0] = atoi(token);
 			token = strtok_r(line, "	", &saveptr);
@@ -169,15 +171,15 @@ Entity *LoadPlayer(int id) {
 			token = strtok_r(line, "	", &saveptr);
 			player->player.inmunity = (StatusType) atoi(token);
 			token = strtok_r(line, "	", &saveptr);
-			player->player.weapon = LoadWeapon(atoi(token));
+			player->player.weapon = LoadWeapon(weaponData, atoi(token));
 			token = strtok_r(line, "	", &saveptr);
-			player->player.armor = LoadArmor(atoi(token));
+			player->player.armor = LoadArmor(armorData, atoi(token));
 			token = strtok_r(line, "	", &saveptr);
-			player->player.charm = LoadCharm(atoi(token));
+			player->player.charm = LoadCharm(charmData, atoi(token));
 			token = strtok_r(line, "	", &saveptr);
 			feature = strtok_r(token, ",", &saveptr);
 			while (token != NULL) {
-				SetFeature(player, (Feature) atoi(feature));
+				SetFeature(weaponData, charmData, techData, player, (Feature) atoi(feature));
 				feature = strtok_r(NULL, ",", &saveptr);
 				player->player.featuresAmount++;
 			}
@@ -236,17 +238,17 @@ void UnloadEntity(EntityType type, Combat *combat, int position) {
 			return;
 	}
 }
-void DrawCombat(void) {
+void DrawCombat(Texture2D *textures, Combat combat, Color color) {
 	int i;
 	Sprite *sprite;
 	for (i = 0; i < 5; i++) {
 		sprite = combat.enemy[i]->enemy.sprite;
-		DrawTexturePro(textures[sprite->textureIndex], sprite->origin, sprite->dest, Vector2Add(sprite->position, (Vector2) { -64 * combat.enemy[i]->enemy.position, 0 }), sprite->rotation, globalColor);
+		DrawTexturePro(textures[sprite->textureIndex], sprite->origin, sprite->dest, Vector2Add(sprite->position, (Vector2) { -64 * combat.enemy[i]->enemy.position, 0 }), sprite->rotation, color);
 		sprite = combat.player[i]->player.sprite;
-		DrawTexturePro(textures[sprite->textureIndex], sprite->origin, sprite->dest, Vector2Add(sprite->position, (Vector2) { -64 * combat.player[i]->player.position, 0 }), sprite->rotation, globalColor);
+		DrawTexturePro(textures[sprite->textureIndex], sprite->origin, sprite->dest, Vector2Add(sprite->position, (Vector2) { -64 * combat.player[i]->player.position, 0 }), sprite->rotation, color);
 	}
 }
-Technique LoadTech(int id) {
+Technique LoadTech(FILE *techData, int id) {
 	Technique tech;
 	int techId;
 	char line[256];
@@ -336,7 +338,7 @@ Technique LoadTech(int id) {
 	}
 	return tech;
 }
-Equip LoadWeapon(int id) {
+Equip LoadWeapon(FILE *weaponData, int id) {
 	Equip weapon;
 	weapon.weapon.type = EQUIP_WEAPON;
 	int weaponId;
@@ -378,7 +380,7 @@ Equip LoadWeapon(int id) {
 	}
 	return weapon;
 }
-Equip LoadArmor(int id) {
+Equip LoadArmor(FILE *armorData, int id) {
 	Equip armor;
 	armor.armor.type = EQUIP_ARMOR;
 	int armorId;
@@ -420,7 +422,7 @@ Equip LoadArmor(int id) {
 	}
 	return armor;
 }
-Equip LoadCharm(int id) {
+Equip LoadCharm(FILE *charmData, int id) {
 	Equip charm;
 	charm.charm.type = EQUIP_CHARM;
 	int charmId;
@@ -534,7 +536,7 @@ void SetProficiency(Entity *player, AttributeType attr) {
 			break;
 	}
 }
-void SetFeature(Entity *player, Feature feature) {
+void SetFeature(FILE *weaponData, FILE *charmFile, FILE *techData, Entity *player, Feature feature) {
 	switch (feature) {
 		case FEAT_DEMONHANDS:
 			//TODO: Add 5? random demon hands techniques
@@ -552,49 +554,49 @@ void SetFeature(Entity *player, Feature feature) {
 			player->player.enemyBonus[(int) ENEMY_UNDEAD] += 1;
 			break;
 		case FEAT_LUXURIOUSGEM:
-			player->player.charm = LoadCharm(1);
+			player->player.charm = LoadCharm(charmFile, 1);
 		default:
 			break;
 	}
 	player->player.features[player->player.featuresAmount] = feature;
 	player->player.featuresAmount++;
 }
-int DiceRoll(DiceType dice) {
+int DiceRoll(DiceType dice, int *randomValue) {
 	int roll;
 	switch (dice) {
 		case DICE_D100:
 		case DICE_SAVED100:
-			roll = (randomValue % 100) +  1;
+			roll = (*randomValue % 100) +  1;
 			break;
 		case DICE_D20:
 		case DICE_SAVED20:
-			roll = (randomValue % 20) + 1;
+			roll = (*randomValue % 20) + 1;
 			break;
 		case DICE_D12:
 		case DICE_SAVED12:
-			roll = (randomValue % 12) + 1;
+			roll = (*randomValue % 12) + 1;
 			break;
 		case DICE_D10:
 		case DICE_SAVED10:
-			roll = (randomValue % 10) + 1;
+			roll = (*randomValue % 10) + 1;
 			break;
 		case DICE_D8:
 		case DICE_SAVED8:
-			roll = (randomValue % 8) + 1;
+			roll = (*randomValue % 8) + 1;
 			break;
 		case DICE_D6:
 		case DICE_SAVED6:
-			roll = (randomValue % 6) + 1;
+			roll = (*randomValue % 6) + 1;
 			break;
 		case DICE_D4:
 		case DICE_SAVED4:
-			roll = (randomValue % 4) + 1;
+			roll = (*randomValue % 4) + 1;
 			break;
 		default:
 			roll = 0;
 			break;
 	}
-	Random();
+	Random(randomValue);
 	return roll;
 }
 int DiceMean(DiceType dice) {
@@ -624,14 +626,14 @@ int DiceMean(DiceType dice) {
 			return 0;
 	}
 }
-void SetSeed(int seed) {
+void SetSeed(int seed, int *randomValue) {
 	srand(seed);
-	randomValue = rand();
+	*randomValue = rand();
 }
-void SetTimeSeed(void) {
+void SetTimeSeed(int *randomValue) {
 	srand(time(NULL));
-	randomValue = rand();
+	*randomValue = rand();
 }
-void Random(void) {
-	randomValue = rand();
+void Random(int *randomValue) {
+	*randomValue = rand();
 }

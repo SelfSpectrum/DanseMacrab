@@ -1,10 +1,3 @@
-#include <stdio.h>
-#include <math.h>
-#include <time.h>
-#include <stdlib.h>
-#include <string.h>
-#include <raylib.h>
-#include <raymath.h>
 #include "entity.h"
 
 #define ANIM_SIZE 16
@@ -42,8 +35,9 @@ struct StateData {
 	Animable *anims[ANIM_SIZE]; // Animation handling and rendering
 	Sprite *sprites[SPRITE_SIZE]; // INFO: What and where to render
 	Message *messages[MSG_SIZE];
-	int spritePosition;
-	int messagePosition;
+	int animAmount;
+	int spriteAmount;
+	int messageAmount;
 	// Inputs
 	Button *buttons[BUTTON_SIZE];
 	int buttonAmount;
@@ -66,6 +60,17 @@ struct StateData {
 	int sfxPosition; // Position to locate one "free" sfxAlias
 	// Combat
 	Combat combat;
+	// Files
+	FILE *animsData;
+	FILE *spriteData;
+	FILE *charmData;
+	FILE *armorData;
+	FILE *weaponData;
+	FILE *techData;
+	FILE *characterData;
+	FILE *enemyData;
+	FILE *dialogData;
+	FILE *translationData;
 };
 
 // INFO: Input functions
@@ -103,17 +108,6 @@ int main() {
 	//-------------------------------------------------------------
 	// Files to load data
 	//-------------------------------------------------------------
-	
-	FILE *animsData = fopen("./resources/anims/animations.tsv", "r");
-	FILE *spriteData = fopen("./resources/gfx/sprites.tsv", "r");
-	FILE *charmData = fopen("./resources/combat/charms.tsv", "r");
-	FILE *armorData = fopen("./resources/combat/armors.tsv", "r");
-	FILE *weaponData = fopen("./resources/combat/weapons.tsv", "r");
-	FILE *techData = fopen("./resources/combat/tech.tsv", "r");
-	FILE *characterData = fopen("./resources/combat/characters.tsv", "r");
-	FILE *enemyData = fopen("./resources/combat/enemies.tsv", "r");
-	FILE *dialogData = fopen("./resources/text/dialog.tsv", "r");
-	FILE *translationData = fopen("./resources/text/english.tsv", "r");
 
 	Shader shader = LoadShader(0, "contour.fs");
 	Font fontDefault = LoadFont("./resources/fonts/pixelperfect.ttf");
@@ -149,8 +143,9 @@ int main() {
 	
 	state.globalColor = (Color) { 255, 255, 255, 255 };
 
-	state.spritePosition = 0;
-	state.messagePosition = 0;
+	state.animAmount = 0;
+	state.spriteAmount = 0;
+	state.messageAmount = 0;
 
 	int animCount = 0;
 	int texCount = 0;
@@ -209,11 +204,9 @@ int main() {
 					DrawText("Are you sure you want to exit program?", 50, 90, 8, state.globalColor);
 				}
 				else {
-					for (animCount = 0; animCount < ANIM_SIZE; animCount++) {
-						if (state.anims[animCount] != NULL) DrawAnimable(state.anims[animCount], shader);
-					}
-					DrawSprite(shader, state.sprites, &state.spritePosition, state.globalColor);
-					DrawButton(shader);
+					DrawAnimable(state.anims, state.textures, &state.animAmount, shader, state.globalColor);
+					DrawSprite(state.sprites, state.textures, &state.spriteAmount, shader, state.globalColor);
+					DrawButton(state.buttons, state.textures, &state.buttonAmount, shader, state.globalColor);
 					BeginShaderMode(shader);
 						DrawTexturePro(state.textures[7], (Rectangle) { 0, 0, 64, 64 }, (Rectangle) { 0, 0, 64, 64 }, (Vector2) { 0, 0 }, 0, state.globalColor);
 						DrawTexturePro(state.textures[7], (Rectangle) { 0, 0, 64, 64 }, (Rectangle) { 0, 0, 64, 64 }, (Vector2) { -64, 0 }, 0, state.globalColor);
@@ -243,8 +236,8 @@ int main() {
 	UnloadShader(shader);
 	UnloadRenderTexture(target);
 	UnloadFont(fontDefault);
-	UnloadSprite(state.sprites, &state.spritePosition);
-	UnloadButton(state.buttons);
+	UnloadSprite(state.sprites, &state.spriteAmount);
+	UnloadButton(state.buttons, &state.buttonAmount, BUTTON_SIZE);
 	UnloadCombat(&state.combat);
 	UnloadAnimation(state.anims);
 	UnloadMessage(state.messages);
@@ -254,16 +247,16 @@ int main() {
 	for (sfxCount = 0; sfxCount < SFXALIAS_SIZE; sfxCount++) UnloadSoundAlias(state.sfxAlias[sfxCount]);
 	for (sfxCount = 0; sfxCount < SOUND_SIZE; sfxCount++) UnloadSound(state.sounds[sfxCount]);
 
-	if (animsData != NULL) fclose(animsData);
-	if (spriteData != NULL) fclose(spriteData);
-	if (charmData != NULL) fclose(charmData);
-	if (armorData != NULL) fclose(armorData);
-	if (weaponData != NULL) fclose(weaponData);
-	if (techData != NULL) fclose(techData);
-	if (characterData != NULL) fclose(characterData);
-	if (enemyData != NULL) fclose(enemyData);
-	if (dialogData != NULL) fclose(dialogData);
-	if (translationData != NULL) fclose(translationData);
+	if (state.animsData != NULL) fclose(state.animsData);
+	if (state.spriteData != NULL) fclose(state.spriteData);
+	if (state.charmData != NULL) fclose(state.charmData);
+	if (state.armorData != NULL) fclose(state.armorData);
+	if (state.weaponData != NULL) fclose(state.weaponData);
+	if (state.techData != NULL) fclose(state.techData);
+	if (state.characterData != NULL) fclose(state.characterData);
+	if (state.enemyData != NULL) fclose(state.enemyData);
+	if (state.dialogData != NULL) fclose(state.dialogData);
+	if (state.translationData != NULL) fclose(state.translationData);
 
 	CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
 	CloseWindow();              // Close window and OpenGL context
@@ -365,18 +358,30 @@ void Cancel(StateData *state) {
 }
 void SetState(StateData *state, GameState newState) {
 	int i;
-	UnloadSprite(state->sprites, &state->spritePosition);
+	UnloadSprite(state->sprites, &state->spriteAmount);
 	UnloadAnimation(state->anims);
 	UnloadButton(state->buttons);
 	state->state = newState;
 	switch (state->state) {
 		case STATE_INIT:
+			state->animsData = fopen("./resources/anims/animations.tsv", "r");
+			state->spriteData = fopen("./resources/gfx/sprites.tsv", "r");
+			state->charmData = fopen("./resources/combat/charms.tsv", "r");
+			state->armorData = fopen("./resources/combat/armors.tsv", "r");
+			state->weaponData = fopen("./resources/combat/weapons.tsv", "r");
+			state->techData = fopen("./resources/combat/tech.tsv", "r");
+			state->characterData = fopen("./resources/combat/characters.tsv", "r");
+			state->enemyData = fopen("./resources/combat/enemies.tsv", "r");
+			state->dialogData = fopen("./resources/text/dialog.tsv", "r");
+			state->translationData = fopen("./resources/text/english.tsv", "r");
+
 			state->textures[0] = LoadTexture("./resources/gfx/bigSprites00.png");
 			state->textures[3] = LoadTexture("./resources/gfx/cards.png");
 			state->textures[4] = LoadTexture("./resources/gfx/UI.png");
 			state->textures[5] = LoadTexture("./resources/gfx/abilities.png");
 			state->textures[6] = LoadTexture("./resources/gfx/attacks.png");
 			state->textures[7] = LoadTexture("./resources/gfx/entities.png");
+
 			state->sounds[0] = LoadSound("./resources/sfx/pressStart.mp3");
 			state->sounds[1] = LoadSound("./resources/sfx/buttonSelect.wav");
 			state->sounds[2] = LoadSound("./resources/sfx/buttonCancel.wav");
@@ -386,16 +391,17 @@ void SetState(StateData *state, GameState newState) {
 			for (i = 0; i < ANIM_SIZE; i++) state->anims[i] = NULL;
 			for (i = 0; i < SPRITE_SIZE; i++) state->sprites[i]  = NULL;
 			for (i = 0; i < MSG_SIZE; i++) state->messages[i] = NULL;
+
 			break;
 		case STATE_TITLE:
-			LoadSprite("./resources/layout/mainTitle.tsv", &state->spritePosition, SPRITE_SIZE);
-			LoadAnimation(1, (Vector2) { 0 });
+			LoadSprite("./resources/layout/mainTitle.tsv", &state->spriteAmount, SPRITE_SIZE);
+			LoadAnimation(state->animsData, 1, state->anims, (Vector2) { 0 });
 			break;
 		case STATE_MAINMENU:
-			LoadSprite("./resources/layout/mainMenu.tsv", &state->spritePosition, SPRITE_SIZE);
+			LoadSprite("./resources/layout/mainMenu.tsv", &state->spriteAmount, SPRITE_SIZE);
 			break;
 		case STATE_FIGHT:
-			LoadButton("./resources/layout/fightButtons.tsv");
+			LoadButton("./resources/layout/fightButtons.tsv", &state->buttonAmount);
 			ChangeSelection(state);
 			state->buttonSkip = 2;
 			break;

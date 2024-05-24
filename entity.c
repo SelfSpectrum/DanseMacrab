@@ -539,10 +539,22 @@ void SetProficiency(Entity *player, AttributeType attr) {
 void SetFeature(FILE *weaponData, FILE *charmFile, FILE *techData, Entity *player, Feature feature) {
 	switch (feature) {
 		case FEAT_DEMONHANDS:
-			//TODO: Add 5? random demon hands techniques
+			player->player.tech[player->player.techAmount] = LoadTech(techData, 81);
+			player->player.techAmount++;
+			player->player.tech[player->player.techAmount] = LoadTech(techData, 82);
+			player->player.techAmount++;
+			player->player.tech[player->player.techAmount] = LoadTech(techData, 83);
+			player->player.techAmount++;
+			player->player.tech[player->player.techAmount] = LoadTech(techData, 86);
+			player->player.techAmount++;
+			player->player.tech[player->player.techAmount] = LoadTech(techData, 87);
+			player->player.techAmount++;
 			break;
 		case FEAT_PASSIONFUL:
 			player->player.charisma[5] += 1;
+			break;
+		case FEAT_PASSIONNAIL:
+			player->player.weapon = LoadWeapon(weaponData, 64);
 			break;
 		case FEAT_DEMONHUNTER:
 			player->player.enemyBonus[(int) ENEMY_DEMON] += 1;

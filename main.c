@@ -134,7 +134,7 @@ int main() {
 	state.extraAKey = KEY_A;
 	state.extraBKey = KEY_B;
 	SetExitKey(KEY_NULL); // Disable KEY_ESCAPE to close window, X-button still works
-	state.combat = (Combat) { { NULL }, { NULL } };// Data from position, entities and stuff
+	state.combat = (Combat) { { NULL }, { NULL }, { 0 }, 0, 0 }; // Data from position, entities and stuff
 	//combat.playable[2] = LoadEntity("", ENTITY_PLAYER); TODO
 
 	//-------------------------------------------------------------
@@ -233,7 +233,7 @@ int main() {
 	UnloadFont(fontDefault);
 	UnloadSprite(state.sprites, &state.spriteAmount);
 	UnloadButton(state.buttons, &state.buttonAmount);
-	UnloadCombat(&state.combat);
+	UnloadCombat(&(state.combat));
 	UnloadAnimable(state.anims, &state.animAmount);
 	UnloadMessage(state.messages, &state.messageAmount);
 	UnloadMusicStream(state.music); // Unload music stream buffers from RAM

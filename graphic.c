@@ -192,6 +192,7 @@ void UnloadSingleAnimable(Animable **anims, int *animAmount, int position, int A
 	fclose(anims[position]->data);
 	free(anims[position]);
 	anims[position] = NULL;
+	(*animAmount)--;
 	int i;
 	for (i = 0; i < (ANIM_SIZE - 1); i++)
 		if (anims[i] == NULL) anims[i] = anims[i + 1];
@@ -292,6 +293,7 @@ void UnloadSprite(Sprite **sprites, int *spriteAmount) {
 void UnloadSingleSprite(Sprite **sprites, int *spriteAmount, int position, int SPRITE_SIZE) {
 	free(sprites[position]);
 	sprites[position] = NULL;
+	(*spriteAmount)--;
 	int i;
 	for (i = 0; i < (SPRITE_SIZE - 1); i++)
 		if (sprites[i] == NULL) sprites[i] = sprites[i + 1];
@@ -397,8 +399,15 @@ Message *LoadMessage(FILE *translationData, int id) {
 	}
 	return message;
 }
-void RenderMessage(Font font) {
-	//
+void RenderMessage(Message message, Font font, Color color) {
+	DrawTextPro(font, message.string, message.position, message.origin, message.rotation, 8, 10, color);
 }
 void UnloadMessage(Message **messages, int *messageAmount) {
+	int i;
+	for (i = 0; i < (*messageAmount); i++) {
+		free(messages[i]);
+		messages[i] = NULL;
+	}
+	(*messageAmount) = 0;
+	printf("INFO: MESSAGE: Messages unloaded correctly\n");
 }

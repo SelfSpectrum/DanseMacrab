@@ -429,8 +429,8 @@ void LoadEnemiesOnCombat(FILE *file, FILE *enemyData, FILE *spriteData, FILE *te
 Entity *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id);
 Entity *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id);
 void MoveEntity(Entity *entity, int position);
-void DamageEntity(Entity attacker, Technique tech);
-void KillEntity(Entity *entity); //TODO
+void DamageEntity(Combat *combat, Entity attacker, Technique tech);
+void KillEntity(Combat *combat, Entity *entity); //TODO
 void UnloadCombat(Combat *combat);
 void UnloadEntity(EntityType type, Combat *combat, int position);
 void DrawCombat(Texture2D *textures, Combat combat, Color color);

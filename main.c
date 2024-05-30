@@ -83,8 +83,8 @@ void ChangeSelection(StateData *state);
 void SetState(StateData *state, GameState newState);
 // INFO: SFX functions
 void PlaySecSound(int id, StateData *state);
-void LowPassFilter(void *buffer, unsigned int frames);		// TODO
-void Crossfade();						// TODO
+//void LowPassFilter(void *buffer, unsigned int frames);		// TODO
+//void Crossfade();						// TODO
 
 int main() {
 	//-------------------------------------------------------------
@@ -95,14 +95,14 @@ int main() {
 	const int virtualScreenHeight = 180;
 	const int screenWidth = 960;
 	const int screenHeight = 540;
+	InitWindow(screenWidth, screenHeight, "Danse Macrab");
 	const float virtualRatio = (float)screenWidth/(float)virtualScreenWidth;
 	Camera2D worldSpaceCamera = { {0, 0}, {0, 0}, 0.0f, 1.0f };
 	Camera2D screenSpaceCamera = { {0, 0}, {0, 0}, 0.0f, 1.0f };
 	RenderTexture2D target = LoadRenderTexture(virtualScreenWidth, virtualScreenHeight);
-	Rectangle sourceRec = { 0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height };
-	Rectangle destRec = { -virtualRatio, -virtualRatio , screenWidth + (virtualRatio*2), screenHeight + (virtualRatio*2) };
+	Rectangle sourceRec = { 0.0f, 0.0f, (float) target.texture.width, - (float) target.texture.height };
+	Rectangle destRec = { -virtualRatio, -virtualRatio , screenWidth + (virtualRatio * 2), screenHeight + (virtualRatio * 2) };
 	Vector2 origin = { 0.0f, 0.0f };
-	InitWindow(screenWidth, screenHeight, "Danse Macrab");
 	SetTargetFPS(60);// INFO: Set our game to run at 60 frames-per-second
 
 	//-------------------------------------------------------------
@@ -123,16 +123,6 @@ int main() {
 	state.buttonAmount = 0;
 	state.buttonPosition = 0;
 	state.buttonSkip = 0;
-	state.startKey = KEY_ENTER;
-	state.selectKey = KEY_BACKSPACE;
-	state.acceptKey = KEY_Z;
-	state.cancelKey = KEY_X;
-	state.leftKey = KEY_LEFT;
-	state.rightKey = KEY_RIGHT;
-	state.upKey = KEY_UP;
-	state.downKey = KEY_DOWN;
-	state.extraAKey = KEY_A;
-	state.extraBKey = KEY_B;
 	SetExitKey(KEY_NULL); // Disable KEY_ESCAPE to close window, X-button still works
 	state.combat = (Combat) { { NULL }, { NULL }, { 0 }, 0, 0 }; // Data from position, entities and stuff
 	//combat.playable[2] = LoadEntity("", ENTITY_PLAYER); TODO
@@ -233,14 +223,10 @@ int main() {
 	UnloadFont(fontDefault);
 	UnloadSprite(state.sprites, &state.spriteAmount);
 	UnloadButton(state.buttons, &state.buttonAmount);
-	UnloadCombat(&(state.combat));
+	UnloadCombat(&state.combat);
 	UnloadAnimable(state.anims, &state.animAmount);
 	UnloadMessage(state.messages, &state.messageAmount);
 	UnloadMusicStream(state.music); // Unload music stream buffers from RAM
-
-	for (i = 0; i < TEX_SIZE; i++) UnloadTexture(state.textures[i]);
-	for (i = 0; i < SFXALIAS_SIZE; i++) UnloadSoundAlias(state.sfxAlias[i]);
-	for (i = 0; i < SOUND_SIZE; i++) UnloadSound(state.sounds[i]);
 
 	if (state.animsData != NULL) fclose(state.animsData);
 	if (state.spriteData != NULL) fclose(state.spriteData);
@@ -252,6 +238,10 @@ int main() {
 	if (state.enemyData != NULL) fclose(state.enemyData);
 	if (state.dialogData != NULL) fclose(state.dialogData);
 	if (state.translationData != NULL) fclose(state.translationData);
+
+	for (i = 0; i < TEX_SIZE; i++) UnloadTexture(state.textures[i]);
+	for (i = 0; i < SFXALIAS_SIZE; i++) UnloadSoundAlias(state.sfxAlias[i]);
+	for (i = 0; i < SOUND_SIZE; i++) UnloadSound(state.sounds[i]);
 
 	CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
 	CloseWindow();              // Close window and OpenGL context
@@ -359,16 +349,26 @@ void SetState(StateData *state, GameState newState) {
 	state->state = newState;
 	switch (state->state) {
 		case STATE_INIT:
-			state->animsData = fopen("./resources/anims/animations.tsv", "r");
-			state->spriteData = fopen("./resources/gfx/sprites.tsv", "r");
-			state->charmData = fopen("./resources/combat/charms.tsv", "r");
-			state->armorData = fopen("./resources/combat/armors.tsv", "r");
-			state->weaponData = fopen("./resources/combat/weapons.tsv", "r");
-			state->techData = fopen("./resources/combat/tech.tsv", "r");
-			state->characterData = fopen("./resources/combat/characters.tsv", "r");
-			state->enemyData = fopen("./resources/combat/enemies.tsv", "r");
-			state->dialogData = fopen("./resources/text/dialog.tsv", "r");
-			state->translationData = fopen("./resources/text/english.tsv", "r");
+			if (FileExists("./resources/anims/animations.tsv"))
+				state->animsData = fopen("./resources/anims/animations.tsv", "r");
+			if (FileExists("./resources/gfx/sprites.tsv"))
+				state->spriteData = fopen("./resources/gfx/sprites.tsv", "r");
+			if (FileExists("./resources/combat/charms.tsv"))
+				state->charmData = fopen("./resources/combat/charms.tsv", "r");
+			if (FileExists("./resources/combat/armors.tsv"))
+				state->armorData = fopen("./resources/combat/armors.tsv", "r");
+			if (FileExists("./resources/combat/weapons.tsv"))
+				state->weaponData = fopen("./resources/combat/weapons.tsv", "r");
+			if (FileExists("./resources/combat/tech.tsv"))
+				state->techData = fopen("./resources/combat/tech.tsv", "r");
+			if (FileExists("./resources/combat/characters.tsv"))
+				state->characterData = fopen("./resources/combat/characters.tsv", "r");
+			if (FileExists("./resources/combat/enemies.tsv"))
+				state->enemyData = fopen("./resources/combat/enemies.tsv", "r");
+			if (FileExists("./resources/text/dialog.tsv"))
+				state->dialogData = fopen("./resources/text/dialog.tsv", "r");
+			if (FileExists("./resources/text/english.tsv"))
+				state->translationData = fopen("./resources/text/english.tsv", "r");
 
 			state->textures[0] = LoadTexture("./resources/gfx/bigSprites00.png");
 			state->textures[3] = LoadTexture("./resources/gfx/cards.png");
@@ -387,6 +387,18 @@ void SetState(StateData *state, GameState newState) {
 			for (i = 0; i < SPRITE_SIZE; i++) state->sprites[i]  = NULL;
 			for (i = 0; i < MSG_SIZE; i++) state->messages[i] = NULL;
 
+			state->startKey = KEY_ENTER;
+			state->selectKey = KEY_BACKSPACE;
+			state->acceptKey = KEY_Z;
+			state->cancelKey = KEY_X;
+			state->leftKey = KEY_LEFT;
+			state->rightKey = KEY_RIGHT;
+			state->upKey = KEY_UP;
+			state->downKey = KEY_DOWN;
+			state->extraAKey = KEY_A;
+			state->extraBKey = KEY_B;
+			
+			SetState(state, STATE_TITLE);
 			break;
 		case STATE_TITLE:
 			LoadSprite("./resources/layout/mainTitle.tsv", state->sprites, &state->spriteAmount, SPRITE_SIZE);

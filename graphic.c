@@ -18,16 +18,13 @@ void LoadAnimable(FILE *animsData, Animable **anims, Vector2 offset, int *animAm
 		if (animId == id) {
 			token = strtok_r(NULL, "	", &saveptr);
 			printf("INFO: ANIMATION: Loading %s with ID %d in the %d register\n", token, animId, (*animAmount));
-			while (token != NULL) {
-				for ( ; (*animAmount) < ANIM_SIZE; (*animAmount)++) {
-					token = strtok_r(NULL, "	", &saveptr);
-					printf("INFO: ANIMATION: Direction %s\n", token);
-					repeat = (bool) atoi(strtok_r(NULL, "	", &saveptr));
-					printf("INFO: ANIMATION: Repeat %d\n", repeat);
-					anims[(*animAmount)] = LoadSingleAnimable(token, repeat, *animAmount, offset);
-					token = strtok_r(NULL, "	", &saveptr);
-					break;
-				}
+			token = strtok_r(NULL, "	", &saveptr);
+			for ( ; (*animAmount) < ANIM_SIZE && token != NULL; (*animAmount)++) {
+				printf("INFO: ANIMATION: Direction %s\n", token);
+				repeat = (bool) atoi(strtok_r(NULL, "	", &saveptr));
+				printf("INFO: ANIMATION: Repeat %d\n", repeat);
+				anims[(*animAmount)] = LoadSingleAnimable(token, repeat, *animAmount, offset);
+				token = strtok_r(NULL, "	", &saveptr);
 			}
 			break;
 		}
@@ -139,28 +136,26 @@ void ParseAnimable(char *line, Animable *anim) {
 void UpdateAnimable(Animable **anims, int *animAmount, int ANIM_SIZE) {
 	int i;
 	for (i = 0; i < (*animAmount); i++) {
-		if (anims[i] != NULL) {
-			char line[256];
-			anims[i]->origin = QuaternionAdd(anims[i]->origin, anims[i]->deltaOrigin);
-			anims[i]->dest = QuaternionAdd(anims[i]->dest, anims[i]->deltaDest);
-			anims[i]->position = Vector2Add(anims[i]->position, anims[i]->deltaPos);
-			anims[i]->rotation += anims[i]->deltaRotation;
-			anims[i]->currentFrame++;
-			if (anims[i]->currentFrame >= anims[i]->frame) {
-				if (anims[i]->frame != 0) {
-					if (fgets(line, sizeof(line), anims[i]->data) != NULL) {
-						//printf("INFO: ANIMABLE: Next animable line loaded.\n");
-						ParseAnimable(line, anims[i]);
-						//printf("INFO: ANIMABLE: Next animable line parsed.\n");
-					}
+		char line[256];
+		anims[i]->origin = QuaternionAdd(anims[i]->origin, anims[i]->deltaOrigin);
+		anims[i]->dest = QuaternionAdd(anims[i]->dest, anims[i]->deltaDest);
+		anims[i]->position = Vector2Add(anims[i]->position, anims[i]->deltaPos);
+		anims[i]->rotation += anims[i]->deltaRotation;
+		anims[i]->currentFrame++;
+		if (anims[i]->currentFrame >= anims[i]->frame) {
+			if (anims[i]->frame != 0) {
+				if (fgets(line, sizeof(line), anims[i]->data) != NULL) {
+					//printf("INFO: ANIMABLE: Next animable line loaded.\n");
+					ParseAnimable(line, anims[i]);
+					//printf("INFO: ANIMABLE: Next animable line parsed.\n");
 				}
-				else if (anims[i]->repeat) {
-					anims[i]->currentFrame = 0;
-					rewind(anims[i]->data);
-					if (fgets(line, sizeof(line), anims[i]->data) != NULL) ParseAnimable(line, anims[i]);
-				}
-				else UnloadSingleAnimable(anims, animAmount, i, ANIM_SIZE);
 			}
+			else if (anims[i]->repeat) {
+				anims[i]->currentFrame = 0;
+				rewind(anims[i]->data);
+				if (fgets(line, sizeof(line), anims[i]->data) != NULL) ParseAnimable(line, anims[i]);
+			}
+			else UnloadSingleAnimable(anims, animAmount, i, ANIM_SIZE);
 		}
 	}
 }

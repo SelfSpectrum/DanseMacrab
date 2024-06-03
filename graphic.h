@@ -70,8 +70,8 @@ Animable *LoadSingleAnimable(const char *animSheet, bool repeat, int index, Vect
 void ParseAnimable(char *line, Animable *anim);
 void UpdateAnimable(Animable **anims, int *animAmount, int ANIM_SIZE);
 void DrawAnimable(Animable **anims, Texture2D *textures, int *animAmount, Shader shader, Color color);
-void UnloadSingleAnimable(Animable **anims, int *animAmount, int position, int ANIM_SIZE);
 void UnloadAnimable(Animable **animationArray, int *animAmount);
+void UnloadSingleAnimable(Animable **anims, int *animAmount, int position, int ANIM_SIZE);
 // Sprite work
 void LoadSprite(const char *spriteSheet, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE);
 Sprite *LoadSingleSprite(FILE *spriteData, int id);

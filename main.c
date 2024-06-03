@@ -58,6 +58,7 @@ struct StateData {
 	Sound sounds[SOUND_SIZE]; // Here I hold all the sounds used in the game
 	Sound sfxAlias[SFXALIAS_SIZE]; // Used to reproduce several sounds at once
 	int sfxPosition; // Position to locate one "free" sfxAlias
+	bool unloadSfx;
 	// Combat
 	Combat combat;
 	// Files
@@ -127,16 +128,6 @@ int main() {
 	state.combat = (Combat) { { NULL }, { NULL }, { 0 }, 0, 0 }; // Data from position, entities and stuff
 	//combat.playable[2] = LoadEntity("", ENTITY_PLAYER); TODO
 
-	//-------------------------------------------------------------
-	// Textures used to load sprites and funny stuff
-	//-------------------------------------------------------------
-	
-	state.globalColor = (Color) { 255, 255, 255, 255 };
-
-	state.animAmount = 0;
-	state.spriteAmount = 0;
-	state.messageAmount = 0;
-
 	int i = 0;
 
 	//-------------------------------------------------------------
@@ -144,13 +135,6 @@ int main() {
 	//-------------------------------------------------------------
 	
 	InitAudioDevice();
-	state.music = LoadMusicStream("./resources/sfx/title.mp3");
-	state.music.looping = true;
-
-	state.sfxPosition = 0;
-
-	PlayMusicStream(state.music);
-	SetMusicVolume(state.music, 1.0f);
 
 	SetState(&state, STATE_INIT);
 
@@ -192,14 +176,6 @@ int main() {
 					DrawAnimable(state.anims, state.textures, &state.animAmount, shader, state.globalColor);
 					DrawSprite(state.sprites, state.textures, &state.spriteAmount, shader, state.globalColor);
 					DrawButton(state.buttons, state.textures, &state.buttonAmount, shader, state.globalColor);
-					BeginShaderMode(shader);
-						DrawTexturePro(state.textures[7], (Rectangle) { 0, 0, 64, 64 }, (Rectangle) { 0, 0, 64, 64 }, (Vector2) { 0, 0 }, 0, state.globalColor);
-						DrawTexturePro(state.textures[7], (Rectangle) { 0, 0, 64, 64 }, (Rectangle) { 0, 0, 64, 64 }, (Vector2) { -64, 0 }, 0, state.globalColor);
-						DrawTexturePro(state.textures[7], (Rectangle) { 0, 0, 64, 64 }, (Rectangle) { 0, 0, 64, 64 }, (Vector2) { -128, 0 }, 0, state.globalColor);
-						DrawTexturePro(state.textures[7], (Rectangle) { 0, 0, 64, 64 }, (Rectangle) { 0, 0, 64, 64 }, (Vector2) { -196, 0 }, 0, state.globalColor);
-						DrawTexturePro(state.textures[7], (Rectangle) { 0, 0, 64, 64 }, (Rectangle) { 0, 0, 64, 64 }, (Vector2) { -256, 0 }, 0, state.globalColor);
-						DrawTexturePro(state.textures[5], (Rectangle) { 0, 0, 16, 16 }, (Rectangle) { 0, 0, 16, 16 }, (Vector2) { 0, -16 }, 0, state.globalColor);
-					EndShaderMode();
 				}
 			EndMode2D();
 		EndTextureMode();
@@ -239,9 +215,15 @@ int main() {
 	if (state.dialogData != NULL) fclose(state.dialogData);
 	if (state.translationData != NULL) fclose(state.translationData);
 
-	for (i = 0; i < TEX_SIZE; i++) UnloadTexture(state.textures[i]);
-	for (i = 0; i < SFXALIAS_SIZE; i++) UnloadSoundAlias(state.sfxAlias[i]);
-	for (i = 0; i < SOUND_SIZE; i++) UnloadSound(state.sounds[i]);
+	for (i = 0; i < TEX_SIZE; i++)
+		if (state.textures[i].id != 0)
+			UnloadTexture(state.textures[i]);
+	for (i = 0; i < SFXALIAS_SIZE; i++)
+		if (state.sfxAlias[i].frameCount != 0)
+			UnloadSoundAlias(state.sfxAlias[i]);
+	for (i = 0; i < SOUND_SIZE; i++)
+		if (state.sounds[i].frameCount != 0)
+			UnloadSound(state.sounds[i]);
 
 	CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
 	CloseWindow();              // Close window and OpenGL context
@@ -251,10 +233,15 @@ int main() {
 
 void PlaySecSound(int id, StateData *state) {
 	id = id % SOUND_SIZE;
-	UnloadSoundAlias(state->sfxAlias[state->sfxPosition]);
+	printf("I'm guessing this could be a breakpoint\n");
+	//if (state->unloadSfx)
+	if (state->sfxAlias[state->sfxPosition].frameCount != 0)
+		UnloadSoundAlias(state->sfxAlias[state->sfxPosition]);
+	printf("I'm guessing this could be a breakpoint\n");
 	state->sfxAlias[state->sfxPosition] = LoadSoundAlias(state->sounds[id]);
 	PlaySound(state->sfxAlias[state->sfxPosition]);
 	state->sfxPosition = (state->sfxPosition + 1) % SFXALIAS_SIZE;
+	if (state->sfxPosition == 0) state->unloadSfx = true;
 }
 void Menu(StateData *state) {
 	if (state->buttonAmount > 0) {
@@ -347,6 +334,7 @@ void SetState(StateData *state, GameState newState) {
 	UnloadAnimable(state->anims, &state->animAmount);
 	UnloadButton(state->buttons, &state->buttonAmount);
 	state->state = newState;
+	printf("INFO: STATE: Loading state %d.\n", (int) newState);
 	switch (state->state) {
 		case STATE_INIT:
 			if (FileExists("./resources/anims/animations.tsv"))
@@ -398,11 +386,24 @@ void SetState(StateData *state, GameState newState) {
 			state->extraAKey = KEY_A;
 			state->extraBKey = KEY_B;
 			
+			state->sfxPosition = 0;
+			state->unloadSfx = false;
+			state->animAmount = 0;
+			state->spriteAmount = 0;
+			state->messageAmount = 0;
+
 			SetState(state, STATE_TITLE);
 			break;
 		case STATE_TITLE:
 			LoadSprite("./resources/layout/mainTitle.tsv", state->sprites, &state->spriteAmount, SPRITE_SIZE);
 			LoadAnimable(state->animsData, state->anims, (Vector2) { 0 }, &state->animAmount, ANIM_SIZE, 1);
+
+			state->music = LoadMusicStream("./resources/sfx/title.mp3");
+			state->music.looping = true;
+
+			PlayMusicStream(state->music);
+			SetMusicVolume(state->music, 1.0f);
+
 			break;
 		case STATE_MAINMENU:
 			LoadSprite("./resources/layout/mainMenu.tsv", state->sprites, &state->spriteAmount, SPRITE_SIZE);

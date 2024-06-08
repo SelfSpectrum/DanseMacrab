@@ -10,6 +10,8 @@
 
 typedef enum GameState GameState;
 typedef struct StateData StateData;
+typedef struct SoundStruct SoundStruct;
+typedef struct SafeSound SafeSound;
 
 enum GameState {
 	STATE_INIT,
@@ -31,7 +33,7 @@ struct StateData {
 	int randomValue;
 	// Visuals
 	Color globalColor; // Used to render the white lines in all textures as colors
-	Texture2D textures[TEX_SIZE]; // Here I hold all the texture used in the game
+	TextureSafe textures[TEX_SIZE]; // Here I hold all the texture used in the game
 	Animable *anims[ANIM_SIZE]; // Animation handling and rendering
 	Sprite *sprites[SPRITE_SIZE]; // INFO: What and where to render
 	Message *messages[MSG_SIZE];
@@ -72,6 +74,10 @@ struct StateData {
 	FILE *enemyData;
 	FILE *dialogData;
 	FILE *translationData;
+};
+struct SoundStruct {
+	Sound sound;
+	bool init;
 };
 
 // INFO: Input functions
@@ -216,14 +222,14 @@ int main() {
 	if (state.translationData != NULL) fclose(state.translationData);
 
 	for (i = 0; i < TEX_SIZE; i++)
-		if (state.textures[i].id != 0)
-			UnloadTexture(state.textures[i]);
+		if (state.textures[i].init)
+			UnloadTexture(state.textures[i].tex);
 	for (i = 0; i < SFXALIAS_SIZE; i++)
-		if (state.sfxAlias[i].frameCount != 0)
-			UnloadSoundAlias(state.sfxAlias[i]);
+		if (state.sfxAlias[i].init)
+			UnloadSoundAlias(state.sfxAlias[i].sfx);
 	for (i = 0; i < SOUND_SIZE; i++)
-		if (state.sounds[i].frameCount != 0)
-			UnloadSound(state.sounds[i]);
+		if (state.sounds[i].init)
+			UnloadSound(state.sounds[i].sfx);
 
 	CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
 	CloseWindow();              // Close window and OpenGL context
@@ -328,6 +334,8 @@ void Cancel(StateData *state) {
 			break;
 	}
 }
+// Python3
+// Python3=dbus.mainloop.qt
 void SetState(StateData *state, GameState newState) {
 	int i;
 	UnloadSprite(state->sprites, &state->spriteAmount);
@@ -337,6 +345,12 @@ void SetState(StateData *state, GameState newState) {
 	printf("INFO: STATE: Loading state %d.\n", (int) newState);
 	switch (state->state) {
 		case STATE_INIT:
+			for (i = 0; i < TEX_SIZE; i++) state->textures[i].init = false;
+			for (i = 0; i < BUTTON_SIZE; i++) state->buttons[i] = NULL;
+			for (i = 0; i < ANIM_SIZE; i++) state->anims[i] = NULL;
+			for (i = 0; i < SPRITE_SIZE; i++) state->sprites[i]  = NULL;
+			for (i = 0; i < MSG_SIZE; i++) state->messages[i] = NULL;
+
 			if (FileExists("./resources/anims/animations.tsv"))
 				state->animsData = fopen("./resources/anims/animations.tsv", "r");
 			if (FileExists("./resources/gfx/sprites.tsv"))
@@ -358,22 +372,23 @@ void SetState(StateData *state, GameState newState) {
 			if (FileExists("./resources/text/english.tsv"))
 				state->translationData = fopen("./resources/text/english.tsv", "r");
 
-			state->textures[0] = LoadTexture("./resources/gfx/bigSprites00.png");
-			state->textures[3] = LoadTexture("./resources/gfx/cards.png");
-			state->textures[4] = LoadTexture("./resources/gfx/UI.png");
-			state->textures[5] = LoadTexture("./resources/gfx/abilities.png");
-			state->textures[6] = LoadTexture("./resources/gfx/attacks.png");
-			state->textures[7] = LoadTexture("./resources/gfx/entities.png");
+			state->textures[0].tex = LoadTexture("./resources/gfx/bigSprites00.png");
+			state->textures[0].init = true;
+			state->textures[3].tex = LoadTexture("./resources/gfx/cards.png");
+			state->textures[3].init = true;
+			state->textures[4].tex = LoadTexture("./resources/gfx/UI.png");
+			state->textures[4].init = true;
+			state->textures[5].tex = LoadTexture("./resources/gfx/abilities.png");
+			state->textures[5].init = true;
+			state->textures[6].tex = LoadTexture("./resources/gfx/attacks.png");
+			state->textures[6].init = true;
+			state->textures[7].tex = LoadTexture("./resources/gfx/entities.png");
+			state->textures[7].init = true;
 
 			state->sounds[0] = LoadSound("./resources/sfx/pressStart.mp3");
 			state->sounds[1] = LoadSound("./resources/sfx/buttonSelect.wav");
 			state->sounds[2] = LoadSound("./resources/sfx/buttonCancel.wav");
 			state->sounds[3] = LoadSound("./resources/sfx/error.wav");
-
-			for (i = 0; i < BUTTON_SIZE; i++) state->buttons[i] = NULL;
-			for (i = 0; i < ANIM_SIZE; i++) state->anims[i] = NULL;
-			for (i = 0; i < SPRITE_SIZE; i++) state->sprites[i]  = NULL;
-			for (i = 0; i < MSG_SIZE; i++) state->messages[i] = NULL;
 
 			state->startKey = KEY_ENTER;
 			state->selectKey = KEY_BACKSPACE;

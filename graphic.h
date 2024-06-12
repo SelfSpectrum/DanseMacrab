@@ -91,7 +91,7 @@ void DrawButton(Button **buttons, SafeTexture *textures, int *buttonAmount, Shad
 void UnloadButton(Button **buttons, int *buttonAmount);
 // Text and translations and stuff
 Message *LoadMessage(FILE *translationData, int id);			// To load a text line with the corresponding translation
-void RenderMessage(Message message, Font font, Color color);
+void DrawMessage(Message **messages, Font font, Color color);
 void UnloadMessage(Message **messages, int *menssageAmount);
 
 #endif			// ENTITY_H

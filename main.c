@@ -10,7 +10,7 @@
 
 typedef enum GameState GameState;
 typedef struct StateData StateData;
-typedef struct SoundStruct SoundStruct;
+typedef struct PlayerPref PlayerPref;
 typedef struct SafeSound SafeSound;
 
 enum GameState {
@@ -24,6 +24,17 @@ enum GameState {
 	STATE_ATTACKMENU,
 	STATE_DEBUG
 };
+struct SafeSound {
+	Sound sound;
+	bool init;
+};
+struct PlayerPref {
+	bool firstTime;
+	char namePref[64];
+	Language language;
+	float musicVolume;
+	float sfxVolume;
+};
 struct StateData {
 	// State
 	GameState state;
@@ -31,9 +42,10 @@ struct StateData {
 	bool exitWindow; // Flag to set window to exit
 	//bool runGame; // To know if the game should run
 	int randomValue;
+	PlayerPref pref;
 	// Visuals
 	Color globalColor; // Used to render the white lines in all textures as colors
-	TextureSafe textures[TEX_SIZE]; // Here I hold all the texture used in the game
+	SafeTexture textures[TEX_SIZE]; // Here I hold all the texture used in the game
 	Animable *anims[ANIM_SIZE]; // Animation handling and rendering
 	Sprite *sprites[SPRITE_SIZE]; // INFO: What and where to render
 	Message *messages[MSG_SIZE];
@@ -57,10 +69,9 @@ struct StateData {
 	int extraBKey;
 	// Sounds
 	Music music;
-	Sound sounds[SOUND_SIZE]; // Here I hold all the sounds used in the game
-	Sound sfxAlias[SFXALIAS_SIZE]; // Used to reproduce several sounds at once
+	SafeSound sounds[SOUND_SIZE]; // Here I hold all the sounds used in the game
+	SafeSound sfxAlias[SFXALIAS_SIZE]; // Used to reproduce several sounds at once
 	int sfxPosition; // Position to locate one "free" sfxAlias
-	bool unloadSfx;
 	// Combat
 	Combat combat;
 	// Files
@@ -75,10 +86,6 @@ struct StateData {
 	FILE *dialogData;
 	FILE *translationData;
 };
-struct SoundStruct {
-	Sound sound;
-	bool init;
-};
 
 // INFO: Input functions
 void Accept(StateData *state);
@@ -88,6 +95,9 @@ void Select(StateData *state);
 void Menu(StateData *state);
 void ChangeSelection(StateData *state);
 void SetState(StateData *state, GameState newState);
+// INFO: Player Preferences functions
+void SavePrefs(PlayerPref prefs);
+PlayerPref LoadPrefs();
 // INFO: SFX functions
 void PlaySecSound(int id, StateData *state);
 //void LowPassFilter(void *buffer, unsigned int frames);		// TODO
@@ -127,9 +137,6 @@ int main() {
 	state.exitWindowRequested = false;
 	state.exitWindow = false;
 	//state.runGame = true;
-	state.buttonAmount = 0;
-	state.buttonPosition = 0;
-	state.buttonSkip = 0;
 	SetExitKey(KEY_NULL); // Disable KEY_ESCAPE to close window, X-button still works
 	state.combat = (Combat) { { NULL }, { NULL }, { 0 }, 0, 0 }; // Data from position, entities and stuff
 	//combat.playable[2] = LoadEntity("", ENTITY_PLAYER); TODO
@@ -160,7 +167,7 @@ int main() {
 		else {
 			UpdateAnimable(state.anims, &state.animAmount, ANIM_SIZE);
 			for (i = 0; i < TEX_SIZE; i++) {
-				SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), state.textures[i]);
+				SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), state.textures[i].tex);
 			}
 			if (IsKeyPressed(state.startKey)) Start(&state);
 			if (IsKeyPressed(state.acceptKey)) Accept(&state);
@@ -226,10 +233,10 @@ int main() {
 			UnloadTexture(state.textures[i].tex);
 	for (i = 0; i < SFXALIAS_SIZE; i++)
 		if (state.sfxAlias[i].init)
-			UnloadSoundAlias(state.sfxAlias[i].sfx);
+			UnloadSoundAlias(state.sfxAlias[i].sound);
 	for (i = 0; i < SOUND_SIZE; i++)
 		if (state.sounds[i].init)
-			UnloadSound(state.sounds[i].sfx);
+			UnloadSound(state.sounds[i].sound);
 
 	CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
 	CloseWindow();              // Close window and OpenGL context
@@ -239,15 +246,12 @@ int main() {
 
 void PlaySecSound(int id, StateData *state) {
 	id = id % SOUND_SIZE;
-	printf("I'm guessing this could be a breakpoint\n");
-	//if (state->unloadSfx)
-	if (state->sfxAlias[state->sfxPosition].frameCount != 0)
-		UnloadSoundAlias(state->sfxAlias[state->sfxPosition]);
-	printf("I'm guessing this could be a breakpoint\n");
-	state->sfxAlias[state->sfxPosition] = LoadSoundAlias(state->sounds[id]);
-	PlaySound(state->sfxAlias[state->sfxPosition]);
+	if (state->sfxAlias[state->sfxPosition].init)
+		UnloadSoundAlias(state->sfxAlias[state->sfxPosition].sound);
+	state->sfxAlias[state->sfxPosition].sound = LoadSoundAlias(state->sounds[id].sound);
+	state->sfxAlias[state->sfxPosition].init = true;
+	PlaySound(state->sfxAlias[state->sfxPosition].sound);
 	state->sfxPosition = (state->sfxPosition + 1) % SFXALIAS_SIZE;
-	if (state->sfxPosition == 0) state->unloadSfx = true;
 }
 void Menu(StateData *state) {
 	if (state->buttonAmount > 0) {
@@ -334,18 +338,22 @@ void Cancel(StateData *state) {
 			break;
 	}
 }
-// Python3
-// Python3=dbus.mainloop.qt
 void SetState(StateData *state, GameState newState) {
 	int i;
-	UnloadSprite(state->sprites, &state->spriteAmount);
-	UnloadAnimable(state->anims, &state->animAmount);
-	UnloadButton(state->buttons, &state->buttonAmount);
+	if (newState != STATE_INIT) {
+		UnloadSprite(state->sprites, &state->spriteAmount);
+		UnloadAnimable(state->anims, &state->animAmount);
+		UnloadButton(state->buttons, &state->buttonAmount);
+	}
 	state->state = newState;
 	printf("INFO: STATE: Loading state %d.\n", (int) newState);
 	switch (state->state) {
 		case STATE_INIT:
+			state->pref = LoadPrefs();
+
 			for (i = 0; i < TEX_SIZE; i++) state->textures[i].init = false;
+			for (i = 0; i < SOUND_SIZE; i++) state->sounds[i].init = false;
+			for (i = 0; i < SFXALIAS_SIZE; i++) state->sfxAlias[i].init = false;
 			for (i = 0; i < BUTTON_SIZE; i++) state->buttons[i] = NULL;
 			for (i = 0; i < ANIM_SIZE; i++) state->anims[i] = NULL;
 			for (i = 0; i < SPRITE_SIZE; i++) state->sprites[i]  = NULL;
@@ -369,8 +377,23 @@ void SetState(StateData *state, GameState newState) {
 				state->enemyData = fopen("./resources/combat/enemies.tsv", "r");
 			if (FileExists("./resources/text/dialog.tsv"))
 				state->dialogData = fopen("./resources/text/dialog.tsv", "r");
-			if (FileExists("./resources/text/english.tsv"))
-				state->translationData = fopen("./resources/text/english.tsv", "r");
+			switch (state->pref.language) {
+				case LANG_SPANISH:
+					if (FileExists("./resources/text/spanish.tsv"))
+						state->translationData = fopen("./resources/text/spanish.tsv", "r");
+					break;
+				case LANG_ENGLISH:
+					if (FileExists("./resources/text/english.tsv"))
+						state->translationData = fopen("./resources/text/english.tsv", "r");
+					break;
+				case LANG_RUSSIAN:
+					if (FileExists("./resources/text/russian.tsv"))
+						state->translationData = fopen("./resources/text/russian.tsv", "r");
+					break;
+				default:
+					// TODO: Failsafe if something goes wrong
+					break;
+			}
 
 			state->textures[0].tex = LoadTexture("./resources/gfx/bigSprites00.png");
 			state->textures[0].init = true;
@@ -385,10 +408,14 @@ void SetState(StateData *state, GameState newState) {
 			state->textures[7].tex = LoadTexture("./resources/gfx/entities.png");
 			state->textures[7].init = true;
 
-			state->sounds[0] = LoadSound("./resources/sfx/pressStart.mp3");
-			state->sounds[1] = LoadSound("./resources/sfx/buttonSelect.wav");
-			state->sounds[2] = LoadSound("./resources/sfx/buttonCancel.wav");
-			state->sounds[3] = LoadSound("./resources/sfx/error.wav");
+			state->sounds[0].sound = LoadSound("./resources/sfx/pressStart.mp3");
+			state->sounds[0].init = true;
+			state->sounds[1].sound = LoadSound("./resources/sfx/buttonSelect.wav");
+			state->sounds[1].init = true;
+			state->sounds[2].sound = LoadSound("./resources/sfx/buttonCancel.wav");
+			state->sounds[2].init = true;
+			state->sounds[3].sound = LoadSound("./resources/sfx/error.wav");
+			state->sounds[3].init = true;
 
 			state->startKey = KEY_ENTER;
 			state->selectKey = KEY_BACKSPACE;
@@ -402,10 +429,14 @@ void SetState(StateData *state, GameState newState) {
 			state->extraBKey = KEY_B;
 			
 			state->sfxPosition = 0;
-			state->unloadSfx = false;
 			state->animAmount = 0;
 			state->spriteAmount = 0;
 			state->messageAmount = 0;
+			state->buttonAmount = 0;
+			state->buttonPosition = 0;
+			state->buttonSkip = 0;
+
+			state->globalColor = (Color) {255, 255, 255, 255};
 
 			SetState(state, STATE_TITLE);
 			break;
@@ -431,4 +462,40 @@ void SetState(StateData *state, GameState newState) {
 		default:
 			break;
 	}
+}
+void SavePrefs(PlayerPref prefs) {
+	char buffer[512]; // Big buffer to save all data from the user and ensure it gets saved properly
+	sprintf(buffer, "fsp=%d\nname=%s\nlang=%d\nmus=%.2f\nsfx=%.2f",
+			(int) prefs.firstTime,
+			prefs.namePref,
+			(int) prefs.language,
+			prefs.musicVolume,
+			prefs.sfxVolume);
+	SaveFileText("PlayerPrefs.data", buffer);
+}
+PlayerPref LoadPrefs() {
+	PlayerPref prefs = { true, "", 0, 0.0f, 0.0f }; // Default preferences
+	if (!FileExists("PlayerPrefs.data")) {
+		printf("INFO: PREFS: Prefs file does not exist, creating one.\n");
+		SavePrefs(prefs);
+		return prefs;
+	}
+	char *buffer = LoadFileText("PlayerPrefs.data");
+	if (buffer == NULL) {
+		//TODO: Remember to drop an error when this happen and to abort, informing it and to choose to reload or override
+		printf("INFO: PREFS: Prefs file loading error, returning default.\n");
+		return prefs;
+	}
+	int ftp;
+	int lang;
+	sscanf(buffer, "fsp=%d\nname=%s\nlang=%d\nmus=%f\nsfx=%f",
+			&ftp,
+			prefs.namePref,
+			&lang,
+			&prefs.musicVolume,
+			&prefs.sfxVolume);
+	prefs.firstTime = (bool) ftp;
+	prefs.language = (Language) lang;
+	UnloadFileText(buffer); // Unload this file data
+	return prefs;
 }

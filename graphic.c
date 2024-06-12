@@ -159,12 +159,12 @@ void UpdateAnimable(Animable **anims, int *animAmount, int ANIM_SIZE) {
 		}
 	}
 }
-void DrawAnimable(Animable **anims, Texture2D *textures, int *animAmount, Shader shader, Color color) {
+void DrawAnimable(Animable **anims, SafeTexture *textures, int *animAmount, Shader shader, Color color) {
 	int i;
 	for (i = 0; i < (*animAmount); i++) {
 		//printf("%u\n", anim->currentFrame);   // TODO: A good way of view the frame count as debug inside game
 		if (anims[i]->shader) BeginShaderMode(shader);
-		DrawTexturePro(textures[anims[i]->textureIndex],
+		DrawTexturePro(textures[anims[i]->textureIndex].tex,
 				(Rectangle) { anims[i]->origin.w, anims[i]->origin.x, anims[i]->origin.y, anims[i]->origin.z },
 				(Rectangle) { anims[i]->dest.w, anims[i]->dest.x, anims[i]->dest.y, anims[i]->dest.z },
 				Vector2Add(anims[i]->position, anims[i]->offset),
@@ -263,11 +263,11 @@ Sprite *ParseSprite(char *line) {
 	}
 	return sprite;
 }
-void DrawSprite(Sprite **sprites, Texture2D *textures, int *spriteAmount, Shader shader, Color color) {
+void DrawSprite(Sprite **sprites, SafeTexture *textures, int *spriteAmount, Shader shader, Color color) {
 	int i;
 	for (i = 0; i < (*spriteAmount); i++) {
 		if (sprites[i]->shader) BeginShaderMode(shader);
-		DrawTexturePro(textures[sprites[i]->textureIndex],
+		DrawTexturePro(textures[sprites[i]->textureIndex].tex,
 				sprites[i]->origin,
 				sprites[i]->dest,
 				sprites[i]->position,
@@ -351,11 +351,11 @@ Button *ParseButton(char *line) {
 	}
 	return button;
 }
-void DrawButton(Button **buttons, Texture2D *textures, int *buttonAmount, Shader shader, Color color) {
+void DrawButton(Button **buttons, SafeTexture *textures, int *buttonAmount, Shader shader, Color color) {
 	int i;
 	for (i = 0; i < (*buttonAmount); i++) {
 		if (buttons[i]->shader) BeginShaderMode(shader);
-		DrawTexturePro(textures[buttons[i]->textureIndex],
+		DrawTexturePro(textures[buttons[i]->textureIndex].tex,
 				(buttons[i]->selected) ? buttons[i]->originOn : buttons[i]->originOff,
 				buttons[i]->dest,
 				buttons[i]->position,
@@ -394,7 +394,8 @@ Message *LoadMessage(FILE *translationData, int id) {
 	}
 	return message;
 }
-void RenderMessage(Message message, Font font, Color color) {
+void DrawMessage(Message message, Font font, Color color) {
+	
 	DrawTextPro(font, message.string, message.position, message.origin, message.rotation, 8, 10, color);
 }
 void UnloadMessage(Message **messages, int *messageAmount) {

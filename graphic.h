@@ -20,13 +20,15 @@ struct SafeTexture {
 	bool init;
 };	
 struct Message {
-	char *string;
+	char string[256];
 	int id;
 	Vector2 position;
 	Vector2 origin;
 	float rotation;
 	float fontSize;
+	float spacing;
 	bool shader;
+	bool useColor;
 };
 struct Sprite {
 	int textureIndex;
@@ -91,7 +93,8 @@ Button *ParseButton(char *line);
 void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Color color);
 void UnloadButton(Button **buttons, int *buttonAmount);
 // Text and translations and stuff
-Message *LoadMessage(FILE *translationData, int id);			// To load a text line with the corresponding translation
+void LoadMessageIntoRegister(FILE *translationData, Message **messages, int *messageAmount, int MSG_SIZE, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, bool shader, bool useColor, int id); // To load a text line with the corresponding translation
+Message *LoadSingleMessage(FILE *translationData, int id, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, bool shader, bool useColor);
 void DrawMessage(Message **messages, int messageAmount, Font font, Shader shader, Color color);
 void UnloadMessage(Message **messages, int *menssageAmount);
 

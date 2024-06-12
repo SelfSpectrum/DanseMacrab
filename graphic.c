@@ -33,24 +33,23 @@ void LoadAnimable(FILE *animsData, Animable **anims, Vector2 offset, int *animAm
 Animable *LoadSingleAnimable(const char *animSheet, bool repeat, int index, Vector2 offset) {
 	// Dynamic allocation since many animables might be created and destroyed in quick successions, don't forget to free later
 	Animable *anim = (Animable *) malloc(sizeof(Animable));	
-	if (anim != NULL) {
-		// If the file has problems to open, lack of memory won't be a problem, I hope
-		if (FileExists(animSheet)) {
-			// Line from the file that contains all the struct data
-			char line[256];
-			FILE *file = fopen(animSheet, "r");
-			if (fgets(line, sizeof(line), file) != NULL) {
-				ParseAnimable(line, anim);
-				printf("INFO: ANIMABLE: Animable loaded succesfully\n");
-				anim->currentFrame = 0;
-				anim->data = file;
-				anim->repeat = repeat;
-				anim->index = index;
-				anim->offset = offset;
-			}
+	// If the file has problems to open, lack of memory won't be a problem, I hope
+	if (anim == NULL) return NULL;
+	if (FileExists(animSheet)) {
+		// Line from the file that contains all the struct data
+		char line[256];
+		FILE *file = fopen(animSheet, "r");
+		if (fgets(line, sizeof(line), file) != NULL) {
+			ParseAnimable(line, anim);
+			printf("INFO: ANIMABLE: Animable loaded succesfully\n");
+			anim->currentFrame = 0;
+			anim->data = file;
+			anim->repeat = repeat;
+			anim->index = index;
+			anim->offset = offset;
 		}
-		else printf("INFO: ANIMABLE: Error opening the animation file %s!\n", animSheet);
 	}
+	else printf("INFO: ANIMABLE: Error opening the animation file %s!\n", animSheet);
 	return anim;
 }
 void ParseAnimable(char *line, Animable *anim) {
@@ -193,21 +192,22 @@ void UnloadSingleAnimable(Animable **anims, int *animAmount, int position, int A
 		if (anims[i] == NULL) anims[i] = anims[i + 1];
 }
 void LoadSprite(const char *spriteSheet, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE) {
-	if (FileExists(spriteSheet)) {
-		FILE *file = fopen(spriteSheet, "r");
-		char line[256];
-		while (fgets(line, sizeof(line), file) != NULL) {
-			if ((*spriteAmount) >= SPRITE_SIZE) {
-				printf("WARNING: SPRITE: Sprites register full.\n");
-				break;
-			}
-			sprites[(*spriteAmount)] = ParseSprite(line);
-			(*spriteAmount)++;
-		}
-		printf("INFO: SPRITE: Sprites loaded from \"%s\" correctly.\n", spriteSheet);
-		fclose(file);
+	if (!FileExists(spriteSheet)) {
+		printf("INFO: SPRITE: Sprite file \"%s\" not available.\n", spriteSheet);
+		return;
 	}
-	else printf("INFO: SPRITE: Sprite file \"%s\" not available.\n", spriteSheet);
+	FILE *file = fopen(spriteSheet, "r");
+	char line[256];
+	while (fgets(line, sizeof(line), file) != NULL) {
+		if ((*spriteAmount) >= SPRITE_SIZE) {
+			printf("WARNING: SPRITE: Sprites register full.\n");
+			break;
+		}
+		sprites[(*spriteAmount)] = ParseSprite(line);
+		(*spriteAmount)++;
+	}
+	printf("INFO: SPRITE: Sprites loaded from \"%s\" correctly.\n", spriteSheet);
+	fclose(file);
 }
 Sprite *LoadSingleSprite(FILE *spriteData, int id) {
 	rewind(spriteData);
@@ -353,8 +353,10 @@ Button *ParseButton(char *line) {
 }
 void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Color color) {
 	int i;
+	printf("Breakpoint?\n");
 	for (i = 0; i < buttonAmount; i++) {
 		if (buttons[i]->shader) BeginShaderMode(shader);
+		printf("Breakpoint aaa?\n");
 		DrawTexturePro(textures[buttons[i]->textureIndex].tex,
 				(buttons[i]->selected) ? buttons[i]->originOn : buttons[i]->originOff,
 				buttons[i]->dest,
@@ -373,21 +375,52 @@ void UnloadButton(Button **buttons, int *buttonAmount) {
 	(*buttonAmount) = 0;
 	printf("INFO: BUTTONS: Buttons unloaded correctly\n");
 }
-Message *LoadMessage(FILE *translationData, int id) {
+void LoadMessageIntoRegister(FILE *translationData, Message **messages, int *messageAmount, int MSG_SIZE, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, bool shader, bool useColor, int id) {
+	if ((*messageAmount) < MSG_SIZE) {
+		messages[*messageAmount] = LoadSingleMessage(translationData,
+							     id,
+							     position,
+							     origin,
+							     rotation,
+							     fontSize,
+							     spacing,
+							     shader,
+							     useColor);
+		if (messages[*messageAmount] != NULL) (*messageAmount)++;
+	}
+}
+Message *LoadSingleMessage(FILE *translationData, int id, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, bool shader, bool useColor) {
+	if (translationData == NULL) {
+		printf("INFO: MESSAGE: The translation data is not available.\n");
+		return NULL;
+	}
 	Message *message = (Message *) malloc(sizeof(Message));
-	if (message == NULL) return NULL;
+	if (message == NULL) {
+		printf("INFO: MESSAGE: Couldn't allocate memory for the message.\n");
+		return NULL;
+	}
+
 	message->id = id;
+	message->position = position;
+	message->origin = origin;
+	message->rotation = rotation;
+	message->fontSize = fontSize;
+	message->spacing = spacing;
+	message->shader = shader;
+	message->useColor = useColor;
+	
 	char line[512];
 	char *token;
 	char *saveptr;
-	int textId = 0;
+	int textId = 1;
 	rewind(translationData);
-	if (fgets(line, sizeof(line), translationData) != NULL) return message;
+	if (fgets(line, sizeof(line), translationData) == NULL) return message;
 	while (fgets(line, sizeof(line), translationData) != NULL) {
 		token = strtok_r(line, "	", &saveptr);
 		textId = atoi(token);
 		if (textId == id) {
 			token = strtok_r(NULL, "	", &saveptr);
+			printf("%s\n", token);
 			strcpy(message->string, token);
 			return message;
 		}
@@ -403,9 +436,9 @@ void DrawMessage(Message **messages, int messageAmount, Font font, Shader shader
 			    messages[i]->position,
 			    messages[i]->origin,
 			    messages[i]->rotation,
-			    8,
-			    10,
-			    color);
+			    messages[i]->fontSize,
+			    messages[i]->spacing,
+			    messages[i]->useColor ? color : (Color) {0, 0, 0, 255});
 		if (messages[i]->shader) EndShaderMode();
 	}
 }

@@ -345,6 +345,7 @@ void SetState(StateData *state, GameState newState) {
 		UnloadSprite(state->sprites, &state->spriteAmount);
 		UnloadAnimable(state->anims, &state->animAmount);
 		UnloadButton(state->buttons, &state->buttonAmount);
+		UnloadMessage(state->messages, &state->messageAmount);
 	}
 	state->state = newState;
 	printf("INFO: STATE: Loading state %d.\n", (int) newState);
@@ -444,6 +445,13 @@ void SetState(StateData *state, GameState newState) {
 		case STATE_TITLE:
 			LoadSprite("./resources/layout/mainTitle.tsv", state->sprites, &state->spriteAmount, SPRITE_SIZE);
 			LoadAnimable(state->animsData, state->anims, (Vector2) { 0 }, &state->animAmount, ANIM_SIZE, 1);
+			LoadMessageIntoRegister(state->translationData,
+						state->messages,
+						&state->messageAmount,
+						MSG_SIZE,
+						(Vector2) {70, 80},
+						(Vector2) {0, 0},
+						0, 16, 1, true, false, 1);
 
 			state->music = LoadMusicStream("./resources/sfx/title.mp3");
 			state->music.looping = true;
@@ -475,7 +483,7 @@ void SavePrefs(PlayerPref prefs) {
 	SaveFileText("PlayerPrefs.data", buffer);
 }
 PlayerPref LoadPrefs() {
-	PlayerPref prefs = { true, "", 0, 0.0f, 0.0f }; // Default preferences
+	PlayerPref prefs = { true, "AAA", 0, 0.0f, 0.0f }; // Default preferences
 	if (!FileExists("PlayerPrefs.data")) {
 		printf("INFO: PREFS: Prefs file does not exist, creating one.\n");
 		SavePrefs(prefs);

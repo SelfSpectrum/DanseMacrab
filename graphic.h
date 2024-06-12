@@ -26,6 +26,7 @@ struct Message {
 	Vector2 origin;
 	float rotation;
 	float fontSize;
+	bool shader;
 };
 struct Sprite {
 	int textureIndex;
@@ -74,24 +75,24 @@ void LoadAnimable(FILE *animsData, Animable **anims, Vector2 offset, int *animAm
 Animable *LoadSingleAnimable(const char *animSheet, bool repeat, int index, Vector2 offset);
 void ParseAnimable(char *line, Animable *anim);
 void UpdateAnimable(Animable **anims, int *animAmount, int ANIM_SIZE);
-void DrawAnimable(Animable **anims, SafeTexture *textures, int *animAmount, Shader shader, Color color);
+void DrawAnimable(Animable **anims, SafeTexture *textures, int animAmount, Shader shader, Color color);
 void UnloadAnimable(Animable **animationArray, int *animAmount);
 void UnloadSingleAnimable(Animable **anims, int *animAmount, int position, int ANIM_SIZE);
 // Sprite work
 void LoadSprite(const char *spriteSheet, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE);
 Sprite *LoadSingleSprite(FILE *spriteData, int id);
 Sprite *ParseSprite(char *line);
-void DrawSprite(Sprite **sprites, SafeTexture *textures, int *spriteAmount, Shader shader, Color color);
+void DrawSprite(Sprite **sprites, SafeTexture *textures, int spriteAmount, Shader shader, Color color);
 void UnloadSprite(Sprite **sprites, int *spriteAmount);
 void UnloadSingleSprite(Sprite **sprites, int *spriteAmount, int position, int SPRITE_SIZE);
 // Buttons stuff
 void LoadButton(const char *buttonSheet, Button **button, int *buttonAmount, int BUTTON_SIZE);
 Button *ParseButton(char *line);
-void DrawButton(Button **buttons, SafeTexture *textures, int *buttonAmount, Shader shader, Color color);
+void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Color color);
 void UnloadButton(Button **buttons, int *buttonAmount);
 // Text and translations and stuff
 Message *LoadMessage(FILE *translationData, int id);			// To load a text line with the corresponding translation
-void DrawMessage(Message **messages, Font font, Color color);
+void DrawMessage(Message **messages, int messageAmount, Font font, Shader shader, Color color);
 void UnloadMessage(Message **messages, int *menssageAmount);
 
 #endif			// ENTITY_H

@@ -159,9 +159,9 @@ void UpdateAnimable(Animable **anims, int *animAmount, int ANIM_SIZE) {
 		}
 	}
 }
-void DrawAnimable(Animable **anims, SafeTexture *textures, int *animAmount, Shader shader, Color color) {
+void DrawAnimable(Animable **anims, SafeTexture *textures, int animAmount, Shader shader, Color color) {
 	int i;
-	for (i = 0; i < (*animAmount); i++) {
+	for (i = 0; i < animAmount; i++) {
 		//printf("%u\n", anim->currentFrame);   // TODO: A good way of view the frame count as debug inside game
 		if (anims[i]->shader) BeginShaderMode(shader);
 		DrawTexturePro(textures[anims[i]->textureIndex].tex,
@@ -263,9 +263,9 @@ Sprite *ParseSprite(char *line) {
 	}
 	return sprite;
 }
-void DrawSprite(Sprite **sprites, SafeTexture *textures, int *spriteAmount, Shader shader, Color color) {
+void DrawSprite(Sprite **sprites, SafeTexture *textures, int spriteAmount, Shader shader, Color color) {
 	int i;
-	for (i = 0; i < (*spriteAmount); i++) {
+	for (i = 0; i < spriteAmount; i++) {
 		if (sprites[i]->shader) BeginShaderMode(shader);
 		DrawTexturePro(textures[sprites[i]->textureIndex].tex,
 				sprites[i]->origin,
@@ -351,9 +351,9 @@ Button *ParseButton(char *line) {
 	}
 	return button;
 }
-void DrawButton(Button **buttons, SafeTexture *textures, int *buttonAmount, Shader shader, Color color) {
+void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Color color) {
 	int i;
-	for (i = 0; i < (*buttonAmount); i++) {
+	for (i = 0; i < buttonAmount; i++) {
 		if (buttons[i]->shader) BeginShaderMode(shader);
 		DrawTexturePro(textures[buttons[i]->textureIndex].tex,
 				(buttons[i]->selected) ? buttons[i]->originOn : buttons[i]->originOff,
@@ -394,9 +394,20 @@ Message *LoadMessage(FILE *translationData, int id) {
 	}
 	return message;
 }
-void DrawMessage(Message message, Font font, Color color) {
-	
-	DrawTextPro(font, message.string, message.position, message.origin, message.rotation, 8, 10, color);
+void DrawMessage(Message **messages, int messageAmount, Font font, Shader shader, Color color) {
+	int i;
+	for (i = 0; i < messageAmount; i++) {
+		if (messages[i]->shader) BeginShaderMode(shader);
+		DrawTextPro(font,
+			    messages[i]->string,
+			    messages[i]->position,
+			    messages[i]->origin,
+			    messages[i]->rotation,
+			    8,
+			    10,
+			    color);
+		if (messages[i]->shader) EndShaderMode();
+	}
 }
 void UnloadMessage(Message **messages, int *messageAmount) {
 	int i;

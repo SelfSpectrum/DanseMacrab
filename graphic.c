@@ -353,10 +353,8 @@ Button *ParseButton(char *line) {
 }
 void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Color color) {
 	int i;
-	printf("Breakpoint?\n");
 	for (i = 0; i < buttonAmount; i++) {
 		if (buttons[i]->shader) BeginShaderMode(shader);
-		printf("Breakpoint aaa?\n");
 		DrawTexturePro(textures[buttons[i]->textureIndex].tex,
 				(buttons[i]->selected) ? buttons[i]->originOn : buttons[i]->originOff,
 				buttons[i]->dest,
@@ -375,21 +373,19 @@ void UnloadButton(Button **buttons, int *buttonAmount) {
 	(*buttonAmount) = 0;
 	printf("INFO: BUTTONS: Buttons unloaded correctly\n");
 }
-void LoadMessageIntoRegister(FILE *translationData, Message **messages, int *messageAmount, int MSG_SIZE, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, bool shader, bool useColor, int id) {
+void LoadMessageIntoRegister(FILE *translationData, Message **messages, int *messageAmount, int MSG_SIZE, Vector2 position, float fontSize, float spacing, bool useColor, Align align, int id) {
 	if ((*messageAmount) < MSG_SIZE) {
 		messages[*messageAmount] = LoadSingleMessage(translationData,
 							     id,
 							     position,
-							     origin,
-							     rotation,
 							     fontSize,
 							     spacing,
-							     shader,
-							     useColor);
+							     useColor,
+							     align);
 		if (messages[*messageAmount] != NULL) (*messageAmount)++;
 	}
 }
-Message *LoadSingleMessage(FILE *translationData, int id, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, bool shader, bool useColor) {
+Message *LoadSingleMessage(FILE *translationData, int id, Vector2 position, float fontSize, float spacing, bool useColor, Align align) {
 	if (translationData == NULL) {
 		printf("INFO: MESSAGE: The translation data is not available.\n");
 		return NULL;
@@ -402,12 +398,10 @@ Message *LoadSingleMessage(FILE *translationData, int id, Vector2 position, Vect
 
 	message->id = id;
 	message->position = position;
-	message->origin = origin;
-	message->rotation = rotation;
 	message->fontSize = fontSize;
 	message->spacing = spacing;
-	message->shader = shader;
 	message->useColor = useColor;
+	message->align = align;
 	
 	char line[512];
 	char *token;
@@ -420,31 +414,34 @@ Message *LoadSingleMessage(FILE *translationData, int id, Vector2 position, Vect
 		textId = atoi(token);
 		if (textId == id) {
 			token = strtok_r(NULL, "	", &saveptr);
-			printf("%s\n", token);
-			strcpy(message->string, token);
+			if (message->align == ALIGN_CENTER)
+				message->position = Vector2Add(message->position,
+						(Vector2) { -MeasureText(token, message->fontSize) / 2, 0 });
+			message->codepoints = LoadCodepoints(token, &message->codepointAmount);
+			int i;
+			for (i = 0; i < message->codepointAmount; i++) printf("%d ", message->codepoints[i]); //TODO: UTF-8 encoding when the fonts are Unicode, fix that to fix russian
+			printf("\n");
 			return message;
 		}
 	}
 	return message;
 }
-void DrawMessage(Message **messages, int messageAmount, Font font, Shader shader, Color color) {
+void DrawMessage(Message **messages, int messageAmount, Font font, Color color) {
 	int i;
 	for (i = 0; i < messageAmount; i++) {
-		if (messages[i]->shader) BeginShaderMode(shader);
-		DrawTextPro(font,
-			    messages[i]->string,
+		DrawTextCodepoints(font,
+			    messages[i]->codepoints,
+			    messages[i]->codepointAmount,
 			    messages[i]->position,
-			    messages[i]->origin,
-			    messages[i]->rotation,
 			    messages[i]->fontSize,
 			    messages[i]->spacing,
 			    messages[i]->useColor ? color : (Color) {0, 0, 0, 255});
-		if (messages[i]->shader) EndShaderMode();
 	}
 }
 void UnloadMessage(Message **messages, int *messageAmount) {
 	int i;
 	for (i = 0; i < (*messageAmount); i++) {
+		UnloadCodepoints(messages[i]->codepoints);
 		free(messages[i]);
 		messages[i] = NULL;
 	}

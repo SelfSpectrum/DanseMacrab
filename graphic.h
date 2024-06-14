@@ -8,27 +8,37 @@
 #include <raylib.h>
 #include <raymath.h>
 
+typedef enum Language Language;
+typedef enum Align Align;
 typedef struct SafeTexture SafeTexture;
 typedef struct Message Message;
 typedef struct Sprite Sprite;
 typedef struct Animable Animable;
 typedef struct Button Button;
-typedef enum Language Language;
 
+enum Language {
+	LANG_SPANISH = 0,
+	LANG_ENGLISH = 1,
+	LANG_RUSSIAN = 2
+};
+enum Align {
+	ALIGN_LEFT = 0,
+	ALIGN_CENTER = 1,
+	ALIGN_RIGHT = 2
+};
 struct SafeTexture {
 	Texture2D tex;
 	bool init;
 };	
 struct Message {
-	char string[256];
+	int *codepoints;
+	int codepointAmount;
 	int id;
 	Vector2 position;
-	Vector2 origin;
-	float rotation;
 	float fontSize;
 	float spacing;
-	bool shader;
 	bool useColor;
+	Align align;
 };
 struct Sprite {
 	int textureIndex;
@@ -66,11 +76,6 @@ struct Animable {
 	bool shader;              // Draw inside shader mode?
 	bool repeat;              // Upon finishing, rewind animation?
 };
-enum Language {
-	LANG_SPANISH = 0,
-	LANG_ENGLISH = 1,
-	LANG_RUSSIAN = 2
-};
 
 // INFO: GFX functions
 void LoadAnimable(FILE *animsData, Animable **anims, Vector2 offset, int *animAmount, int ANIM_SIZE, int id);
@@ -93,9 +98,9 @@ Button *ParseButton(char *line);
 void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Color color);
 void UnloadButton(Button **buttons, int *buttonAmount);
 // Text and translations and stuff
-void LoadMessageIntoRegister(FILE *translationData, Message **messages, int *messageAmount, int MSG_SIZE, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, bool shader, bool useColor, int id); // To load a text line with the corresponding translation
-Message *LoadSingleMessage(FILE *translationData, int id, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, bool shader, bool useColor);
-void DrawMessage(Message **messages, int messageAmount, Font font, Shader shader, Color color);
+void LoadMessageIntoRegister(FILE *translationData, Message **messages, int *messageAmount, int MSG_SIZE, Vector2 position, float fontSize, float spacing, bool useColor, Align align, int id); // To load a text line with the corresponding translation
+Message *LoadSingleMessage(FILE *translationData, int id, Vector2 position, float fontSize, float spacing, bool useColor, Align align);
+void DrawMessage(Message **messages, int messageAmount, Font font, Color color);
 void UnloadMessage(Message **messages, int *menssageAmount);
 
 #endif			// ENTITY_H

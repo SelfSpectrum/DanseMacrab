@@ -127,7 +127,7 @@ int main() {
 	//-------------------------------------------------------------
 
 	Shader shader = LoadShader(0, "contour.fs");
-	Font fontDefault = LoadFont("./resources/fonts/pixelperfect.ttf");
+	Font font = LoadFontEx("./resources/fonts/unifont-14.0.04.ttf", 16, NULL, 0);
 
 	//-------------------------------------------------------------
 	// Game Inputs and State
@@ -189,7 +189,7 @@ int main() {
 					DrawAnimable(state.anims, state.textures, state.animAmount, shader, state.globalColor);
 					DrawSprite(state.sprites, state.textures, state.spriteAmount, shader, state.globalColor);
 					DrawButton(state.buttons, state.textures, state.buttonAmount, shader, state.globalColor);
-					DrawMessage(state.messages, state.messageAmount, fontDefault, shader, state.globalColor);
+					DrawMessage(state.messages, state.messageAmount, font, state.globalColor);
 				}
 			EndMode2D();
 		EndTextureMode();
@@ -210,7 +210,7 @@ int main() {
 	StopMusicStream(state.music);
 	UnloadShader(shader);
 	UnloadRenderTexture(target);
-	UnloadFont(fontDefault);
+	UnloadFont(font);
 	UnloadSprite(state.sprites, &state.spriteAmount);
 	UnloadButton(state.buttons, &state.buttonAmount);
 	UnloadCombat(&state.combat);
@@ -449,9 +449,10 @@ void SetState(StateData *state, GameState newState) {
 						state->messages,
 						&state->messageAmount,
 						MSG_SIZE,
-						(Vector2) {70, 80},
-						(Vector2) {0, 0},
-						0, 16, 1, true, false, 1);
+						(Vector2) {160, 158}, // Position
+						16, // Font size
+						1, // Spacing
+						true, ALIGN_CENTER, 1);
 
 			state->music = LoadMusicStream("./resources/sfx/title.mp3");
 			state->music.looping = true;

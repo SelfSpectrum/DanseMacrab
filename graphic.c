@@ -397,7 +397,7 @@ Message *LoadSingleMessage(FILE *translationData, int id, Vector2 position, floa
 	}
 
 	message->id = id;
-	message->position = position;
+	message->origin = position;
 	message->fontSize = fontSize;
 	message->spacing = spacing;
 	message->useColor = useColor;
@@ -415,11 +415,12 @@ Message *LoadSingleMessage(FILE *translationData, int id, Vector2 position, floa
 		if (textId == id) {
 			token = strtok_r(NULL, "	", &saveptr);
 			if (message->align == ALIGN_CENTER)
-				message->position = Vector2Add(message->position,
+				message->position = Vector2Add(message->origin,
 						(Vector2) { -MeasureText(token, message->fontSize) / 2, 0 });
+			else message->position = message->origin;
 			message->codepoints = LoadCodepoints(token, &message->codepointAmount);
 			int i;
-			for (i = 0; i < message->codepointAmount; i++) printf("%d ", message->codepoints[i]); //TODO: UTF-8 encoding when the fonts are Unicode, fix that to fix russian
+			for (i = 0; i < message->codepointAmount; i++) printf("%d ", message->codepoints[i]);
 			printf("\n");
 			return message;
 		}
@@ -447,4 +448,44 @@ void UnloadMessage(Message **messages, int *messageAmount) {
 	}
 	(*messageAmount) = 0;
 	printf("INFO: MESSAGE: Messages unloaded correctly\n");
+}
+void ChangeTranslation(FILE **translationData, Message **messages, int messageAmount, Language language) {
+	if (*translationData != NULL) {
+		free(*translationData);
+		(*translationData) = NULL;
+	}
+	switch (language) {
+		case LANG_SPANISH:
+			if (FileExists("./resources/text/spanish.tsv"))
+				(*translationData) = fopen("./resources/text/spanish.tsv", "r");
+			break;
+		case LANG_ENGLISH:
+			if (FileExists("./resources/text/english.tsv"))
+				(*translationData) = fopen("./resources/text/english.tsv", "r");
+			break;
+		case LANG_RUSSIAN:
+			if (FileExists("./resources/text/russian.tsv"))
+				(*translationData) = fopen("./resources/text/russian.tsv", "r");
+			break;
+		default:
+			// TODO: Failsafe if something goes wrong
+			break;
+	}
+	UpdateMessage(*translationData, messages, messageAmount);
+}
+void UpdateMessage(FILE *translationData, Message **messages, int messageAmount) {
+	int i;
+	Message *aux;
+	for (i = 0; i < messageAmount; i++) {
+		aux = LoadSingleMessage(translationData,
+					messages[i]->id,
+					messages[i]->origin,
+					messages[i]->fontSize,
+					messages[i]->spacing,
+					messages[i]->useColor,
+					messages[i]->align);
+		free(messages[i]);
+		messages[i] = aux;
+		aux = NULL;
+	}
 }

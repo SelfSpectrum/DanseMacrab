@@ -35,6 +35,7 @@ struct Message {
 	int codepointAmount;
 	int id;
 	Vector2 position;
+	Vector2 origin;
 	float fontSize;
 	float spacing;
 	bool useColor;
@@ -98,9 +99,20 @@ Button *ParseButton(char *line);
 void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Color color);
 void UnloadButton(Button **buttons, int *buttonAmount);
 // Text and translations and stuff
-void LoadMessageIntoRegister(FILE *translationData, Message **messages, int *messageAmount, int MSG_SIZE, Vector2 position, float fontSize, float spacing, bool useColor, Align align, int id); // To load a text line with the corresponding translation
+void LoadMessageIntoRegister(FILE *translationData,
+			     Message **messages,
+			     int *messageAmount,
+			     int MSG_SIZE,
+			     Vector2 position,
+			     float fontSize,
+			     float spacing,
+			     bool useColor,
+			     Align align,
+			     int id); // To load a text line with the corresponding translation
 Message *LoadSingleMessage(FILE *translationData, int id, Vector2 position, float fontSize, float spacing, bool useColor, Align align);
 void DrawMessage(Message **messages, int messageAmount, Font font, Color color);
 void UnloadMessage(Message **messages, int *menssageAmount);
+void ChangeTranslation(FILE **translationData, Message **messages, int messageAmount, Language language);
+void UpdateMessage(FILE *translationData, Message **messages, int messageAmount);
 
 #endif			// ENTITY_H

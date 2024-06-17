@@ -31,8 +31,9 @@ struct SafeTexture {
 	bool init;
 };	
 struct Message {
-	int *codepoints;
-	int codepointAmount;
+	//int *codepoints;
+	//int codepointAmount;
+	char data[512];
 	int id;
 	Vector2 position;
 	Vector2 origin;

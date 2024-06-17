@@ -414,14 +414,15 @@ Message *LoadSingleMessage(FILE *translationData, int id, Vector2 position, floa
 		textId = atoi(token);
 		if (textId == id) {
 			token = strtok_r(NULL, "	", &saveptr);
+			TextCopy(message->data, token);
 			if (message->align == ALIGN_CENTER)
 				message->position = Vector2Add(message->origin,
-						(Vector2) { -MeasureText(token, message->fontSize) / 2, 0 });
+					(Vector2) { -MeasureText(message->data, message->fontSize) / 2, 0 });
 			else message->position = message->origin;
-			message->codepoints = LoadCodepoints(token, &message->codepointAmount);
-			int i;
-			for (i = 0; i < message->codepointAmount; i++) printf("%d ", message->codepoints[i]);
-			printf("\n");
+			printf("%s\n", message->data);
+			//message->codepoints = LoadCodepoints(token, &message->codepointAmount);
+			//int i;
+			//for (i = 0; i < message->codepointAmount; i++) printf("%d ", message->codepoints[i]);
 			return message;
 		}
 	}
@@ -430,6 +431,7 @@ Message *LoadSingleMessage(FILE *translationData, int id, Vector2 position, floa
 void DrawMessage(Message **messages, int messageAmount, Font font, Color color) {
 	int i;
 	for (i = 0; i < messageAmount; i++) {
+		/*
 		DrawTextCodepoints(font,
 			    messages[i]->codepoints,
 			    messages[i]->codepointAmount,
@@ -437,12 +439,19 @@ void DrawMessage(Message **messages, int messageAmount, Font font, Color color) 
 			    messages[i]->fontSize,
 			    messages[i]->spacing,
 			    messages[i]->useColor ? color : (Color) {0, 0, 0, 255});
+		*/
+		DrawTextEx(font,
+			   messages[i]->data,
+			   messages[i]->position,
+			   messages[i]->fontSize,
+			   messages[i]->spacing,
+			   messages[i]->useColor ? color : (Color) {0, 0, 0, 255});
 	}
 }
 void UnloadMessage(Message **messages, int *messageAmount) {
 	int i;
 	for (i = 0; i < (*messageAmount); i++) {
-		UnloadCodepoints(messages[i]->codepoints);
+		//UnloadCodepoints(messages[i]->codepoints);
 		free(messages[i]);
 		messages[i] = NULL;
 	}
@@ -457,15 +466,15 @@ void ChangeTranslation(FILE **translationData, Message **messages, int messageAm
 	switch (language) {
 		case LANG_SPANISH:
 			if (FileExists("./resources/text/spanish.tsv"))
-				(*translationData) = fopen("./resources/text/spanish.tsv", "r");
+				(*translationData) = fopen("./resources/text/spanishOUT.tsv", "r");
 			break;
 		case LANG_ENGLISH:
 			if (FileExists("./resources/text/english.tsv"))
-				(*translationData) = fopen("./resources/text/english.tsv", "r");
+				(*translationData) = fopen("./resources/text/englishOUT.tsv", "r");
 			break;
 		case LANG_RUSSIAN:
 			if (FileExists("./resources/text/russian.tsv"))
-				(*translationData) = fopen("./resources/text/russian.tsv", "r");
+				(*translationData) = fopen("./resources/text/russianOUT.tsv", "r");
 			break;
 		default:
 			// TODO: Failsafe if something goes wrong

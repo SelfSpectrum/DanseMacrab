@@ -373,9 +373,10 @@ void UnloadButton(Button **buttons, int *buttonAmount) {
 	(*buttonAmount) = 0;
 	printf("INFO: BUTTONS: Buttons unloaded correctly\n");
 }
-void LoadMessageIntoRegister(FILE *translationData, Message **messages, int *messageAmount, int MSG_SIZE, Vector2 position, float fontSize, float spacing, bool useColor, Align align, int id) {
+void LoadMessageIntoRegister(FILE *translationData, Font *font, Message **messages, int *messageAmount, int MSG_SIZE, Vector2 position, float fontSize, float spacing, bool useColor, Align align, int id) {
 	if ((*messageAmount) < MSG_SIZE) {
 		messages[*messageAmount] = LoadSingleMessage(translationData,
+							     font,
 							     id,
 							     position,
 							     fontSize,
@@ -385,7 +386,7 @@ void LoadMessageIntoRegister(FILE *translationData, Message **messages, int *mes
 		if (messages[*messageAmount] != NULL) (*messageAmount)++;
 	}
 }
-Message *LoadSingleMessage(FILE *translationData, int id, Vector2 position, float fontSize, float spacing, bool useColor, Align align) {
+Message *LoadSingleMessage(FILE *translationData, Font *font, int id, Vector2 position, float fontSize, float spacing, bool useColor, Align align) {
 	if (translationData == NULL) {
 		printf("INFO: MESSAGE: The translation data is not available.\n");
 		return NULL;
@@ -414,15 +415,17 @@ Message *LoadSingleMessage(FILE *translationData, int id, Vector2 position, floa
 		textId = atoi(token);
 		if (textId == id) {
 			token = strtok_r(NULL, "	", &saveptr);
-			TextCopy(message->data, token);
+			printf("%s\n", token);
+
+			message->codepoints = LoadCodepoints(token, &message->codepointAmount);
+			int i;
+			//for (i = 0; i < message->codepointAmount; i++) printf("%d ", message->codepoints[i]);
+
 			if (message->align == ALIGN_CENTER)
 				message->position = Vector2Add(message->origin,
-					(Vector2) { -MeasureText(message->data, message->fontSize) / 2, 0 });
+					(Vector2) { -MeasureTextEx(font, token, message->fontSize) / 2, 0 });
 			else message->position = message->origin;
-			printf("%s\n", message->data);
-			//message->codepoints = LoadCodepoints(token, &message->codepointAmount);
-			//int i;
-			//for (i = 0; i < message->codepointAmount; i++) printf("%d ", message->codepoints[i]);
+
 			return message;
 		}
 	}
@@ -431,7 +434,6 @@ Message *LoadSingleMessage(FILE *translationData, int id, Vector2 position, floa
 void DrawMessage(Message **messages, int messageAmount, Font font, Color color) {
 	int i;
 	for (i = 0; i < messageAmount; i++) {
-		/*
 		DrawTextCodepoints(font,
 			    messages[i]->codepoints,
 			    messages[i]->codepointAmount,
@@ -439,54 +441,49 @@ void DrawMessage(Message **messages, int messageAmount, Font font, Color color) 
 			    messages[i]->fontSize,
 			    messages[i]->spacing,
 			    messages[i]->useColor ? color : (Color) {0, 0, 0, 255});
-		*/
-		DrawTextEx(font,
-			   messages[i]->data,
-			   messages[i]->position,
-			   messages[i]->fontSize,
-			   messages[i]->spacing,
-			   messages[i]->useColor ? color : (Color) {0, 0, 0, 255});
 	}
 }
 void UnloadMessage(Message **messages, int *messageAmount) {
 	int i;
 	for (i = 0; i < (*messageAmount); i++) {
-		//UnloadCodepoints(messages[i]->codepoints);
+		UnloadCodepoints(messages[i]->codepoints);
 		free(messages[i]);
 		messages[i] = NULL;
 	}
 	(*messageAmount) = 0;
 	printf("INFO: MESSAGE: Messages unloaded correctly\n");
 }
-void ChangeTranslation(FILE **translationData, Message **messages, int messageAmount, Language language) {
-	if (*translationData != NULL) {
-		free(*translationData);
-		(*translationData) = NULL;
-	}
+void ChangeTranslation(FILE **translationData, SafeFont *font, Message **messages, int messageAmount, Language language) {
+	if (*translationData != NULL) free(*translationData);
 	switch (language) {
 		case LANG_SPANISH:
 			if (FileExists("./resources/text/spanish.tsv"))
-				(*translationData) = fopen("./resources/text/spanishOUT.tsv", "r");
+				(*translationData) = fopen("./resources/text/spanish.tsv", "r");
+
 			break;
 		case LANG_ENGLISH:
 			if (FileExists("./resources/text/english.tsv"))
-				(*translationData) = fopen("./resources/text/englishOUT.tsv", "r");
+				(*translationData) = fopen("./resources/text/english.tsv", "r");
 			break;
 		case LANG_RUSSIAN:
 			if (FileExists("./resources/text/russian.tsv"))
-				(*translationData) = fopen("./resources/text/russianOUT.tsv", "r");
+				(*translationData) = fopen("./resources/text/russian.tsv", "r");
+
+			font->codepoints = { 1025, 1040, 1041, 1042, 1043, 1044, 1045, 1046, 1047, 1048, 1049, 1050, 1051, 1052, 1053, 1054, 1055, 1056, 1057, 1058, 1059, 1060, 1061, 1062, 1063, 1064, 1065, 1066, 1067, 1068, 1069, 1070, 1071, 1072, 1073, 1074, 1075, 1076, 1077, 1078, 1079, 1080, 1081, 1082, 1083, 1084, 1085, 1086, 1087, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1099, 1100, 1101, 1102, 1103, 1105 };
+			font->codepointAmount = 65;
 			break;
 		default:
 			// TODO: Failsafe if something goes wrong
 			break;
 	}
-	UpdateMessage(*translationData, messages, messageAmount);
+	UpdateMessage(*translationData, &font->font, messages, messageAmount);
 }
-void UpdateMessage(FILE *translationData, Message **messages, int messageAmount) {
+void UpdateMessage(FILE *translationData, Font *font, Message **messages, int messageAmount) {
 	int i;
 	Message *aux;
 	for (i = 0; i < messageAmount; i++) {
 		aux = LoadSingleMessage(translationData,
+					font,
 					messages[i]->id,
 					messages[i]->origin,
 					messages[i]->fontSize,

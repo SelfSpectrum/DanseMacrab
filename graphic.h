@@ -5,12 +5,14 @@
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
+#include <iconv.h>
 #include <raylib.h>
 #include <raymath.h>
 
 typedef enum Language Language;
 typedef enum Align Align;
 typedef struct SafeTexture SafeTexture;
+typedef struct SafeFont SafeFont;
 typedef struct Message Message;
 typedef struct Sprite Sprite;
 typedef struct Animable Animable;
@@ -29,11 +31,17 @@ enum Align {
 struct SafeTexture {
 	Texture2D tex;
 	bool init;
-};	
+};
+struct SafeFont {
+	Font font;
+	char fontName[64];
+	int codepoints[256];
+	int codepointAmount;
+}
 struct Message {
-	//int *codepoints;
-	//int codepointAmount;
-	char data[512];
+	int *codepoints;
+	int codepointAmount;
+	//char data[256];
 	int id;
 	Vector2 position;
 	Vector2 origin;
@@ -79,7 +87,7 @@ struct Animable {
 	bool repeat;              // Upon finishing, rewind animation?
 };
 
-// INFO: GFX functions
+// Animation work?
 void LoadAnimable(FILE *animsData, Animable **anims, Vector2 offset, int *animAmount, int ANIM_SIZE, int id);
 Animable *LoadSingleAnimable(const char *animSheet, bool repeat, int index, Vector2 offset);
 void ParseAnimable(char *line, Animable *anim);
@@ -87,6 +95,7 @@ void UpdateAnimable(Animable **anims, int *animAmount, int ANIM_SIZE);
 void DrawAnimable(Animable **anims, SafeTexture *textures, int animAmount, Shader shader, Color color);
 void UnloadAnimable(Animable **animationArray, int *animAmount);
 void UnloadSingleAnimable(Animable **anims, int *animAmount, int position, int ANIM_SIZE);
+
 // Sprite work
 void LoadSprite(const char *spriteSheet, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE);
 Sprite *LoadSingleSprite(FILE *spriteData, int id);
@@ -94,13 +103,16 @@ Sprite *ParseSprite(char *line);
 void DrawSprite(Sprite **sprites, SafeTexture *textures, int spriteAmount, Shader shader, Color color);
 void UnloadSprite(Sprite **sprites, int *spriteAmount);
 void UnloadSingleSprite(Sprite **sprites, int *spriteAmount, int position, int SPRITE_SIZE);
+
 // Buttons stuff
 void LoadButton(const char *buttonSheet, Button **button, int *buttonAmount, int BUTTON_SIZE);
 Button *ParseButton(char *line);
 void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Color color);
 void UnloadButton(Button **buttons, int *buttonAmount);
+
 // Text and translations and stuff
 void LoadMessageIntoRegister(FILE *translationData,
+			     Font *font,
 			     Message **messages,
 			     int *messageAmount,
 			     int MSG_SIZE,
@@ -110,10 +122,10 @@ void LoadMessageIntoRegister(FILE *translationData,
 			     bool useColor,
 			     Align align,
 			     int id); // To load a text line with the corresponding translation
-Message *LoadSingleMessage(FILE *translationData, int id, Vector2 position, float fontSize, float spacing, bool useColor, Align align);
+Message *LoadSingleMessage(FILE *translationData, Font *font, int id, Vector2 position, float fontSize, float spacing, bool useColor, Align align);
 void DrawMessage(Message **messages, int messageAmount, Font font, Color color);
 void UnloadMessage(Message **messages, int *menssageAmount);
-void ChangeTranslation(FILE **translationData, Message **messages, int messageAmount, Language language);
-void UpdateMessage(FILE *translationData, Message **messages, int messageAmount);
+void ChangeTranslation(FILE **translationData, SafeFont *font,  Message **messages, int messageAmount, Language language);
+void UpdateMessage(FILE *translationData, Font *font, Message **messages, int messageAmount);
 
 #endif			// ENTITY_H

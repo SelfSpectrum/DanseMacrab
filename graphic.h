@@ -62,22 +62,22 @@ struct Button {
 	bool selected;
 };
 struct Animable {
-	int frame;       // Frame needed to change to the next event
-	int currentFrame;// Current frame of animation
+	int frame; // Frame needed to change to the next event
+	int currentFrame; // Current frame of animation
 	int index;
-	FILE *data;               // File that contains the animation data
-	int textureIndex;         // Index in the Texture array from where the sample will come
-	Quaternion origin;        // Rectangle of origin to get the texture sample
-	Quaternion dest;          // Rectangle of destination to place the texture sample
-	Vector2 position;         // Position of the destination???
-	float rotation;           // Rotation of the texture sample
+	FILE *data; // File that contains the animation data
+	int textureIndex; // Index in the Texture array from where the sample will come
+	Quaternion origin; // Rectangle of origin to get the texture sample
+	Quaternion dest; // Rectangle of destination to place the texture sample
+	Vector2 position; // Position of the destination???
+	float rotation; // Rotation of the texture sample
 	Quaternion deltaOrigin;
 	Quaternion deltaDest;
 	Vector2 deltaPos;
 	float deltaRotation;
 	Vector2 offset;
-	bool shader;              // Draw inside shader mode?
-	bool repeat;              // Upon finishing, rewind animation?
+	bool shader; // Draw inside shader mode?
+	bool repeat; // Upon finishing, rewind animation?
 };
 
 // Animation work?

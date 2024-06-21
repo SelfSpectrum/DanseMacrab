@@ -174,11 +174,16 @@ void DrawAnimable(Animable **anims, SafeTexture *textures, int animAmount, Shade
 }
 void UnloadAnimable(Animable **anims, int *animAmount) {
 	int i;
+	printf("Breakpoint??? 00\n");
 	for (i = 0; i < (*animAmount); i++) {
-		fclose(anims[i]->data);
+		fclose(anims[i]->data); // TODO: Perhaps there is a deadlock in here, must ensure safety on the file
+		printf("Breakpoint??? 01\n");
 		free(anims[i]);
+		printf("Breakpoint??? 02\n");
 		anims[i] = NULL;
+		printf("Breakpoint??? 03\n");
 	}
+	printf("Breakpoint??? 04\n");
 	(*animAmount) = 0;
 	printf("INFO: ANIMATION: Animable array data unloaded.\n");
 }

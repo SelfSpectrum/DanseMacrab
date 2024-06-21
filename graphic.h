@@ -12,7 +12,6 @@
 typedef enum Language Language;
 typedef enum Align Align;
 typedef struct SafeTexture SafeTexture;
-typedef struct SafeFont SafeFont;
 typedef struct Message Message;
 typedef struct Sprite Sprite;
 typedef struct Animable Animable;
@@ -32,12 +31,6 @@ struct SafeTexture {
 	Texture2D tex;
 	bool init;
 };
-struct SafeFont {
-	Font font;
-	char fontName[64];
-	int codepoints[256];
-	int codepointAmount;
-}
 struct Message {
 	int *codepoints;
 	int codepointAmount;
@@ -125,7 +118,7 @@ void LoadMessageIntoRegister(FILE *translationData,
 Message *LoadSingleMessage(FILE *translationData, Font *font, int id, Vector2 position, float fontSize, float spacing, bool useColor, Align align);
 void DrawMessage(Message **messages, int messageAmount, Font font, Color color);
 void UnloadMessage(Message **messages, int *menssageAmount);
-void ChangeTranslation(FILE **translationData, SafeFont *font,  Message **messages, int messageAmount, Language language);
+void ChangeTranslation(FILE **translationData, Font *font,  Message **messages, int messageAmount, Language language);
 void UpdateMessage(FILE *translationData, Font *font, Message **messages, int messageAmount);
 
 #endif			// ENTITY_H

@@ -187,7 +187,7 @@ int main() {
 				else {
 					DrawAnimable(state.anims, state.textures, state.animAmount, shader, state.globalColor);
 					DrawSprite(state.sprites, state.textures, state.spriteAmount, shader, state.globalColor);
-					DrawButton(state.buttons, state.textures, state.buttonAmount, shader, state.globalColor);
+					DrawButton(state.buttons, state.textures, state.buttonAmount, shader, state.font, state.globalColor);
 					DrawMessage(state.messages, state.messageAmount, state.font, state.globalColor);
 				}
 			EndMode2D();
@@ -227,43 +227,79 @@ int main() {
 	UnloadFont(state.font);
 	printf("Breakpoint base 9\n");
 
-	if (state.animsData != NULL) fclose(state.animsData);
-	printf("Breakpoint 0\n");
-	if (state.spriteData != NULL) fclose(state.spriteData);
-	printf("Breakpoint 1\n");
-	if (state.charmData != NULL) fclose(state.charmData);
-	printf("Breakpoint 2\n");
-	if (state.armorData != NULL) fclose(state.armorData);
-	printf("Breakpoint 3\n");
-	if (state.weaponData != NULL) fclose(state.weaponData);
-	printf("Breakpoint 4\n");
-	if (state.techData != NULL) fclose(state.techData);
-	printf("Breakpoint 5\n");
-	if (state.characterData != NULL) fclose(state.characterData);
-	printf("Breakpoint 6\n");
-	if (state.enemyData != NULL) fclose(state.enemyData);
-	printf("Breakpoint 7\n");
-	if (state.dialogData != NULL) fclose(state.dialogData);
-	printf("Breakpoint 8\n");
-	if (state.translationData != NULL) fclose(state.translationData);
-	printf("Breakpoint 9\n");
+	if (state.animsData != NULL) {
+		fclose(state.animsData);
+		state.animsData = NULL;
+		printf("Breakpoint 0\n");
+	}
+	if (state.spriteData != NULL) {
+		fclose(state.spriteData);
+		state.spriteData = NULL;
+		printf("Breakpoint 1\n");
+	}
+	if (state.charmData != NULL) {
+		fclose(state.charmData);
+		state.charmData = NULL;
+		printf("Breakpoint 2\n");
+	}
+	if (state.armorData != NULL) {
+		fclose(state.armorData);
+		state.armorData = NULL;
+		printf("Breakpoint 3\n");
+	}
+	if (state.weaponData != NULL) {
+		fclose(state.weaponData);
+		state.weaponData = NULL;
+		printf("Breakpoint 4\n");
+	}
+	if (state.techData != NULL) {
+		fclose(state.techData);
+		state.techData = NULL;
+		printf("Breakpoint 5\n");
+	}
+	if (state.characterData != NULL) {
+		fclose(state.characterData);
+		state.characterData = NULL;
+		printf("Breakpoint 6\n");
+	}
+	if (state.enemyData != NULL) {
+		fclose(state.enemyData);
+		state.enemyData = NULL;
+		printf("Breakpoint 7\n");
+	}
+	if (state.dialogData != NULL) {
+		fclose(state.dialogData);
+		state.dialogData = NULL;
+		printf("Breakpoint 8\n");
+	}
+	if (state.translationData != NULL) {
+		fclose(state.translationData);
+		state.translationData = NULL;
+		printf("Breakpoint 9\n");
+	}
 
 	for (i = 0; i < TEX_SIZE; i++) {
 		printf("Tex %d\n", i);
-		if (state.textures[i].init)
+		if (state.textures[i].init) {
 			UnloadTexture(state.textures[i].tex);
+			state.textures[i].init = false;
+		}
 	}
 	printf("Breakpoint 0\n");
 	for (i = 0; i < SFXALIAS_SIZE; i++) {
 		printf("Sfx %d\n", i);
-		if (state.sfxAlias[i].init)
+		if (state.sfxAlias[i].init) {
 			UnloadSoundAlias(state.sfxAlias[i].sound);
+			state.sfxAlias[i].init = false;
+		}
 	}
 	printf("Breakpoint 1\n");
 	for (i = 0; i < SOUND_SIZE; i++) {
 		printf("Snd %d\n", i);
-		if (state.sounds[i].init)
+		if (state.sounds[i].init) {
 			UnloadSound(state.sounds[i].sound);
+			state.sounds[i].init = false;
+		}
 	}
 	printf("Breakpoint 10\n");
 
@@ -513,7 +549,7 @@ void SetState(StateData *state, GameState newState) {
 			LoadSprite("./resources/layout/mainMenu.tsv", state->sprites, &state->spriteAmount, SPRITE_SIZE);
 			break;
 		case STATE_FIGHT:
-			LoadButton("./resources/layout/fightButtons.tsv", state->buttons, &state->buttonAmount, BUTTON_SIZE);
+			LoadButton("./resources/layout/fightButtons.tsv", state->translationData, &state->font, state->buttons, &state->buttonAmount, BUTTON_SIZE);
 			ChangeSelection(state);
 			state->buttonSkip = 2;
 			break;

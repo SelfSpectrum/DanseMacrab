@@ -300,14 +300,14 @@ void UnloadSingleSprite(Sprite **sprites, int *spriteAmount, int position, int S
 	for (i = 0; i < (SPRITE_SIZE - 1); i++)
 		if (sprites[i] == NULL) sprites[i] = sprites[i + 1];
 }
-void LoadButton(const char *buttonSheet, Button **buttons, int *buttonAmount, int BUTTON_SIZE) {
+void LoadButton(const char *buttonSheet, FILE *translationData, Font *font, Button **buttons, int *buttonAmount, int BUTTON_SIZE) {
 	if (FileExists(buttonSheet)) {
 		FILE *file = fopen(buttonSheet, "r");
 		char line[256];
 		while (fgets(line, sizeof(line), file) != NULL) {
 			for ( ; (*buttonAmount) < BUTTON_SIZE; (*buttonAmount)++) {
 				if (buttons[(*buttonAmount)] == NULL) {
-					buttons[(*buttonAmount)] = ParseButton(line);
+					buttons[(*buttonAmount)] = ParseButton(line, translationData, font);
 					break;
 				}
 			}
@@ -315,7 +315,7 @@ void LoadButton(const char *buttonSheet, Button **buttons, int *buttonAmount, in
 		fclose(file);
 	}
 }
-Button *ParseButton(char *line) {
+Button *ParseButton(char *line, FILE *translationData, Font *font) {
 	Button *button = (Button *) malloc(sizeof(Button));
 	char *token;
 	char *saveptr;
@@ -354,13 +354,16 @@ Button *ParseButton(char *line) {
 		button->rotation = atof(token);
 		token = strtok_r(NULL, "	", &saveptr);
 		button->shader = (bool) atoi(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		button->message = LoadSingleMessage(translationData, font, atoi(token), button->position, 32, 1, true, ALIGN_LEFT);
 		button->selected = false;
 	}
 	return button;
 }
-void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Color color) {
+void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Font font, Color color) {
 	int i;
 	for (i = 0; i < buttonAmount; i++) {
+		DrawButtonMessage(buttons[i], font, color);
 		if (buttons[i]->shader) BeginShaderMode(shader);
 		DrawTexturePro(textures[buttons[i]->textureIndex].tex,
 				(buttons[i]->selected) ? buttons[i]->originOn : buttons[i]->originOff,
@@ -374,6 +377,7 @@ void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shade
 void UnloadButton(Button **buttons, int *buttonAmount) {
 	int i;
 	for (i = 0; i < (*buttonAmount); i++) {
+		if (buttons[i]->message != NULL) UnloadSingleMessage(&buttons[i]->message);
 		free(buttons[i]);
 		buttons[i] = NULL;
 	}
@@ -394,6 +398,7 @@ void LoadMessageIntoRegister(FILE *translationData, Font *font, Message **messag
 	}
 }
 Message *LoadSingleMessage(FILE *translationData, Font *font, int id, Vector2 position, float fontSize, float spacing, bool useColor, Align align) {
+	if (id <= 0) return NULL;
 	if (translationData == NULL) {
 		printf("INFO: MESSAGE: The translation data is not available.\n");
 		return NULL;
@@ -442,25 +447,35 @@ Message *LoadSingleMessage(FILE *translationData, Font *font, int id, Vector2 po
 }
 void DrawMessage(Message **messages, int messageAmount, Font font, Color color) {
 	int i;
-	for (i = 0; i < messageAmount; i++) {
-		DrawTextCodepoints(font,
-			    messages[i]->codepoints,
-			    messages[i]->codepointAmount,
-			    messages[i]->position,
-			    messages[i]->fontSize,
-			    messages[i]->spacing,
-			    messages[i]->useColor ? color : (Color) {0, 0, 0, 255});
-	}
+	for (i = 0; i < messageAmount; i++)
+		DrawSingleMessage(messages[i], font, color);
+}
+void DrawSingleMessage(Message *message, Font font, Color color) {
+	DrawTextCodepoints(font,
+		    message->codepoints,
+		    message->codepointAmount,
+		    message->position,
+		    message->fontSize,
+		    message->spacing,
+		    message->useColor ? color : (Color) {0, 0, 0, 255});
+}
+void DrawButtonMessage(Button *button, Font font, Color color) {
+	if (button->message == NULL) return;
+	DrawSingleMessage(button->message, font, color);
+
 }
 void UnloadMessage(Message **messages, int *messageAmount) {
 	int i;
 	for (i = 0; i < (*messageAmount); i++) {
-		UnloadCodepoints(messages[i]->codepoints);
-		free(messages[i]);
-		messages[i] = NULL;
+		UnloadSingleMessage(&messages[i]);
 	}
 	(*messageAmount) = 0;
 	printf("INFO: MESSAGE: Messages unloaded correctly\n");
+}
+void UnloadSingleMessage(Message **message) {
+	UnloadCodepoints((*message)->codepoints);
+	free(*message);
+	(*message) = NULL;
 }
 void ChangeTranslation(FILE **translationData, Font *font, Message **messages, int messageAmount, Language language) {
 	if (*translationData != NULL) {

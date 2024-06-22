@@ -207,17 +207,26 @@ int main() {
 	}
 
 	StopMusicStream(state.music);
+	printf("Breakpoint base 0\n");
 	UnloadShader(shader);
+	printf("Breakpoint base 1\n");
 	UnloadRenderTexture(target);
+	printf("Breakpoint base 2\n");
 	UnloadSprite(state.sprites, &state.spriteAmount);
+	printf("Breakpoint base 3\n");
 	UnloadButton(state.buttons, &state.buttonAmount);
+	printf("Breakpoint base 4\n");
 	UnloadCombat(&state.combat);
+	printf("Breakpoint base 5\n");
 	UnloadAnimable(state.anims, &state.animAmount);
+	printf("Breakpoint base 6\n");
 	UnloadMessage(state.messages, &state.messageAmount);
+	printf("Breakpoint base 7\n");
 	UnloadMusicStream(state.music); // Unload music stream buffers from RAM
+	printf("Breakpoint base 8\n");
 	UnloadFont(state.font);
+	printf("Breakpoint base 9\n");
 
-	printf("Breakpoint Base\n");
 	if (state.animsData != NULL) fclose(state.animsData);
 	printf("Breakpoint 0\n");
 	if (state.spriteData != NULL) fclose(state.spriteData);
@@ -239,16 +248,23 @@ int main() {
 	if (state.translationData != NULL) fclose(state.translationData);
 	printf("Breakpoint 9\n");
 
-	for (i = 0; i < TEX_SIZE; i++)
+	for (i = 0; i < TEX_SIZE; i++) {
+		printf("Tex %d\n", i);
 		if (state.textures[i].init)
 			UnloadTexture(state.textures[i].tex);
-	for (i = 0; i < SFXALIAS_SIZE; i++)
+	}
+	printf("Breakpoint 0\n");
+	for (i = 0; i < SFXALIAS_SIZE; i++) {
+		printf("Sfx %d\n", i);
 		if (state.sfxAlias[i].init)
 			UnloadSoundAlias(state.sfxAlias[i].sound);
-	for (i = 0; i < SOUND_SIZE; i++)
+	}
+	printf("Breakpoint 1\n");
+	for (i = 0; i < SOUND_SIZE; i++) {
+		printf("Snd %d\n", i);
 		if (state.sounds[i].init)
 			UnloadSound(state.sounds[i].sound);
-
+	}
 	printf("Breakpoint 10\n");
 
 	CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
@@ -482,8 +498,8 @@ void SetState(StateData *state, GameState newState) {
 						&state->messageAmount,
 						MSG_SIZE,
 						(Vector2) {160, 158}, // Position
-						24, // Font size
-						.33f, // Spacing
+						16, // Font size
+						.5f, // Spacing
 						true, ALIGN_CENTER, 1);
 
 			state->music = LoadMusicStream("./resources/sfx/title.mp3");

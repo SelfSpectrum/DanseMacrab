@@ -47,6 +47,7 @@ Animable *LoadSingleAnimable(const char *animSheet, bool repeat, int index, Vect
 			anim->repeat = repeat;
 			anim->index = index;
 			anim->offset = offset;
+			anim->onUse = true;
 		}
 	}
 	else printf("INFO: ANIMABLE: Error opening the animation file %s!\n", animSheet);
@@ -135,6 +136,7 @@ void ParseAnimable(char *line, Animable *anim) {
 void UpdateAnimable(Animable **anims, int *animAmount, int ANIM_SIZE) {
 	int i;
 	for (i = 0; i < (*animAmount); i++) {
+		if (!anims[i]->onUse) continue;
 		char line[256];
 		anims[i]->origin = QuaternionAdd(anims[i]->origin, anims[i]->deltaOrigin);
 		anims[i]->dest = QuaternionAdd(anims[i]->dest, anims[i]->deltaDest);
@@ -161,6 +163,7 @@ void UpdateAnimable(Animable **anims, int *animAmount, int ANIM_SIZE) {
 void DrawAnimable(Animable **anims, SafeTexture *textures, int animAmount, Shader shader, Color color) {
 	int i;
 	for (i = 0; i < animAmount; i++) {
+		if (!anims[i]->onUse) continue;
 		//printf("%u\n", anim->currentFrame);   // TODO: A good way of view the frame count as debug inside game
 		if (anims[i]->shader) BeginShaderMode(shader);
 		DrawTexturePro(textures[anims[i]->textureIndex].tex,
@@ -174,21 +177,20 @@ void DrawAnimable(Animable **anims, SafeTexture *textures, int animAmount, Shade
 }
 void UnloadAnimable(Animable **anims, int *animAmount) {
 	int i;
-	printf("Breakpoint??? 00\n");
 	for (i = 0; i < (*animAmount); i++) {
-		fclose(anims[i]->data); // TODO: Perhaps there is a deadlock in here, must ensure safety on the file
-		printf("Breakpoint??? 01\n");
+		anims[i]->onUse = false;
+		fclose(anims[i]->data); // TODO: must ensure safety on the file
+		anims[i]->data = NULL;
 		free(anims[i]);
-		printf("Breakpoint??? 02\n");
 		anims[i] = NULL;
-		printf("Breakpoint??? 03\n");
 	}
-	printf("Breakpoint??? 04\n");
 	(*animAmount) = 0;
 	printf("INFO: ANIMATION: Animable array data unloaded.\n");
 }
 void UnloadSingleAnimable(Animable **anims, int *animAmount, int position, int ANIM_SIZE) {
+	anims[position]->onUse = false;
 	fclose(anims[position]->data);
+	anims[position]->data = NULL;
 	free(anims[position]);
 	anims[position] = NULL;
 	(*animAmount)--;
@@ -461,7 +463,10 @@ void UnloadMessage(Message **messages, int *messageAmount) {
 	printf("INFO: MESSAGE: Messages unloaded correctly\n");
 }
 void ChangeTranslation(FILE **translationData, Font *font, Message **messages, int messageAmount, Language language) {
-	if (*translationData != NULL) free(*translationData);
+	if (*translationData != NULL) {
+		free(*translationData);
+		*translationData = NULL;
+	}
 	switch (language) {
 		case LANG_SPANISH:
 			if (FileExists("./resources/text/spanish.tsv"))
@@ -470,7 +475,7 @@ void ChangeTranslation(FILE **translationData, Font *font, Message **messages, i
 			int spaCode[144] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 160, 176, 191, 193, 201, 205, 209, 211, 215, 218, 225, 233, 237, 241, 243, 247, 250 };
 
 			UnloadFont(*font);
-			(*font) = LoadFontEx("./resources/fonts/Pixelatus.ttf", 64, spaCode, 144);
+			(*font) = LoadFontEx("./resources/fonts/Pixel-UniCode.ttf", 64, spaCode, 144);
 			break;
 		case LANG_ENGLISH:
 			if (FileExists("./resources/text/english.tsv"))
@@ -479,7 +484,7 @@ void ChangeTranslation(FILE **translationData, Font *font, Message **messages, i
 			int engCode[129] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 160, 176 };
 
 			UnloadFont(*font);
-			(*font) = LoadFontEx("./resources/fonts/Pixelatus.ttf", 64, engCode, 129);
+			(*font) = LoadFontEx("./resources/fonts/Pixel-UniCode.ttf", 64, engCode, 129);
 			break;
 		case LANG_RUSSIAN:
 			if (FileExists("./resources/text/russian.tsv"))
@@ -488,7 +493,7 @@ void ChangeTranslation(FILE **translationData, Font *font, Message **messages, i
 			int rusCode[141] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 123, 124, 125, 126, 191, 1025, 1040, 1041, 1042, 1043, 1044, 1045, 1046, 1047, 1048, 1049, 1050, 1051, 1052, 1053, 1054, 1055, 1056, 1057, 1058, 1059, 1060, 1061, 1062, 1063, 1064, 1065, 1066, 1067, 1068, 1069, 1070, 1071, 1072, 1073, 1074, 1075, 1076, 1077, 1078, 1079, 1080, 1081, 1082, 1083, 1084, 1085, 1086, 1087, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1099, 1100, 1101, 1102, 1103, 1105 };
 
 			UnloadFont(*font);
-			(*font) = LoadFontEx("./resources/fonts/Pixelatus.ttf", 64, rusCode, 141);
+			(*font) = LoadFontEx("./resources/fonts/Pixel-UniCode.ttf", 64, rusCode, 141);
 			break;
 		default:
 			// TODO: Failsafe if something goes wrong
@@ -509,6 +514,7 @@ void UpdateMessage(FILE *translationData, Font *font, Message **messages, int me
 					messages[i]->useColor,
 					messages[i]->align);
 		free(messages[i]);
+		messages[i] = NULL;
 		messages[i] = aux;
 		aux = NULL;
 	}

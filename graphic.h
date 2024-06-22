@@ -78,6 +78,7 @@ struct Animable {
 	Vector2 offset;
 	bool shader; // Draw inside shader mode?
 	bool repeat; // Upon finishing, rewind animation?
+	bool onUse;
 };
 
 // Animation work?

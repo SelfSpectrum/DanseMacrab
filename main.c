@@ -103,8 +103,8 @@ void SavePrefs(PlayerPref prefs);
 PlayerPref LoadPrefs();
 // INFO: SFX functions
 void PlaySecSound(int id, StateData *state);
-//void LowPassFilter(void *buffer, unsigned int frames);		// TODO
-//void Crossfade();						// TODO
+//void LowPassFilter(void *buffer, unsigned int frames); // TODO
+//void Crossfade(); // TODO
 
 int main() {
 	//-------------------------------------------------------------
@@ -419,13 +419,9 @@ void SetState(StateData *state, GameState newState) {
 	int i;
 	if (newState != STATE_INIT) {
 		UnloadSprite(state->sprites, &state->spriteAmount);
-		printf("State Breakpoint 0\n");
 		UnloadAnimable(state->anims, &state->animAmount);
-		printf("State Breakpoint 1\n");
 		UnloadButton(state->buttons, &state->buttonAmount);
-		printf("State Breakpoint 2\n");
 		UnloadMessage(state->messages, &state->messageAmount);
-		printf("State Breakpoint 3\n");
 	}
 	
 	printf("State Breakpoint 4\n");

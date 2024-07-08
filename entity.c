@@ -1,7 +1,10 @@
 #include "entity.h"
 
 void LoadEnemiesFile(FILE **file, const char *enemySheet) {
-	if (*file != NULL) fclose(*file);
+	if (*file != NULL) {
+		fclose(*file);
+		(*file) = NULL;
+	}
 	if (FileExists(enemySheet)) *file = fopen(enemySheet, "r");
 }
 void LoadEnemiesOnCombat(FILE *file, FILE *enemyData, FILE *spriteData, FILE *techData, Combat *combat, int id) {

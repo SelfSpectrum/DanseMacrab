@@ -20,8 +20,8 @@ int main(void)
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 1600;
-    const int screenHeight = 900;
+    const int screenWidth = 900;
+    const int screenHeight = 600;
 
     InitWindow(screenWidth, screenHeight, "raylib [shapes] example - raylib logo animation");
 
@@ -147,12 +147,10 @@ int main(void)
 
                 DrawText(TextSubtext("raylib", 0, lettersCount), GetScreenWidth()/2 - 44, GetScreenHeight()/2 + 48, 50, Fade(BLACK, alpha));
             }
-            /* 
             else if (state == 4)
             {
                 DrawText("[R] REPLAY", 340, 200, 20, GRAY);
             }
-            */
 
         EndDrawing();
         //----------------------------------------------------------------------------------

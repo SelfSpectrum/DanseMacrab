@@ -185,8 +185,8 @@ int main() {
 					DrawText("Are you sure you want to exit program?", 50, 90, 8, state.globalColor);
 				}
 				else {
-					DrawAnimable(state.anims, state.textures, state.animAmount, shader, state.globalColor);
-					DrawSprite(state.sprites, state.textures, state.spriteAmount, shader, state.globalColor);
+					//DrawAnimable(state.anims, state.textures, state.animAmount, shader, state.globalColor);
+					//DrawSprite(state.sprites, state.textures, state.spriteAmount, shader, state.globalColor);
 					DrawButton(state.buttons, state.textures, state.buttonAmount, shader, state.font, state.globalColor);
 					DrawMessage(state.messages, state.messageAmount, state.font, state.globalColor);
 				}
@@ -529,9 +529,9 @@ void SetState(StateData *state, GameState newState) {
 						state->messages,
 						&state->messageAmount,
 						MSG_SIZE,
-						(Vector2) {160, 158}, // Position
-						16, // Font size
-						.5f, // Spacing
+						(Vector2) {160, 154}, // Position
+						16.3333333f, // Font size
+						0.83333333f, // Spacing
 						true, ALIGN_CENTER, 1);
 
 			state->music = LoadMusicStream("./resources/sfx/title.mp3");

@@ -285,7 +285,6 @@ int main() {
 			state.textures[i].init = false;
 		}
 	}
-	printf("Breakpoint 0\n");
 	for (i = 0; i < SFXALIAS_SIZE; i++) {
 		printf("Sfx %d\n", i);
 		if (state.sfxAlias[i].init) {
@@ -293,7 +292,6 @@ int main() {
 			state.sfxAlias[i].init = false;
 		}
 	}
-	printf("Breakpoint 1\n");
 	for (i = 0; i < SOUND_SIZE; i++) {
 		printf("Snd %d\n", i);
 		if (state.sounds[i].init) {
@@ -301,7 +299,6 @@ int main() {
 			state.sounds[i].init = false;
 		}
 	}
-	printf("Breakpoint 10\n");
 
 	CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
 	CloseWindow();              // Close window and OpenGL context
@@ -530,8 +527,8 @@ void SetState(StateData *state, GameState newState) {
 						&state->messageAmount,
 						MSG_SIZE,
 						(Vector2) {160, 154}, // Position
-						16.3333333f, // Font size
-						0.83333333f, // Spacing
+						16, // Font size
+						0, // Spacing
 						true, ALIGN_CENTER, 1);
 
 			state->music = LoadMusicStream("./resources/sfx/title.mp3");

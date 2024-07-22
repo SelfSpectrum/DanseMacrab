@@ -355,7 +355,12 @@ Button *ParseButton(char *line, FILE *translationData, Font *font) {
 		token = strtok_r(NULL, "	", &saveptr);
 		button->shader = (bool) atoi(token);
 		token = strtok_r(NULL, "	", &saveptr);
-		button->message = LoadSingleMessage(translationData, font, atoi(token), button->position, 32, 1, true, ALIGN_LEFT);
+		button->message = LoadSingleMessage(translationData,
+						    font,
+						    atoi(token),
+						    (Vector2) { -button->position.x + 16, -button->position.y },
+						    16, 0, true, ALIGN_LEFT);
+		printf("Button's Pos (%f, %f)\n", button->position.x, button->position.y);
 		button->selected = false;
 	}
 	return button;
@@ -363,7 +368,6 @@ Button *ParseButton(char *line, FILE *translationData, Font *font) {
 void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Font font, Color color) {
 	int i;
 	for (i = 0; i < buttonAmount; i++) {
-		DrawButtonMessage(buttons[i], font, color);
 		if (buttons[i]->shader) BeginShaderMode(shader);
 		DrawTexturePro(textures[buttons[i]->textureIndex].tex,
 				(buttons[i]->selected) ? buttons[i]->originOn : buttons[i]->originOff,
@@ -372,6 +376,7 @@ void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shade
 				buttons[i]->rotation,
 				color);
 		if (buttons[i]->shader) EndShaderMode();
+		DrawButtonMessage(buttons[i], font, color);
 	}
 }
 void UnloadButton(Button **buttons, int *buttonAmount) {
@@ -427,19 +432,23 @@ Message *LoadSingleMessage(FILE *translationData, Font *font, int id, Vector2 po
 		textId = atoi(token);
 		if (textId == id) {
 			token = strtok_r(NULL, "	", &saveptr);
-			printf("%s\n", token);
+			//printf("%s\n", token);
 
 			message->codepoints = LoadCodepoints(token, &message->codepointAmount);
 			int i;
-			for (i = 0; i < message->codepointAmount; i++) printf("%d ", message->codepoints[i]);
-			printf("\n\n");
+			for (i = 0; i < message->codepointAmount; i++) printf("%c", message->codepoints[i]);
+			for (i = 0; i < message->codepointAmount; i++) printf(" %d", message->codepoints[i]);
+			printf("\n");
 
 			Vector2 mesVec = MeasureTextEx(*font, token, message->fontSize, spacing);
 
 			if (message->align == ALIGN_CENTER)
 				message->position = Vector2Add(message->origin, (Vector2) { -mesVec.x / 2, 0 });
 			else message->position = message->origin;
+			message->position.x = round(message->position.x);
+			message->position.y = round(message->position.y);
 
+			printf("Message's Pos (%f, %f)\n", message->position.x, message->position.y);
 			return message;
 		}
 	}
@@ -457,11 +466,11 @@ void DrawSingleMessage(Message *message, Font font, Color color) {
 		    message->position,
 		    message->fontSize,
 		    message->spacing,
-		    message->useColor ? color : (Color) {0, 0, 0, 255});
+		    message->useColor ? color : BLACK);
 }
 void DrawButtonMessage(Button *button, Font font, Color color) {
 	if (button->message == NULL) return;
-	DrawSingleMessage(button->message, font, color);
+	DrawSingleMessage(button->message, font, button->selected ? BLACK : color);
 
 }
 void UnloadMessage(Message **messages, int *messageAmount) {
@@ -490,7 +499,7 @@ void ChangeTranslation(FILE **translationData, Font *font, Message **messages, i
 			int spaCode[144] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 160, 176, 191, 193, 201, 205, 209, 211, 215, 218, 225, 233, 237, 241, 243, 247, 250 };
 
 			UnloadFont(*font);
-			(*font) = LoadFontEx("./resources/fonts/Pixel-UniCode.ttf", 128, spaCode, 144);
+			(*font) = LoadFontEx("./resources/fonts/Pixel-UniCode.ttf", 32, spaCode, 144);
 			break;
 		case LANG_ENGLISH:
 			if (FileExists("./resources/text/english.tsv"))
@@ -499,7 +508,7 @@ void ChangeTranslation(FILE **translationData, Font *font, Message **messages, i
 			int engCode[129] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 160, 176 };
 
 			UnloadFont(*font);
-			(*font) = LoadFontEx("./resources/fonts/Pixel-UniCode.ttf", 128, engCode, 129);
+			(*font) = LoadFontEx("./resources/fonts/Pixel-UniCode.ttf", 32, engCode, 129);
 			break;
 		case LANG_RUSSIAN:
 			if (FileExists("./resources/text/russian.tsv"))
@@ -508,7 +517,7 @@ void ChangeTranslation(FILE **translationData, Font *font, Message **messages, i
 			int rusCode[141] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 123, 124, 125, 126, 191, 1025, 1040, 1041, 1042, 1043, 1044, 1045, 1046, 1047, 1048, 1049, 1050, 1051, 1052, 1053, 1054, 1055, 1056, 1057, 1058, 1059, 1060, 1061, 1062, 1063, 1064, 1065, 1066, 1067, 1068, 1069, 1070, 1071, 1072, 1073, 1074, 1075, 1076, 1077, 1078, 1079, 1080, 1081, 1082, 1083, 1084, 1085, 1086, 1087, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1099, 1100, 1101, 1102, 1103, 1105 };
 
 			UnloadFont(*font);
-			(*font) = LoadFontEx("./resources/fonts/Pixel-UniCode.ttf", 128, rusCode, 141);
+			(*font) = LoadFontEx("./resources/fonts/Pixel-UniCode.ttf", 32, rusCode, 141);
 			break;
 		default:
 			// TODO: Failsafe if something goes wrong

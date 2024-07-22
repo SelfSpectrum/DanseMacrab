@@ -102,14 +102,14 @@ void UnloadSprite(Sprite **sprites, int *spriteAmount);
 void UnloadSingleSprite(Sprite **sprites, int *spriteAmount, int position, int SPRITE_SIZE);
 
 // Buttons stuff
-void LoadButton(const char *buttonSheet, FILE *translationData, Font *font, Button **button, int *buttonAmount, int BUTTON_SIZE);
-Button *ParseButton(char *line, FILE *translationData, Font *font);
+void LoadButton(const char *buttonSheet, FILE *translationData, Font font, Button **button, int *buttonAmount, int BUTTON_SIZE);
+Button *ParseButton(char *line, FILE *translationData, Font font);
 void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Font font, Color color);
 void UnloadButton(Button **buttons, int *buttonAmount);
 
 // Text and translations and stuff
 void LoadMessageIntoRegister(FILE *translationData,
-			     Font *font,
+			     Font font,
 			     Message **messages,
 			     int *messageAmount,
 			     int MSG_SIZE,
@@ -119,13 +119,13 @@ void LoadMessageIntoRegister(FILE *translationData,
 			     bool useColor,
 			     Align align,
 			     int id); // To load a text line with the corresponding translation
-Message *LoadSingleMessage(FILE *translationData, Font *font, int id, Vector2 position, float fontSize, float spacing, bool useColor, Align align);
+Message *LoadSingleMessage(FILE *translationData, Font font, int id, Vector2 position, float fontSize, float spacing, bool useColor, Align align);
 void DrawMessage(Message **messages, int messageAmount, Font font, Color color);
 void DrawSingleMessage(Message *message, Font font, Color color);
 void DrawButtonMessage(Button *button, Font font, Color color);
 void UnloadMessage(Message **messages, int *menssageAmount);
 void UnloadSingleMessage(Message **message);
-void ChangeTranslation(FILE **translationData, Font *font,  Message **messages, int messageAmount, Language language);
-void UpdateMessage(FILE *translationData, Font *font, Message **messages, int messageAmount);
+void ChangeTranslation(FILE **translationData, Font font,  Message **messages, int messageAmount, Button **buttons, int buttonAmount, Language language);
+void UpdateMessage(FILE *translationData, Font font, Message **messages, int messageAmount, Button **buttons, int buttonAmount);
 
 #endif			// ENTITY_H

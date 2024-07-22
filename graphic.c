@@ -315,7 +315,7 @@ void UnloadSingleSprite(Sprite **sprites, int *spriteAmount, int position, int S
 	for (i = 0; i < (SPRITE_SIZE - 1); i++)
 		if (sprites[i] == NULL) sprites[i] = sprites[i + 1];
 }
-void LoadButton(const char *buttonSheet, FILE *translationData, Font *font, Button **buttons, int *buttonAmount, int BUTTON_SIZE) {
+void LoadButton(const char *buttonSheet, FILE *translationData, Font font, Button **buttons, int *buttonAmount, int BUTTON_SIZE) {
 	if (FileExists(buttonSheet)) {
 		FILE *file = fopen(buttonSheet, "r");
 		char line[256];
@@ -330,7 +330,7 @@ void LoadButton(const char *buttonSheet, FILE *translationData, Font *font, Butt
 		fclose(file);
 	}
 }
-Button *ParseButton(char *line, FILE *translationData, Font *font) {
+Button *ParseButton(char *line, FILE *translationData, Font font) {
 	Button *button = (Button *) malloc(sizeof(Button));
 	char *token;
 	char *saveptr;
@@ -404,7 +404,7 @@ void UnloadButton(Button **buttons, int *buttonAmount) {
 	(*buttonAmount) = 0;
 	printf("INFO: BUTTONS: Buttons unloaded correctly\n");
 }
-void LoadMessageIntoRegister(FILE *translationData, Font *font, Message **messages, int *messageAmount, int MSG_SIZE, Vector2 position, float fontSize, float spacing, bool useColor, Align align, int id) {
+void LoadMessageIntoRegister(FILE *translationData, Font font, Message **messages, int *messageAmount, int MSG_SIZE, Vector2 position, float fontSize, float spacing, bool useColor, Align align, int id) {
 	if ((*messageAmount) < MSG_SIZE) {
 		messages[*messageAmount] = LoadSingleMessage(translationData,
 							     font,
@@ -417,7 +417,7 @@ void LoadMessageIntoRegister(FILE *translationData, Font *font, Message **messag
 		if (messages[*messageAmount] != NULL) (*messageAmount)++;
 	}
 }
-Message *LoadSingleMessage(FILE *translationData, Font *font, int id, Vector2 position, float fontSize, float spacing, bool useColor, Align align) {
+Message *LoadSingleMessage(FILE *translationData, Font font, int id, Vector2 position, float fontSize, float spacing, bool useColor, Align align) {
 	if (id <= 0) return NULL;
 	if (translationData == NULL) {
 		printf("INFO: MESSAGE: The translation data is not available.\n");
@@ -455,7 +455,7 @@ Message *LoadSingleMessage(FILE *translationData, Font *font, int id, Vector2 po
 			for (i = 0; i < message->codepointAmount; i++) printf(" %d", message->codepoints[i]);
 			printf("\n");
 
-			Vector2 mesVec = MeasureTextEx(*font, token, message->fontSize, spacing);
+			Vector2 mesVec = MeasureTextEx(font, token, message->fontSize, spacing);
 
 			if (message->align == ALIGN_CENTER)
 				message->position = Vector2Add(message->origin, (Vector2) { -mesVec.x / 2, 0 });
@@ -501,46 +501,31 @@ void UnloadSingleMessage(Message **message) {
 	free(*message);
 	(*message) = NULL;
 }
-void ChangeTranslation(FILE **translationData, Font *font, Message **messages, int messageAmount, Language language) {
+void ChangeTranslation(FILE **translationData, Font font, Message **messages, int messageAmount, Button **buttons, int buttonAmount, Language language) {
 	if (*translationData != NULL) {
-		free(*translationData);
-		*translationData = NULL;
+		fclose(*translationData);
+		(*translationData) = NULL;
 	}
 	switch (language) {
 		case LANG_SPANISH:
 			if (FileExists("./resources/text/spanish.tsv"))
 				(*translationData) = fopen("./resources/text/spanish.tsv", "r");
-
-			int spaCode[144] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 160, 176, 191, 193, 201, 205, 209, 211, 215, 218, 225, 233, 237, 241, 243, 247, 250 };
-
-			UnloadFont(*font);
-			(*font) = LoadFontEx("./resources/fonts/Pixel-UniCode.ttf", 32, spaCode, 144);
 			break;
 		case LANG_ENGLISH:
 			if (FileExists("./resources/text/english.tsv"))
 				(*translationData) = fopen("./resources/text/english.tsv", "r");
-
-			int engCode[129] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 160, 176 };
-
-			UnloadFont(*font);
-			(*font) = LoadFontEx("./resources/fonts/Pixel-UniCode.ttf", 32, engCode, 129);
 			break;
 		case LANG_RUSSIAN:
 			if (FileExists("./resources/text/russian.tsv"))
 				(*translationData) = fopen("./resources/text/russian.tsv", "r");
-
-			int rusCode[141] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 123, 124, 125, 126, 191, 1025, 1040, 1041, 1042, 1043, 1044, 1045, 1046, 1047, 1048, 1049, 1050, 1051, 1052, 1053, 1054, 1055, 1056, 1057, 1058, 1059, 1060, 1061, 1062, 1063, 1064, 1065, 1066, 1067, 1068, 1069, 1070, 1071, 1072, 1073, 1074, 1075, 1076, 1077, 1078, 1079, 1080, 1081, 1082, 1083, 1084, 1085, 1086, 1087, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1099, 1100, 1101, 1102, 1103, 1105 };
-
-			UnloadFont(*font);
-			(*font) = LoadFontEx("./resources/fonts/Pixel-UniCode.ttf", 32, rusCode, 141);
 			break;
 		default:
 			// TODO: Failsafe if something goes wrong
 			break;
 	}
-	UpdateMessage(*translationData, font, messages, messageAmount);
+	UpdateMessage(*translationData, font, messages, messageAmount, buttons, buttonAmount);
 }
-void UpdateMessage(FILE *translationData, Font *font, Message **messages, int messageAmount) {
+void UpdateMessage(FILE *translationData, Font font, Message **messages, int messageAmount, Button **buttons, int buttonAmount) {
 	int i;
 	Message *aux;
 	for (i = 0; i < messageAmount; i++) {
@@ -556,5 +541,21 @@ void UpdateMessage(FILE *translationData, Font *font, Message **messages, int me
 		messages[i] = NULL;
 		messages[i] = aux;
 		aux = NULL;
+	}
+	for (i = 0; i < buttonAmount; i++) {
+		if (buttons[i]->message != NULL) {
+			aux = LoadSingleMessage(translationData,
+						font,
+						buttons[i]->message->id,
+						buttons[i]->message->origin,
+						buttons[i]->message->fontSize,
+						buttons[i]->message->spacing,
+						buttons[i]->message->useColor,
+						buttons[i]->message->align);
+			free(buttons[i]->message);
+			buttons[i]->message = NULL;
+			buttons[i]->message = aux;
+			aux = NULL;
+		}
 	}
 }

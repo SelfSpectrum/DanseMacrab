@@ -34,6 +34,7 @@ struct PlayerPref {
 	Language language;
 	float musicVolume;
 	float sfxVolume;
+	int textSpeed;
 };
 struct StateData {
 	// State
@@ -185,8 +186,8 @@ int main() {
 					DrawText("Are you sure you want to exit program?", 50, 90, 8, state.globalColor);
 				}
 				else {
-					//DrawAnimable(state.anims, state.textures, state.animAmount, shader, state.globalColor);
-					//DrawSprite(state.sprites, state.textures, state.spriteAmount, shader, state.globalColor);
+					DrawAnimable(state.anims, state.textures, state.animAmount, shader, state.globalColor);
+					DrawSprite(state.sprites, state.textures, state.spriteAmount, shader, state.globalColor);
 					DrawButton(state.buttons, state.textures, state.buttonAmount, shader, state.font, state.globalColor);
 					DrawMessage(state.messages, state.messageAmount, state.font, state.globalColor);
 				}
@@ -496,6 +497,8 @@ void SetState(StateData *state, GameState newState) {
 
 			state->textures[0].tex = LoadTexture("./resources/gfx/bigSprites00.png");
 			state->textures[0].init = true;
+			state->textures[2].tex = LoadTexture("./resources/gfx/characters.png");
+			state->textures[2].init = true;
 			state->textures[3].tex = LoadTexture("./resources/gfx/cards.png");
 			state->textures[3].init = true;
 			state->textures[4].tex = LoadTexture("./resources/gfx/UI.png");
@@ -521,14 +524,11 @@ void SetState(StateData *state, GameState newState) {
 		case STATE_TITLE:
 			LoadSprite("./resources/layout/mainTitle.tsv", state->sprites, &state->spriteAmount, SPRITE_SIZE);
 			LoadAnimable(state->animsData, state->anims, (Vector2) { 0 }, &state->animAmount, ANIM_SIZE, 1);
-			LoadMessageIntoRegister(state->translationData,
-						&state->font,
-						state->messages,
+			LoadMessageIntoRegister(state->translationData, &state->font, state->messages, &state->messageAmount, MSG_SIZE, (Vector2) {160.5f, 154.5f}, 16, 0, false, ALIGN_CENTER, 1);
+			LoadMessageIntoRegister(state->translationData, &state->font, state->messages,
 						&state->messageAmount,
-						MSG_SIZE,
-						(Vector2) {160, 154}, // Position
-						16, // Font size
-						0, // Spacing
+						MSG_SIZE, (Vector2) {160, 154}, // Position
+						16, 0, // Font size and Spacing
 						true, ALIGN_CENTER, 1);
 
 			state->music = LoadMusicStream("./resources/sfx/title.mp3");
@@ -542,6 +542,7 @@ void SetState(StateData *state, GameState newState) {
 			LoadSprite("./resources/layout/mainMenu.tsv", state->sprites, &state->spriteAmount, SPRITE_SIZE);
 			break;
 		case STATE_FIGHT:
+			LoadSpriteIntoRegister(state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE, (Vector2) { 0, -132 }, 102);
 			LoadButton("./resources/layout/fightButtons.tsv", state->translationData, &state->font, state->buttons, &state->buttonAmount, BUTTON_SIZE);
 			ChangeSelection(state);
 			state->buttonSkip = 2;
@@ -552,16 +553,17 @@ void SetState(StateData *state, GameState newState) {
 }
 void SavePrefs(PlayerPref prefs) {
 	char buffer[512]; // Big buffer to save all data from the user and ensure it gets saved properly
-	sprintf(buffer, "fsp=%d\nname=%s\nlang=%d\nmus=%.2f\nsfx=%.2f",
+	sprintf(buffer, "fsp=%d\nname=%s\nlang=%d\nmus=%.2f\nsfx=%.2f\ntext=%d",
 			(int) prefs.firstTime,
 			prefs.namePref,
 			(int) prefs.language,
 			prefs.musicVolume,
-			prefs.sfxVolume);
+			prefs.sfxVolume,
+			prefs.textSpeed);
 	SaveFileText("PlayerPrefs.data", buffer);
 }
 PlayerPref LoadPrefs() {
-	PlayerPref prefs = { true, "AAA", 0, 0.0f, 0.0f }; // Default preferences
+	PlayerPref prefs = { true, "AAA", 0, 0.0f, 0.0f, 5 }; // Default preferences
 	if (!FileExists("PlayerPrefs.data")) {
 		printf("INFO: PREFS: Prefs file does not exist, creating one.\n");
 		SavePrefs(prefs);
@@ -575,12 +577,13 @@ PlayerPref LoadPrefs() {
 	}
 	int ftp;
 	int lang;
-	sscanf(buffer, "fsp=%d\nname=%s\nlang=%d\nmus=%f\nsfx=%f",
+	sscanf(buffer, "fsp=%d\nname=%s\nlang=%d\nmus=%f\nsfx=%f\ntext=%d",
 			&ftp,
 			prefs.namePref,
 			&lang,
 			&prefs.musicVolume,
-			&prefs.sfxVolume);
+			&prefs.sfxVolume,
+			&prefs.textSpeed);
 	prefs.firstTime = (bool) ftp;
 	prefs.language = (Language) lang;
 	UnloadFileText(buffer); // Unload this file data

@@ -210,11 +210,18 @@ void LoadSprite(const char *spriteSheet, Sprite **sprites, int *spriteAmount, in
 			printf("WARNING: SPRITE: Sprites register full.\n");
 			break;
 		}
-		sprites[(*spriteAmount)] = ParseSprite(line);
+		sprites[(*spriteAmount)] = ParseSprite(line, false);
 		(*spriteAmount)++;
 	}
 	printf("INFO: SPRITE: Sprites loaded from \"%s\" correctly.\n", spriteSheet);
 	fclose(file);
+}
+void LoadSpriteIntoRegister(FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE, Vector2 position, int id) {
+	if ((*spriteAmount) < SPRITE_SIZE) {
+		sprites[*spriteAmount] = LoadSingleSprite(spriteData, id);
+		sprites[*spriteAmount]->position = position;
+		if (sprites[*spriteAmount] != NULL) (*spriteAmount)++;
+	}
 }
 Sprite *LoadSingleSprite(FILE *spriteData, int id) {
 	rewind(spriteData);
@@ -228,15 +235,15 @@ Sprite *LoadSingleSprite(FILE *spriteData, int id) {
 			token = strtok_r(line, "	", &saveptr);
 			spriteId = atoi(token);
 			if (spriteId == id) {
-				token = strtok_r(line, "	", &saveptr); //To delete the sprite name
+				token = strtok_r(NULL, "	", &saveptr); //To delete the sprite name
 				printf("INFO: SPRITE: Parsing %s\n", token);
-				return ParseSprite(line);
+				return ParseSprite(saveptr, true);
 			}
 		}
 	}
 	return NULL;
 }
-Sprite *ParseSprite(char *line) {
+Sprite *ParseSprite(char *line, bool useFile) {
 	Sprite *sprite = (Sprite *) malloc(sizeof(Sprite));
 	char *token;
 	char *saveptr;
@@ -251,6 +258,14 @@ Sprite *ParseSprite(char *line) {
 		sprite->origin.width = atof(token);
 		token = strtok_r(NULL, "	", &saveptr);
 		sprite->origin.height = atof(token);
+		// Let's ignore things useful for buttons
+		if (useFile) {
+			token = strtok_r(NULL, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
+		}
+		// Done
 		token = strtok_r(NULL, "	", &saveptr);
 		sprite->dest.x = atof(token);
 		token = strtok_r(NULL, "	", &saveptr);

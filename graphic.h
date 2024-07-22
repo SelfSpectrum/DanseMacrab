@@ -94,8 +94,9 @@ void UnloadSingleAnimable(Animable **anims, int *animAmount, int position, int A
 
 // Sprite work
 void LoadSprite(const char *spriteSheet, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE);
+void LoadSpriteIntoRegister(FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE, Vector2 position, int id);
 Sprite *LoadSingleSprite(FILE *spriteData, int id);
-Sprite *ParseSprite(char *line);
+Sprite *ParseSprite(char *line, bool useFile);
 void DrawSprite(Sprite **sprites, SafeTexture *textures, int spriteAmount, Shader shader, Color color);
 void UnloadSprite(Sprite **sprites, int *spriteAmount);
 void UnloadSingleSprite(Sprite **sprites, int *spriteAmount, int position, int SPRITE_SIZE);

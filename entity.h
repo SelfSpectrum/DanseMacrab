@@ -417,6 +417,7 @@ union Entity {
 struct Combat {
 	Entity *enemy[5];
 	Entity *player[5];
+	Entity *selected;
 	Equip inventory[20];
 	int inventoryAmount;
 	int turn;

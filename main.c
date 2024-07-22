@@ -131,12 +131,9 @@ int main() {
 	//-------------------------------------------------------------
 	
 	StateData state; // Contains the current state of the game
-	state.exitWindowRequested = false;
-	state.exitWindow = false;
-	//state.runGame = true;
+
 	SetExitKey(KEY_NULL); // Disable KEY_ESCAPE to close window, X-button still works
-	state.combat = (Combat) { { NULL }, { NULL }, { 0 }, 0, 0 }; // Data from position, entities and stuff
-	//combat.playable[2] = LoadEntity("", ENTITY_PLAYER); TODO
+
 	Shader shader = LoadShader(0, "contour.fs");
 
 	int i = 0;
@@ -442,6 +439,10 @@ void SetState(StateData *state, GameState newState) {
 		case STATE_INIT:
 			state->pref = LoadPrefs();
 
+			state->exitWindowRequested = false;
+			state->exitWindow = false;
+			//state.runGame = true;
+
 			state->startKey = KEY_ENTER;
 			state->selectKey = KEY_BACKSPACE;
 			state->acceptKey = KEY_Z;
@@ -534,6 +535,10 @@ void SetState(StateData *state, GameState newState) {
 			state->sounds[2].init = true;
 			state->sounds[3].sound = LoadSound("./resources/sfx/error.wav");
 			state->sounds[3].init = true;
+
+
+			state->combat = (Combat) { { NULL }, { NULL }, NULL, { 0 }, 0, 0 }; // Data from position, entities and stuff
+			state->combat.player[2] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 1);
 
 			SetState(state, STATE_TITLE);
 			break;

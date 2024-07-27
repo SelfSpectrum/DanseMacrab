@@ -247,7 +247,9 @@ void UnloadCombat(Combat *combat) {
 	int i;
 	for (i = 0; i < 5; i++) {
 		UnloadEntity(ENTITY_ENEMY, combat, i);
+		printf("INFO: COMBAT: Combat %d, enemy unloaded.\n", i);
 		UnloadEntity(ENTITY_PLAYER, combat, i);
+		printf("INFO: COMBAT: Combat %d, player unloaded.\n", i);
 	}
 	printf("INFO: COMBAT: Combat unloaded successfully.\n");
 }
@@ -255,13 +257,20 @@ void UnloadEntity(EntityType type, Combat *combat, int position) {
 	switch (type) {
 		case ENTITY_ENEMY:
 			if (combat->enemy[position] == NULL) return;
-			free(combat->enemy[position]->enemy.sprite);
+			if (combat->enemy[position]->enemy.sprite != NULL) {
+				free(combat->enemy[position]->enemy.sprite);
+				combat->enemy[position]->enemy.sprite = NULL;
+			}
 			free(combat->enemy[position]);
 			combat->enemy[position] = NULL;
 			return;
 		case ENTITY_PLAYER:
 			if (combat->player[position] == NULL) return;
-			free(combat->player[position]->player.sprite);
+			if (combat->player[position]->player.sprite != NULL) {
+				free(combat->player[position]->player.sprite);
+				combat->player[position]->player.sprite = NULL;
+			}
+			printf("INFO: COMBAT: Milestone.\n");
 			free(combat->player[position]);
 			combat->player[position] = NULL;
 			return;

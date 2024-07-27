@@ -487,8 +487,8 @@ void SetState(StateData *state, GameState newState) {
 			if (FileExists("./resources/combat/weapons.tsv"))
 				state->weaponData = fopen("./resources/combat/weapons.tsv", "r");
 			else state->weaponData = NULL;
-			if (FileExists("./resources/combat/tech.tsv"))
-				state->techData = fopen("./resources/combat/tech.tsv", "r");
+			if (FileExists("./resources/combat/techniques.tsv"))
+				state->techData = fopen("./resources/combat/techniques.tsv", "r");
 			else state->techData = NULL;
 			if (FileExists("./resources/combat/characters.tsv"))
 				state->characterData = fopen("./resources/combat/characters.tsv", "r");
@@ -496,8 +496,8 @@ void SetState(StateData *state, GameState newState) {
 			if (FileExists("./resources/combat/enemies.tsv"))
 				state->enemyData = fopen("./resources/combat/enemies.tsv", "r");
 			else state->enemyData = NULL;
-			if (FileExists("./resources/text/dialog.tsv"))
-				state->dialogData = fopen("./resources/text/dialog.tsv", "r");
+			if (FileExists("./resources/text/dialogs.tsv"))
+				state->dialogData = fopen("./resources/text/dialogs.tsv", "r");
 			else state->dialogData = NULL;
 
 			state->translationData = NULL;
@@ -564,7 +564,7 @@ void SetState(StateData *state, GameState newState) {
 			break;
 		case STATE_FIGHT:
 			LoadSpriteIntoRegister(state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE, (Vector2) { 0, -132 }, 102);
-			LoadSpriteIntoRegister(state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE, (Vector2) { 0, -86 }, 100);
+			//LoadSpriteIntoRegister(state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE, (Vector2) { 0, -86 }, 100);
 			LoadButton("./resources/layout/fightButtons.tsv", state->translationData, state->font, state->buttons, &state->buttonAmount, BUTTON_SIZE);
 			ChangeSelection(state);
 			state->buttonSkip = 2;

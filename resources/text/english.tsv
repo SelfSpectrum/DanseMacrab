@@ -801,7 +801,7 @@ ID	Inglés
 800	Rin
 801	Takahashi
 802	Red Mage
-803	Mahou
+803	Survivor
 804	
 805	
 806	
@@ -811,7 +811,7 @@ ID	Inglés
 810	Alina
 811	Enescu
 812	Sorcerer
-813	Moldavian
+813	Crimson Herald
 814	
 815	
 816	
@@ -821,7 +821,7 @@ ID	Inglés
 820	Irina
 821	Jashnikova
 822	Black Dog
-823	Plohaya
+823	Cold Conquerer
 824	
 825	
 826	
@@ -831,7 +831,7 @@ ID	Inglés
 830	Enkhjargal
 831	Tseren
 832	Unseelie
-833	Galou
+833	Traveler
 834	
 835	
 836	
@@ -1044,7 +1044,7 @@ ID	Inglés
 1043	Cultist Master
 1044	Marked Crabberer
 1045	Marked Crabberer
-1046	Évariste
+1046	Évariste, the Unholy
 1047	Cultist transformed
 1048	dummy
 1049	dummy
@@ -1069,29 +1069,29 @@ ID	Inglés
 1068	dummy
 1069	dummy
 2000	Rusty Katana
-2001	A rusty old katana, used by you long ago. Have seen better days, but still accomplishes it's purpouse.
+2001	A rusty old katana, used by you long ago. Have seen better days, but still accomplishes it's purpose
 2002	Old Wooden Hammer
-2003	An old wooden hammer, perhaps used time ago for making mochi, hard to really know.
+2003	Clearly not designed for combat, but heavy enough to work as a weapon. 
 2004	Training Staff
-2005	dummy
+2005	Simple yet robust weapon, useful when training the use of the spear. Deadly if used correctly.
 2006	Outworn Revolver
-2007	dummy
+2007	The barrel and other pieces are kept in place by sheer spite. Until the trigger break, this weapon wont rest.
 2008	Broken Fans
-2009	dummy
+2009	Not a weapon in the most literal sense of the word, yet, these broken fans have eerie properties.
 2010	Fishing Spear
-2011	dummy
+2011	There’s few things more trustworthy than a spear, range, damage, stability, what else could you ask for?
 2012	Old Dagger
-2013	dummy
+2013	The edge might seem numb and useless, but in the correct hands, this is the best weapon one could use.
 2014	Nunchuks
-2015	dummy
+2015	Once you stop hurting yourself with these, the enemy might have a really bad time with broken bones.
 2016	Musket
-2017	dummy
+2017	A musket is more than the bullet it shoots, the smoke, the roar... This is a beast waiting to hunt.
 2018	Blunderbuss
-2019	dummy
+2019	The spread might not be lethal at first, but the bleeding is an insidious killer, waiting for an opportunity.
 2020	Flint Pistol
-2021	dummy
+2021	Has range and is deadly. The lead bites the flesh and eats through without remorse.
 2022	Hand Cannon
-2023	dummy
+2023	If bad ideas had shape, this is one of them. Deadly? Sure, but good luck not dying as you use it.
 2024	Katana
 2025	dummy
 2026	Kusarikama
@@ -1130,6 +1130,22 @@ ID	Inglés
 2213	Shinjiro armor
 2214	
 2215	Daichi armor
+2216	
+2217	Nanashis Armor
+2218	
+2219	Eleanor Armor
+2220	
+2221	Valessa Armor
+2222	
+2223	Lee Armor
+2224	
+2225	
+2226	
+2227	
+2228	
+2229	
+2230	
+2231	
 2400	Luxurious Gem
 2401	dummy
 2402	dummy

@@ -183,6 +183,7 @@ int main() {
 					DrawText("Are you sure you want to exit program?", 50, 90, 8, state.globalColor);
 				}
 				else {
+					DrawCombat(state.combat, state.textures, state.globalColor);
 					DrawAnimable(state.anims, state.textures, state.animAmount, shader, state.globalColor);
 					DrawSprite(state.sprites, state.textures, state.spriteAmount, shader, state.globalColor);
 					DrawButton(state.buttons, state.textures, state.buttonAmount, shader, state.font, state.globalColor);

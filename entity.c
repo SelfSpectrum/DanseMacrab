@@ -137,49 +137,49 @@ Entity *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE
 		playerId = atoi(token);
 		if (playerId == id) {
 			player->player.id = playerId;
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			player->player.name = atoi(token);
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			player->player.surname = atoi(token);
-			token = strtok_r(line, "	", &saveptr);
-			player->player.class = atoi(token);
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
+			player->player.giftCurse = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
 			player->player.nomGuerre = atoi(token);
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			player->player.description = atoi(token);
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			player->player.sprite = LoadSingleSprite(spriteData, atoi(token));
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			player->player.physique[0] = atoi(token);
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			player->player.reflex[0] = atoi(token);
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			player->player.lore[0] = atoi(token);
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			player->player.charisma[0] = atoi(token);
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			SetProficiency(player, (AttributeType) atoi(token));
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			SetProficiency(player, (AttributeType) atoi(token));
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			SetProficiency(player, (AttributeType) atoi(token));
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			player->player.hitDice = (DiceType) atoi(token);
 			player->player.maxHealth = DiceMean(player->player.hitDice) + player->player.physique[0];
 			player->player.health = player->player.maxHealth;
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			player->player.weakness = (DamageType) atoi(token);
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			player->player.resistance = (DamageType) atoi(token);
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			player->player.inmunity = (StatusType) atoi(token);
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			player->player.weapon = LoadWeapon(weaponData, atoi(token));
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			player->player.armor = LoadArmor(armorData, atoi(token));
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			player->player.charm = LoadCharm(charmData, atoi(token));
-			token = strtok_r(line, "	", &saveptr);
+			token = strtok_r(NULL, "	", &saveptr);
 			feature = strtok_r(token, ",", &saveptr);
 			while (token != NULL) {
 				SetFeature(weaponData, charmData, techData, player, (Feature) atoi(feature));
@@ -276,14 +276,18 @@ void UnloadEntity(EntityType type, Combat *combat, int position) {
 			return;
 	}
 }
-void DrawCombat(Texture2D *textures, Combat combat, Color color) {
+void DrawCombat(Combat combat, SafeTexture *textures, Color color) {
 	int i;
 	Sprite *sprite;
 	for (i = 0; i < 5; i++) {
-		sprite = combat.enemy[i]->enemy.sprite;
-		DrawTexturePro(textures[sprite->textureIndex], sprite->origin, sprite->dest, Vector2Add(sprite->position, (Vector2) { -64 * combat.enemy[i]->enemy.position, 0 }), sprite->rotation, color);
-		sprite = combat.player[i]->player.sprite;
-		DrawTexturePro(textures[sprite->textureIndex], sprite->origin, sprite->dest, Vector2Add(sprite->position, (Vector2) { -64 * combat.player[i]->player.position, 0 }), sprite->rotation, color);
+		if (combat.enemy[i] != NULL) {
+			sprite = combat.enemy[i]->enemy.sprite;
+			DrawTexturePro(textures[sprite->textureIndex].tex, sprite->origin, sprite->dest, Vector2Add(sprite->position, (Vector2) { -64 * combat.enemy[i]->enemy.position, 0 }), sprite->rotation, color);
+		}
+		if (combat.player[i] != NULL) {
+			sprite = combat.player[i]->player.sprite;
+			DrawTexturePro(textures[sprite->textureIndex].tex, sprite->origin, sprite->dest, Vector2Add(sprite->position, (Vector2) { -64 * combat.player[i]->player.position, 0 }), sprite->rotation, color);
+		}
 	}
 }
 Technique LoadTech(FILE *techData, int id) {

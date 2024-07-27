@@ -31,13 +31,14 @@ enum DamageType {
 	DMG_BALLISTIC = 4,
 	DMG_FIRE = 5,
 	DMG_ICE = 6,
-	DMG_ACID = 7,
-	DMG_PSYCHIC = 8,
-	DMG_HEALNATURE = 9,
-	DMG_HEALBLOODY = 10,
-	DMG_HEALPSY = 11,
-	DMG_HEALARMOR = 12,
-	DMG_TRUE = 13
+	DMG_ELECTRIC = 7,
+	DMG_ACID = 8,
+	DMG_PSYCHIC = 9,
+	DMG_HEALNATURE = 10,
+	DMG_HEALBLOODY = 11,
+	DMG_HEALPSY = 12,
+	DMG_HEALARMOR = 13,
+	DMG_TRUE = 14
 };
 enum EntityType {
 	ENTITY_ENEMY = 0,
@@ -362,7 +363,7 @@ struct Player {
 	// INFO: OTHER STUFF
 	int name;
 	int surname;
-	int class;
+	int giftCurse;
 	int nomGuerre;
 	int description;
 	Equip weapon;
@@ -434,7 +435,7 @@ void DamageEntity(Combat *combat, Entity attacker, Technique tech);
 void KillEntity(Combat *combat, Entity *entity); //TODO
 void UnloadCombat(Combat *combat);
 void UnloadEntity(EntityType type, Combat *combat, int position);
-void DrawCombat(Texture2D *textures, Combat combat, Color color);
+void DrawCombat(Combat combat, SafeTexture *textures, Color color);
 // Techniques
 Technique LoadTech(FILE *techData, int id);
 void PlayerLoadTech(FILE *techData, Entity *player); //TODO

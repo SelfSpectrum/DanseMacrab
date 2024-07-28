@@ -198,7 +198,7 @@ void UnloadSingleAnimable(Animable **anims, int *animAmount, int position, int A
 	for (i = 0; i < (ANIM_SIZE - 1); i++)
 		if (anims[i] == NULL) anims[i] = anims[i + 1];
 }
-void LoadSprite(const char *spriteSheet, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE) {
+void LoadSprite(const char *spriteSheet, FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE) {
 	if (!FileExists(spriteSheet)) {
 		printf("INFO: SPRITE: Sprite file \"%s\" not available.\n", spriteSheet);
 		return;
@@ -208,9 +208,9 @@ void LoadSprite(const char *spriteSheet, Sprite **sprites, int *spriteAmount, in
 	while (fgets(line, sizeof(line), file) != NULL) {
 		if ((*spriteAmount) >= SPRITE_SIZE) {
 			printf("WARNING: SPRITE: Sprites register full.\n");
-			break;
+			return;
 		}
-		sprites[(*spriteAmount)] = ParseSprite(line, false);
+		sprites[(*spriteAmount)] = ParseSprite(line);
 		(*spriteAmount)++;
 	}
 	printf("INFO: SPRITE: Sprites loaded from \"%s\" correctly.\n", spriteSheet);
@@ -237,13 +237,13 @@ Sprite *LoadSingleSprite(FILE *spriteData, int id) {
 			if (spriteId == id) {
 				token = strtok_r(NULL, "	", &saveptr); //To delete the sprite name
 				printf("INFO: SPRITE: Parsing %s\n", token);
-				return ParseSprite(saveptr, true);
+				return ParseSprite(saveptr);
 			}
 		}
 	}
 	return NULL;
 }
-Sprite *ParseSprite(char *line, bool useFile) {
+Sprite *ParseSprite(char *line) {
 	Sprite *sprite = (Sprite *) malloc(sizeof(Sprite));
 	char *token;
 	char *saveptr;
@@ -285,14 +285,14 @@ void DrawSprite(Sprite **sprites, SafeTexture *textures, int spriteAmount, Shade
 }
 void DrawSingleSprite(Sprite *sprite, SafeTexture *textures, Shader shader, Color color) {
 	if (sprite == NULL) return;
-	if (sprites->shader) BeginShaderMode(shader);
-	DrawTexturePro(textures[sprites[i]->textureIndex].tex,
-			sprites->origin,
-			sprites->dest,
-			sprites->position,
-			sprites->rotation,
+	if (sprite->shader) BeginShaderMode(shader);
+	DrawTexturePro(textures[sprite->textureIndex].tex,
+			sprite->origin,
+			sprite->dest,
+			sprite->position,
+			sprite->rotation,
 			color);
-	if (sprites->shader) EndShaderMode();
+	if (sprite->shader) EndShaderMode();
 }
 void UnloadSprite(Sprite **sprites, int *spriteAmount) {
 	int i;
@@ -311,14 +311,14 @@ void UnloadSingleSprite(Sprite **sprites, int *spriteAmount, int position, int S
 	for (i = 0; i < (SPRITE_SIZE - 1); i++)
 		if (sprites[i] == NULL) sprites[i] = sprites[i + 1];
 }
-void LoadButton(const char *buttonSheet, FILE *translationData, Font font, Button **buttons, int *buttonAmount, int BUTTON_SIZE) {
+void LoadButton(const char *buttonSheet, FILE *spriteData, FILE *translationData, Font font, Button **buttons, int *buttonAmount, int BUTTON_SIZE) {
 	if (FileExists(buttonSheet)) {
 		FILE *file = fopen(buttonSheet, "r");
 		char line[256];
 		while (fgets(line, sizeof(line), file) != NULL) {
 			for ( ; (*buttonAmount) < BUTTON_SIZE; (*buttonAmount)++) {
 				if (buttons[(*buttonAmount)] == NULL) {
-					buttons[(*buttonAmount)] = ParseButton(line, translationData, font);
+					buttons[(*buttonAmount)] = ParseButton(line, spriteData, translationData, font);
 					break;
 				}
 			}
@@ -326,22 +326,22 @@ void LoadButton(const char *buttonSheet, FILE *translationData, Font font, Butto
 		fclose(file);
 	}
 }
-Button *ParseButton(char *line, FILE *translationData, Font font) {
+Button *ParseButton(char *line, FILE *spriteData, FILE *translationData, Font font) {
 	Button *button = (Button *) malloc(sizeof(Button));
 	char *token;
 	char *saveptr;
 	if (button != NULL) {
 		token = strtok_r(line, "	", &saveptr);
-		// Sprite off
-		token = strtok_r(line, "	", &saveptr);
-		// Sprite on
+		button->spriteOff = LoadSingleSprite(spriteData, atoi(token));
+		token = strtok_r(NULL, "	", &saveptr);
+		button->spriteOn = LoadSingleSprite(spriteData, atoi(token));
 		token = strtok_r(NULL, "	", &saveptr);
 		button->message = LoadSingleMessage(translationData,
 						    font,
 						    atoi(token),
 						    (Vector2) { -button->position.x + 16, -button->position.y },
 						    16, 0, true, ALIGN_LEFT);
-		printf("Button's Pos (%f, %f)\n", button->position.x, button->position.y);
+		//printf("Button's Pos (%f, %f)\n", button->position.x, button->position.y);
 		button->selected = false;
 	}
 	return button;
@@ -349,14 +349,10 @@ Button *ParseButton(char *line, FILE *translationData, Font font) {
 void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Font font, Color color) {
 	int i;
 	for (i = 0; i < buttonAmount; i++) {
-		if (buttons[i]->shader) BeginShaderMode(shader);
-		DrawTexturePro(textures[buttons[i]->textureIndex].tex,
-				(buttons[i]->selected) ? buttons[i]->originOn : buttons[i]->originOff,
-				buttons[i]->dest,
-				buttons[i]->position,
-				buttons[i]->rotation,
-				color);
-		if (buttons[i]->shader) EndShaderMode();
+		if (buttons[i]->selected)
+			DrawSingleSprite(buttons[i]->spriteOn, textures, shader, color);
+		else 
+			DrawSingleSprite(buttons[i]->spriteOff, textures, shader, color);
 		DrawButtonMessage(buttons[i], font, color);
 	}
 }

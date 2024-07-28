@@ -544,7 +544,7 @@ void SetState(StateData *state, GameState newState) {
 			SetState(state, STATE_TITLE);
 			break;
 		case STATE_TITLE:
-			LoadSprite("./resources/layout/mainTitle.tsv", state->sprites, &state->spriteAmount, SPRITE_SIZE);
+			LoadSprite("./resources/layout/mainTitle.tsv", state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE);
 			LoadAnimable(state->animsData, state->anims, (Vector2) { 0 }, &state->animAmount, ANIM_SIZE, 1);
 			LoadMessageIntoRegister(state->translationData, state->font, state->messages, &state->messageAmount, MSG_SIZE, (Vector2) {160.5f, 154.5f}, 16, 0, false, ALIGN_CENTER, 1);
 			LoadMessageIntoRegister(state->translationData, state->font, state->messages,
@@ -561,12 +561,12 @@ void SetState(StateData *state, GameState newState) {
 
 			break;
 		case STATE_MAINMENU:
-			LoadSprite("./resources/layout/mainMenu.tsv", state->sprites, &state->spriteAmount, SPRITE_SIZE);
+			LoadSprite("./resources/layout/mainMenu.tsv", state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE);
 			break;
 		case STATE_FIGHT:
 			LoadSpriteIntoRegister(state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE, (Vector2) { 0, -132 }, 102);
 			//LoadSpriteIntoRegister(state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE, (Vector2) { 0, -86 }, 100);
-			LoadButton("./resources/layout/fightButtons.tsv", state->translationData, state->font, state->buttons, &state->buttonAmount, BUTTON_SIZE);
+			LoadButton("./resources/layout/fightButtons.tsv", state->spriteData, state->translationData, state->font, state->buttons, &state->buttonAmount, BUTTON_SIZE);
 			ChangeSelection(state);
 			state->buttonSkip = 2;
 			break;

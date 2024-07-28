@@ -1,594 +1,720 @@
-ID	Nombre	ID Texture	Orígen X	Orígen Y	Orígen Largo	Orígen Alto	Orígen H X	Orígen H Y	Orígen H Largo	Orígen H Alto	Destino X	Destino Y	Destino Largo	Destino Alto	Posición X	Posición Y	Rotación	Shader
-1																		
-2																		
-3																		
-4																		
-5																		
-6																		
-7																		
-8																		
-9																		
-10																		
-11																		
-12																		
-13																		
-14																		
-15																		
-16																		
-17																		
-18																		
-19																		
-20																		
-21																		
-22																		
-23																		
-24																		
-25																		
-26																		
-27																		
-28																		
-29																		
-30																		
-31																		
-32																		
-33																		
-34																		
-35																		
-36																		
-37																		
-38																		
-39																		
-40																		
-41																		
-42																		
-43																		
-44																		
-45																		
-46																		
-47																		
-48																		
-49																		
-50																		
-51																		
-52																		
-53																		
-54																		
-55																		
-56																		
-57																		
-58																		
-59																		
-60																		
-61																		
-62																		
-63																		
-64																		
-65																		
-66																		
-67																		
-68																		
-69																		
-70																		
-71																		
-72																		
-73																		
-74																		
-75																		
-76																		
-77																		
-78																		
-79																		
-80																		
-81																		
-82																		
-83																		
-84																		
-85																		
-86																		
-87																		
-88																		
-89																		
-90																		
-91																		
-92																		
-93																		
-94																		
-95																		
-96																		
-97																		
-98																		
-99																		
-100	Rin – Back	2	112	0	48	48	0	0	0	0	0	0	48	48	0	0	0	1
-101	Rin – Front	2	160	0	48	48	0	0	0	0	0	0	48	48	0	0	0	1
-102	Rin – FightMug	2	0	0	112	48	0	0	0	0	0	0	112	48	0	0	0	1
-103	Rin – Death	2																
-104	Rin – MidHarm	2																
-105	Rin – LotHarm	2																
-106	Rin – Damage	2																
-107	Rin – DeathMug	2																
-108	Alina – Back	2	112	48	48	48	0	0	0	0	0	0	48	48	0	0	0	1
-109	Alina – Front	2	160	48	48	48	0	0	0	0	0	0	48	48	0	0	0	1
-110	Alina – FightMug	2	0	48	112	48	0	0	0	0	0	0	112	48	0	0	0	1
-111	Alina – Death	2																
-112	Alina – MidHarm	2																
-113	Alina – LotHarm	2																
-114	Alina – Damage	2																
-115	Alina – DeathMug	2																
-116	Irina – Back	2																
-117	Irina – Front	2																
-118	Irina – FightMug	2																
-119	Irina – Death	2																
-120	Irina – MidHarm	2																
-121	Irina – LotHarm	2																
-122	Irina – Damage	2																
-123	Irina – DeathMug	2																
-124	Enkhjargal – Back	2																
-125	Enkhjargal – Front	2																
-126	Enkhjargal – FightMug	2																
-127	Enkhjargal – Death	2																
-128	Enkhjargal – MidHarm	2																
-129	Enkhjargal – LotHarm	2																
-130	Enkhjargal – Damage	2																
-131	Enkhjargal – DeathMug	2																
-132	Kiyoko – Back	2																
-133	Kiyoko – Front	2																
-134	Kiyoko – FightMug	2																
-135	Kiyoko – Death	2																
-136	Kiyoko – MidHarm	2																
-137	Kiyoko – LotHarm	2																
-138	Kiyoko – Damage	2																
-139	Kiyoko – DeathMug	2																
-140	Haruka – Back	2																
-141	Haruka – Front	2																
-142	Haruka – FightMug	2																
-143	Haruka – Death	2																
-144	Haruka – MidHarm	2																
-145	Haruka – LotHarm	2																
-146	Haruka – Damage	2																
-147	Haruka – DeathMug	2																
-148	Shinjiro – Back	2																
-149	Shinjiro – Front	2																
-150	Shinjiro – FightMug	2																
-151	Shinjiro – Death	2																
-152	Shinjiro – MidHarm	2																
-153	Shinjiro – LotHarm	2																
-154	Shinjiro – Damage	2																
-155	Shinjiro – DeathMug	2																
-156	Daichi – Back	2																
-157	Daichi – Front	2																
-158	Daichi – FightMug	2																
-159	Daichi – Death	2																
-160	Daichi – MidHarm	2																
-161	Daichi – LotHarm	2																
-162	Daichi – Damage	2																
-163	Daichi – DeathMug	2																
-164		2																
-165		2																
-166		2																
-167		2																
-168		2																
-169		2																
-170		2																
-171		2																
-172	Eleanor – Back	2																
-173	Eleanor – Front	2																
-174	Eleanor – FightMug	2																
-175	Eleanor – Death	2																
-176	Eleanor – MidHarm	2																
-177	Eleanor – LotHarm	2																
-178	Eleanor – Damage	2																
-179	Eleanor – DeathMug	2																
-180	Valessa – Back	2																
-181	Valessa – Front	2																
-182	Valessa – FightMug	2																
-183	Valessa – Death	2																
-184	Valessa – MidHarm	2																
-185	Valessa – LotHarm	2																
-186	Valessa – Damage	2																
-187	Valessa – DeathMug	2																
-188	Wei – Back	2																
-189	Wei – Front	2																
-190	Wei – FightMug	2																
-191	Wei – Death	2																
-192	Wei – MidHarm	2																
-193	Wei – LotHarm	2																
-194	Wei – Damage	2																
-195	Wei – DeathMug	2																
-196																		
-197																		
-198																		
-199																		
-200																		
-201																		
-202																		
-203																		
-204																		
-205																		
-206																		
-207																		
-208																		
-209																		
-210																		
-211																		
-212																		
-213																		
-214																		
-215																		
-216																		
-217																		
-218																		
-219																		
-220																		
-221																		
-222																		
-223																		
-224																		
-225																		
-226																		
-227																		
-228																		
-229																		
-230																		
-231																		
-232																		
-233																		
-234																		
-235																		
-236																		
-237																		
-238																		
-239																		
-240																		
-241																		
-242																		
-243																		
-244																		
-245																		
-246																		
-247																		
-248																		
-249																		
-250																		
-251																		
-252																		
-253																		
-254																		
-255																		
-256																		
-257																		
-258																		
-259																		
-260																		
-261																		
-262																		
-263																		
-264																		
-265																		
-266																		
-267																		
-268																		
-269																		
-270																		
-271																		
-272																		
-273																		
-274																		
-275																		
-276																		
-277																		
-278																		
-279																		
-280																		
-281																		
-282																		
-283																		
-284																		
-285																		
-286																		
-287																		
-288																		
-289																		
-290																		
-291																		
-292																		
-293																		
-294																		
-295																		
-296																		
-297																		
-298																		
-299																		
-300	Crabber	7	0	0	32	32	0	0	0	0	0	0	32	32	0	0	0	1
-301	Crabby	7	32	0	32	32	0	0	0	0	0	0	32	32	0	0	0	1
-302	Egg Medium	7	64	0	32	32	0	0	0	0	0	0	32	32	0	0	0	1
-303	Urchin	7	96	0	32	32	0	0	0	0	0	0	32	32	0	0	0	1
-304	High & Bass	7	256	0	48	48	0	0	0	0	0	0	48	48	0	0	0	1
-305	Madness Bearer	7	224	0	32	32	0	0	0	0	0	0	32	32	0	0	0	1
-306	Small Risk	7	128	0	32	32	0	0	0	0	0	0	32	32	0	0	0	1
-307	Crabberer	7	80	32	48	32	0	0	0	0	0	0	48	32	0	0	0	1
-308	Sharpie	7	160	0	32	32	0	0	0	0	0	0	32	32	0	0	0	1
-309	Marked Crabberer	7	128	32	48	32	0	0	0	0	0	0	48	32	0	0	0	1
-310	Panic Betrayer	7	192	0	32	32	0	0	0	0	0	0	32	32	0	0	0	1
-311	Burnout	7	0	64	48	48	0	0	0	0	0	0	48	48	0	0	0	1
-312	Noxious Puncher	7	48	64	48	48	0	0	0	0	0	0	48	48	0	0	0	1
-313	Lightning Snap	7	48	32	32	32	0	0	0	0	0	0	32	32	0	0	0	1
-314	Frostbitten	7	0	32	48	32	0	0	0	0	0	0	48	32	0	0	0	1
-315	Carcinous	7					0	0	0	0	0	0			0	0	0	1
-316	Carcinous Horse																	
-317	Horse																	
-318	Armored Horse																	
-319	Cultist Neophyte																	
-320	Cultist Disciple																	
-321	Cultist Priest																	
-322	Cultist Animator																	
-323	Cultist Master																	
-324	Marked Crabberer																	
-325	Évariste																	
-326																		
-327																		
-328																		
-329																		
-330																		
-331																		
-332																		
-333																		
-334																		
-335																		
-336																		
-337																		
-338																		
-339																		
-340																		
-341																		
-342																		
-343																		
-344																		
-345																		
-346																		
-347																		
-348																		
-349																		
-350																		
-351																		
-352																		
-353																		
-354																		
-355																		
-356																		
-357																		
-358																		
-359																		
-360																		
-361																		
-362																		
-363																		
-364																		
-365																		
-366																		
-367																		
-368																		
-369																		
-370																		
-371																		
-372																		
-373																		
-374																		
-375																		
-376																		
-377																		
-378																		
-379																		
-380																		
-381																		
-382																		
-383																		
-384																		
-385																		
-386																		
-387																		
-388																		
-389																		
-390																		
-391																		
-392																		
-393																		
-394																		
-395																		
-396																		
-397																		
-398																		
-399																		
-400																		
-401																		
-402																		
-403																		
-404																		
-405																		
-406																		
-407																		
-408																		
-409																		
-410																		
-411																		
-412																		
-413																		
-414																		
-415																		
-416																		
-417																		
-418																		
-419																		
-420																		
-421																		
-422																		
-423																		
-424																		
-425																		
-426																		
-427																		
-428																		
-429																		
-430																		
-431																		
-432																		
-433																		
-434																		
-435																		
-436																		
-437																		
-438																		
-439																		
-440																		
-441																		
-442																		
-443																		
-444																		
-445																		
-446																		
-447																		
-448																		
-449																		
-450																		
-451																		
-452																		
-453																		
-454																		
-455																		
-456																		
-457																		
-458																		
-459																		
-460																		
-461																		
-462																		
-463																		
-464																		
-465																		
-466																		
-467																		
-468																		
-469																		
-470																		
-471																		
-472																		
-473																		
-474																		
-475																		
-476																		
-477																		
-478																		
-479																		
-480																		
-481																		
-482																		
-483																		
-484																		
-485																		
-486																		
-487																		
-488																		
-489																		
-490																		
-491																		
-492																		
-493																		
-494																		
-495																		
-496																		
-497																		
-498																		
-499																		
-500	Tech - Sword	5	0	0	16	16	64	0	16	16	0	0	16	16	0	0	0	0
-501	Tech - Shield	5	0	16	16	16	64	16	16	16	0	0	16	16	0	0	0	0
-502	Tech - Hammer	5	0	32	16	16	64	32	16	16	0	0	16	16	0	0	0	0
-503	Tech - Staff																	
-504	Tech - Gun																	
-505	Tech - Fans																	
-506	Tech - Spear																	
-507	Tech - Dagger																	
-508	Tech - Nunchuks																	
-509	Tech - Musket																	
-510	Tech - Cannon																	
-511	Tech - Caestus																	
-512	Tech - Scythe and Chain																	
-513																		
-514																		
-515	Tech - None	5	0	240	16	16	64	240	16	16	0	0	16	16	0	0	0	0
-516	Tech - Slash	5	16	0	16	16	80	0	16	16	0	0	16	16	0	0	0	0
-517	Tech - Evade	5	16	16	16	16	80	16	16	16	0	0	16	16	0	0	0	0
-518	Tech - Smash	5	16	32	16	16	80	32	16	16	0	0	16	16	0	0	0	0
-519																		
-520																		
-521																		
-522																		
-523																		
-524																		
-525																		
-526																		
-527																		
-528																		
-529																		
-530																		
-531																		
-532																		
-533																		
-534																		
-535	Tech - Ice 	5	32	48	16	16	96	48	16	16	0	0	16	16	0	0	0	0
-536																		
-537																		
-538																		
-539																		
-540																		
-541																		
-542																		
-543																		
-544																		
-545																		
-546																		
-547	Tech - Psychic	5	48	0	16	16	112	0	16	16	0	0	16	16	0	0	0	0
-548	Tech - Fire	5	48	16	16	16	112	16	16	16	0	0	16	16	0	0	0	0
-549	Tech - Whispers	5	48	32	16	16	112	32	16	16	0	0	16	16	0	0	0	0
-550	Tech - Counter Fire	5	48	48	16	16	112	48	16	16	0	0	16	16	0	0	0	0
-551	Tech - Madness	5	48	64	16	16	112	64	16	16	0	0	16	16	0	0	0	0
-552	Tech - Telekinesis Right	5	48	80	16	16	112	80	16	16	0	0	16	16	0	0	0	0
-553	Tech - Telekinesis Left	5	48	96	16	16	112	96	16	16	0	0	16	16	0	0	0	0
-554	Tech - Force Field	5	48	112	16	16	112	112	16	16	0	0	16	16	0	0	0	0
-555	Tech - Deflect	5	48	128	16	16	112	128	16	16	0	0	16	16	0	0	0	0
-556	Tech - Rend	5	48	144	16	16	112	144	16	16	0	0	16	16	0	0	0	0
-557	Tech - Gravity	5	48	160	16	16	112	160	16	16	0	0	16	16	0	0	0	0
-558	Tech - Implosion	5	48	176	16	16	112	176	16	16	0	0	16	16	0	0	0	0
-559	Tech - Psy Healing	5	48	192	16	16	112	192	16	16	0	0	16	16	0	0	0	0
-560	Tech - Lightning Rod	5	48	208	16	16	112	208	16	16	0	0	16	16	0	0	0	0
-561	Tech - Lightning	5	48	224	16	16	112	224	16	16	0	0	16	16	0	0	0	0
-562	Tech - Clear System	5	48	240	16	16	112	240	16	16	0	0	16	16	0	0	0	0
-563	Tech - Retaliate	5	128	0	16	16	192	0	16	16	0	0	16	16	0	0	0	0
-564	Tech - Transfuse	5	128	16	16	16	192	16	16	16	0	0	16	16	0	0	0	0
-565	Tech - Sharpen	5	128	32	16	16	192	32	16	16	0	0	16	16	0	0	0	0
-566	Tech - Guillotine	5	128	48	16	16	192	48	16	16	0	0	16	16	0	0	0	0
-567	Tech - Iron Maiden	5	128	64	16	16	192	64	16	16	0	0	16	16	0	0	0	0
-568	Tech - Virtuous Scarlet	5	128	80	16	16	192	80	16	16	0	0	16	16	0	0	0	0
-569	Tech - Still Life	5	128	96	16	16	192	96	16	16	0	0	16	16	0	0	0	0
-570	Tech - Blood in the Water	5	128	112	16	16	192	112	16	16	0	0	16	16	0	0	0	0
-571	Tech - Sensivity	5	128	128	16	16	192	128	16	16	0	0	16	16	0	0	0	0
-572	Tech - Red Strings	5	128	144	16	16	192	144	16	16	0	0	16	16	0	0	0	0
-573	Tech - Last Stand	5	128	160	16	16	192	160	16	16	0	0	16	16	0	0	0	0
-574	Tech - Necrosis	5	128	176	16	16	192	176	16	16	0	0	16	16	0	0	0	0
-575	Tech - Raw Flesh	5	128	192	16	16	192	192	16	16	0	0	16	16	0	0	0	0
-576	Tech - Bleeding	5	128	208	16	16	192	208	16	16	0	0	16	16	0	0	0	0
-577	Tech - Blind	5	128	224	16	16	192	224	16	16	0	0	16	16	0	0	0	0
-578	Tech - Anemia	5	128	240	16	16	192	240	16	16	0	0	16	16	0	0	0	0
-579	Tech - Now You See Me	5	144	0	16	16	208	0	16	16	0	0	16	16	0	0	0	0
-580	Tech - Sleigh of Hands	5	144	16	16	16	208	16	16	16	0	0	16	16	0	0	0	0
-581	Tech - Bind	5	144	32	16	16	208	32	16	16	0	0	16	16	0	0	0	0
-582	Tech - Hearing	5	144	48	16	16	208	48	16	16	0	0	16	16	0	0	0	0
-583	Tech - Pause	5	144	64	16	16	208	64	16	16	0	0	16	16	0	0	0	0
-584	Tech - Conduit	5	144	80	16	16	208	80	16	16	0	0	16	16	0	0	0	0
-585	Tech - I'm Watching You	5	144	96	16	16	208	96	16	16	0	0	16	16	0	0	0	0
-586	Tech - Destruction	5	144	112	16	16	208	112	16	16	0	0	16	16	0	0	0	0
-587	Tech - Stop	5	144	128	16	16	208	128	16	16	0	0	16	16	0	0	0	0
-588	Tech - Drop	5	144	144	16	16	208	144	16	16	0	0	16	16	0	0	0	0
-589	Tech - Cry	5	144	160	16	16	208	160	16	16	0	0	16	16	0	0	0	0
-590	Tech - Flee	5	144	176	16	16	208	176	16	16	0	0	16	16	0	0	0	0
-591	Tech - Cooperate	5	144	192	16	16	208	192	16	16	0	0	16	16	0	0	0	0
-592	Tech - Halt	5	144	208	16	16	208	208	16	16	0	0	16	16	0	0	0	0
-593	Tech - Summon	5	144	224	16	16	208	224	16	16	0	0	16	16	0	0	0	0
+ID	Nombre	ID Texture	Orígen X	Orígen Y	Orígen Largo	Orígen Alto	Destino X	Destino Y	Destino Largo	Destino Alto	Posición X	Posición Y	Rotación	Shader
+1														
+2														
+3														
+4														
+5														
+6														
+7														
+8														
+9														
+10														
+11														
+12														
+13														
+14														
+15														
+16														
+17														
+18														
+19														
+20														
+21														
+22														
+23														
+24														
+25														
+26														
+27														
+28														
+29														
+30														
+31														
+32														
+33														
+34														
+35														
+36														
+37														
+38														
+39														
+40														
+41														
+42														
+43														
+44														
+45														
+46														
+47														
+48														
+49														
+50														
+51														
+52														
+53														
+54														
+55														
+56														
+57														
+58														
+59														
+60														
+61														
+62														
+63														
+64														
+65														
+66														
+67														
+68														
+69														
+70														
+71														
+72														
+73														
+74														
+75														
+76														
+77														
+78														
+79														
+80														
+81														
+82														
+83														
+84														
+85														
+86														
+87														
+88														
+89														
+90														
+91														
+92														
+93														
+94														
+95														
+96														
+97														
+98														
+99														
+100	Rin – Back	2	112	0	48	48	0	0	48	48	0	0	0	1
+101	Rin – Front	2	160	0	48	48	0	0	48	48	0	0	0	1
+102	Rin – FightMug	2	0	0	112	48	0	0	112	48	0	0	0	1
+103	Rin – Death	2												
+104	Rin – MidHarm	2												
+105	Rin – LotHarm	2												
+106	Rin – Damage	2												
+107	Rin – DeathMug	2												
+108	Alina – Back	2	112	48	48	48	0	0	48	48	0	0	0	1
+109	Alina – Front	2	160	48	48	48	0	0	48	48	0	0	0	1
+110	Alina – FightMug	2	0	48	112	48	0	0	112	48	0	0	0	1
+111	Alina – Death	2												
+112	Alina – MidHarm	2												
+113	Alina – LotHarm	2												
+114	Alina – Damage	2												
+115	Alina – DeathMug	2												
+116	Irina – Back	2												
+117	Irina – Front	2												
+118	Irina – FightMug	2												
+119	Irina – Death	2												
+120	Irina – MidHarm	2												
+121	Irina – LotHarm	2												
+122	Irina – Damage	2												
+123	Irina – DeathMug	2												
+124	Enkhjargal – Back	2												
+125	Enkhjargal – Front	2												
+126	Enkhjargal – FightMug	2												
+127	Enkhjargal – Death	2												
+128	Enkhjargal – MidHarm	2												
+129	Enkhjargal – LotHarm	2												
+130	Enkhjargal – Damage	2												
+131	Enkhjargal – DeathMug	2												
+132	Kiyoko – Back	2												
+133	Kiyoko – Front	2												
+134	Kiyoko – FightMug	2												
+135	Kiyoko – Death	2												
+136	Kiyoko – MidHarm	2												
+137	Kiyoko – LotHarm	2												
+138	Kiyoko – Damage	2												
+139	Kiyoko – DeathMug	2												
+140	Haruka – Back	2												
+141	Haruka – Front	2												
+142	Haruka – FightMug	2												
+143	Haruka – Death	2												
+144	Haruka – MidHarm	2												
+145	Haruka – LotHarm	2												
+146	Haruka – Damage	2												
+147	Haruka – DeathMug	2												
+148	Shinjiro – Back	2												
+149	Shinjiro – Front	2												
+150	Shinjiro – FightMug	2												
+151	Shinjiro – Death	2												
+152	Shinjiro – MidHarm	2												
+153	Shinjiro – LotHarm	2												
+154	Shinjiro – Damage	2												
+155	Shinjiro – DeathMug	2												
+156	Daichi – Back	2												
+157	Daichi – Front	2												
+158	Daichi – FightMug	2												
+159	Daichi – Death	2												
+160	Daichi – MidHarm	2												
+161	Daichi – LotHarm	2												
+162	Daichi – Damage	2												
+163	Daichi – DeathMug	2												
+164		2												
+165		2												
+166		2												
+167		2												
+168		2												
+169		2												
+170		2												
+171		2												
+172	Eleanor – Back	2												
+173	Eleanor – Front	2												
+174	Eleanor – FightMug	2												
+175	Eleanor – Death	2												
+176	Eleanor – MidHarm	2												
+177	Eleanor – LotHarm	2												
+178	Eleanor – Damage	2												
+179	Eleanor – DeathMug	2												
+180	Valessa – Back	2												
+181	Valessa – Front	2												
+182	Valessa – FightMug	2												
+183	Valessa – Death	2												
+184	Valessa – MidHarm	2												
+185	Valessa – LotHarm	2												
+186	Valessa – Damage	2												
+187	Valessa – DeathMug	2												
+188	Wei – Back	2												
+189	Wei – Front	2												
+190	Wei – FightMug	2												
+191	Wei – Death	2												
+192	Wei – MidHarm	2												
+193	Wei – LotHarm	2												
+194	Wei – Damage	2												
+195	Wei – DeathMug	2												
+196														
+197														
+198														
+199														
+200														
+201														
+202														
+203														
+204														
+205														
+206														
+207														
+208														
+209														
+210														
+211														
+212														
+213														
+214														
+215														
+216														
+217														
+218														
+219														
+220														
+221														
+222														
+223														
+224														
+225														
+226														
+227														
+228														
+229														
+230														
+231														
+232														
+233														
+234														
+235														
+236														
+237														
+238														
+239														
+240														
+241														
+242														
+243														
+244														
+245														
+246														
+247														
+248														
+249														
+250														
+251														
+252														
+253														
+254														
+255														
+256														
+257														
+258														
+259														
+260														
+261														
+262														
+263														
+264														
+265														
+266														
+267														
+268														
+269														
+270														
+271														
+272														
+273														
+274														
+275														
+276														
+277														
+278														
+279														
+280														
+281														
+282														
+283														
+284														
+285														
+286														
+287														
+288														
+289														
+290														
+291														
+292														
+293														
+294														
+295														
+296														
+297														
+298														
+299														
+300	Crabber	7	0	0	32	32	0	0	32	32	0	0	0	1
+301	Crabby	7	32	0	32	32	0	0	32	32	0	0	0	1
+302	Egg Medium	7	64	0	32	32	0	0	32	32	0	0	0	1
+303	Urchin	7	96	0	32	32	0	0	32	32	0	0	0	1
+304	High & Bass	7	256	0	48	48	0	0	48	48	0	0	0	1
+305	Madness Bearer	7	224	0	32	32	0	0	32	32	0	0	0	1
+306	Small Risk	7	128	0	32	32	0	0	32	32	0	0	0	1
+307	Crabberer	7	80	32	48	32	0	0	48	32	0	0	0	1
+308	Sharpie	7	160	0	32	32	0	0	32	32	0	0	0	1
+309	Marked Crabberer	7	128	32	48	32	0	0	48	32	0	0	0	1
+310	Panic Betrayer	7	192	0	32	32	0	0	32	32	0	0	0	1
+311	Burnout	7	0	64	48	48	0	0	48	48	0	0	0	1
+312	Noxious Puncher	7	48	64	48	48	0	0	48	48	0	0	0	1
+313	Lightning Snap	7	48	32	32	32	0	0	32	32	0	0	0	1
+314	Frostbitten	7	0	32	48	32	0	0	48	32	0	0	0	1
+315	Carcinous	7					0	0			0	0	0	1
+316	Carcinous Horse													
+317	Horse													
+318	Armored Horse													
+319	Cultist Neophyte													
+320	Cultist Disciple													
+321	Cultist Priest													
+322	Cultist Animator													
+323	Cultist Master													
+324	Marked Crabberer													
+325	Évariste													
+326														
+327														
+328														
+329														
+330														
+331														
+332														
+333														
+334														
+335														
+336														
+337														
+338														
+339														
+340														
+341														
+342														
+343														
+344														
+345														
+346														
+347														
+348														
+349														
+350														
+351														
+352														
+353														
+354														
+355														
+356														
+357														
+358														
+359														
+360														
+361														
+362														
+363														
+364														
+365														
+366														
+367														
+368														
+369														
+370														
+371														
+372														
+373														
+374														
+375														
+376														
+377														
+378														
+379														
+380														
+381														
+382														
+383														
+384														
+385														
+386														
+387														
+388														
+389														
+390														
+391														
+392														
+393														
+394														
+395														
+396														
+397														
+398														
+399														
+400														
+401														
+402														
+403														
+404														
+405														
+406														
+407														
+408														
+409														
+410														
+411														
+412														
+413														
+414														
+415														
+416														
+417														
+418														
+419														
+420														
+421														
+422														
+423														
+424														
+425														
+426														
+427														
+428														
+429														
+430														
+431														
+432														
+433														
+434														
+435														
+436														
+437														
+438														
+439														
+440														
+441														
+442														
+443														
+444														
+445														
+446														
+447														
+448														
+449														
+450														
+451														
+452														
+453														
+454														
+455														
+456														
+457														
+458														
+459														
+460														
+461														
+462														
+463														
+464														
+465														
+466														
+467														
+468														
+469														
+470														
+471														
+472														
+473														
+474														
+475														
+476														
+477														
+478														
+479														
+480														
+481														
+482														
+483														
+484														
+485														
+486														
+487														
+488														
+489														
+490														
+491														
+492														
+493														
+494														
+495														
+496														
+497														
+498														
+499														
+500	Tech - Sword	5	0	0	16	16	0	0	16	16	0	0	0	0
+501	Tech - Shield	5	0	16	16	16	0	0	16	16	0	0	0	0
+502	Tech - Hammer	5	0	32	16	16	0	0	16	16	0	0	0	0
+503	Tech - Staff													
+504	Tech - Gun													
+505	Tech - Fans													
+506	Tech - Spear													
+507	Tech - Dagger													
+508	Tech - Nunchuks													
+509	Tech - Musket													
+510	Tech - Cannon													
+511	Tech - Caestus													
+512	Tech - Scythe and Chain													
+513														
+514														
+515	Tech - None	5	0	240	16	16	0	0	16	16	0	0	0	0
+516	Tech - Slash	5	16	0	16	16	0	0	16	16	0	0	0	0
+517	Tech - Evade	5	16	16	16	16	0	0	16	16	0	0	0	0
+518	Tech - Smash	5	16	32	16	16	0	0	16	16	0	0	0	0
+519														
+520														
+521														
+522														
+523														
+524														
+525														
+526														
+527														
+528														
+529														
+530														
+531														
+532														
+533														
+534														
+535	Tech - Ice 	5	32	48	16	16	0	0	16	16	0	0	0	0
+536														
+537														
+538														
+539														
+540														
+541														
+542														
+543														
+544														
+545														
+546														
+547	Tech - Psychic	5	48	0	16	16	0	0	16	16	0	0	0	0
+548	Tech - Fire	5	48	16	16	16	0	0	16	16	0	0	0	0
+549	Tech - Whispers	5	48	32	16	16	0	0	16	16	0	0	0	0
+550	Tech - Counter Fire	5	48	48	16	16	0	0	16	16	0	0	0	0
+551	Tech - Madness	5	48	64	16	16	0	0	16	16	0	0	0	0
+552	Tech - Telekinesis Right	5	48	80	16	16	0	0	16	16	0	0	0	0
+553	Tech - Telekinesis Left	5	48	96	16	16	0	0	16	16	0	0	0	0
+554	Tech - Force Field	5	48	112	16	16	0	0	16	16	0	0	0	0
+555	Tech - Deflect	5	48	128	16	16	0	0	16	16	0	0	0	0
+556	Tech - Rend	5	48	144	16	16	0	0	16	16	0	0	0	0
+557	Tech - Gravity	5	48	160	16	16	0	0	16	16	0	0	0	0
+558	Tech - Implosion	5	48	176	16	16	0	0	16	16	0	0	0	0
+559	Tech - Psy Healing	5	48	192	16	16	0	0	16	16	0	0	0	0
+560	Tech - Lightning Rod	5	48	208	16	16	0	0	16	16	0	0	0	0
+561	Tech - Lightning	5	48	224	16	16	0	0	16	16	0	0	0	0
+562	Tech - Clear System	5	48	240	16	16	0	0	16	16	0	0	0	0
+563	Tech - Retaliate	5	128	0	16	16	0	0	16	16	0	0	0	0
+564	Tech - Transfuse	5	128	16	16	16	0	0	16	16	0	0	0	0
+565	Tech - Sharpen	5	128	32	16	16	0	0	16	16	0	0	0	0
+566	Tech - Guillotine	5	128	48	16	16	0	0	16	16	0	0	0	0
+567	Tech - Iron Maiden	5	128	64	16	16	0	0	16	16	0	0	0	0
+568	Tech - Virtuous Scarlet	5	128	80	16	16	0	0	16	16	0	0	0	0
+569	Tech - Still Life	5	128	96	16	16	0	0	16	16	0	0	0	0
+570	Tech - Blood in the Water	5	128	112	16	16	0	0	16	16	0	0	0	0
+571	Tech - Sensivity	5	128	128	16	16	0	0	16	16	0	0	0	0
+572	Tech - Red Strings	5	128	144	16	16	0	0	16	16	0	0	0	0
+573	Tech - Last Stand	5	128	160	16	16	0	0	16	16	0	0	0	0
+574	Tech - Necrosis	5	128	176	16	16	0	0	16	16	0	0	0	0
+575	Tech - Raw Flesh	5	128	192	16	16	0	0	16	16	0	0	0	0
+576	Tech - Bleeding	5	128	208	16	16	0	0	16	16	0	0	0	0
+577	Tech - Blind	5	128	224	16	16	0	0	16	16	0	0	0	0
+578	Tech - Anemia	5	128	240	16	16	0	0	16	16	0	0	0	0
+579	Tech - Now You See Me	5	144	0	16	16	0	0	16	16	0	0	0	0
+580	Tech - Sleigh of Hands	5	144	16	16	16	0	0	16	16	0	0	0	0
+581	Tech - Bind	5	144	32	16	16	0	0	16	16	0	0	0	0
+582	Tech - Hearing	5	144	48	16	16	0	0	16	16	0	0	0	0
+583	Tech - Pause	5	144	64	16	16	0	0	16	16	0	0	0	0
+584	Tech - Conduit	5	144	80	16	16	0	0	16	16	0	0	0	0
+585	Tech - I'm Watching You	5	144	96	16	16	0	0	16	16	0	0	0	0
+586	Tech - Destruction	5	144	112	16	16	0	0	16	16	0	0	0	0
+587	Tech - Stop	5	144	128	16	16	0	0	16	16	0	0	0	0
+588	Tech - Drop	5	144	144	16	16	0	0	16	16	0	0	0	0
+589	Tech - Cry	5	144	160	16	16	0	0	16	16	0	0	0	0
+590	Tech - Flee	5	144	176	16	16	0	0	16	16	0	0	0	0
+591	Tech - Cooperate	5	144	192	16	16	0	0	16	16	0	0	0	0
+592	Tech - Halt	5	144	208	16	16	0	0	16	16	0	0	0	0
+593	Tech - Summon	5	144	224	16	16	0	0	16	16	0	0	0	0
+594														
+595														
+596														
+597														
+598														
+599														
+600														
+601														
+602														
+603														
+604														
+605														
+606														
+607														
+608														
+609														
+610														
+611														
+612														
+613														
+614														
+615														
+616														
+617														
+618														
+619														
+620														
+621														
+622														
+623														
+624														
+625														
+626	Tech - Sword - On	5	64	0	16	16	0	0	16	16	0	0	0	0
+627	Tech - Shield - On	5	64	16	16	16	0	0	16	16	0	0	0	0
+628	Tech - Hammer - On	5	64	32	16	16	0	0	16	16	0	0	0	0
+629	Tech - Staff - On	5	64	48	16	16	0	0	16	16	0	0	0	0
+630	Tech - Gun - On	5	64	64	16	16	0	0	16	16	0	0	0	0
+631	Tech - Fans - On	5	64	80	16	16	0	0	16	16	0	0	0	0
+632	Tech - Spear - On	5	64	96	16	16	0	0	16	16	0	0	0	0
+633	Tech - Dagger - On	5	64	112	16	16	0	0	16	16	0	0	0	0
+634	Tech - Nunchuks - On	5	64	128	16	16	0	0	16	16	0	0	0	0
+635	Tech - Musket - On	5	64	144	16	16	0	0	16	16	0	0	0	0
+636	Tech - Cannon - On	5	64	160	16	16	0	0	16	16	0	0	0	0
+637	Tech - Caestus - On	5	64	176	16	16	0	0	16	16	0	0	0	0
+638	Tech - Scythe and Chain - On	5	64	192	16	16	0	0	16	16	0	0	0	0
+639		5	64	208	16	16	0	0	16	16	0	0	0	0
+640		5	64	224	16	16	0	0	16	16	0	0	0	0
+641	Tech - None - On	5	64	240	16	16	0	0	16	16	0	0	0	0
+642	Tech - Slash - On	5	80	0	16	16	0	0	16	16	0	0	0	0
+643	Tech - Evade - On	5	80	16	16	16	0	0	16	16	0	0	0	0
+644	Tech - Smash - On	5	80	32	16	16	0	0	16	16	0	0	0	0
+645														
+646														
+647														
+648														
+649														
+650														
+651														
+652														
+653														
+654														
+655														
+656														
+657														
+658														
+659														
+660														
+661	Tech - Ice  - On	5	96	48	16	16	0	0	16	16	0	0	0	0
+662														
+663														
+664														
+665														
+666														
+667														
+668														
+669														
+670														
+671														
+672														
+673	Tech - Psychic - On	5	112	0	16	16	0	0	16	16	0	0	0	0
+674	Tech - Fire - On	5	112	16	16	16	0	0	16	16	0	0	0	0
+675	Tech - Whispers - On	5	112	32	16	16	0	0	16	16	0	0	0	0
+676	Tech - Counter Fire - On	5	112	48	16	16	0	0	16	16	0	0	0	0
+677	Tech - Madness - On	5	112	64	16	16	0	0	16	16	0	0	0	0
+678	Tech - Telekinesis Right - On	5	112	80	16	16	0	0	16	16	0	0	0	0
+679	Tech - Telekinesis Left - On	5	112	96	16	16	0	0	16	16	0	0	0	0
+680	Tech - Force Field - On	5	112	112	16	16	0	0	16	16	0	0	0	0
+681	Tech - Deflect - On	5	112	128	16	16	0	0	16	16	0	0	0	0
+682	Tech - Rend - On	5	112	144	16	16	0	0	16	16	0	0	0	0
+683	Tech - Gravity - On	5	112	160	16	16	0	0	16	16	0	0	0	0
+684	Tech - Implosion - On	5	112	176	16	16	0	0	16	16	0	0	0	0
+685	Tech - Psy Healing - On	5	112	192	16	16	0	0	16	16	0	0	0	0
+686	Tech - Lightning Rod - On	5	112	208	16	16	0	0	16	16	0	0	0	0
+687	Tech - Lightning - On	5	112	224	16	16	0	0	16	16	0	0	0	0
+688	Tech - Clear System - On	5	112	240	16	16	0	0	16	16	0	0	0	0
+689	Tech - Retaliate - On	5	192	0	16	16	0	0	16	16	0	0	0	0
+690	Tech - Transfuse - On	5	192	16	16	16	0	0	16	16	0	0	0	0
+691	Tech - Sharpen - On	5	192	32	16	16	0	0	16	16	0	0	0	0
+692	Tech - Guillotine - On	5	192	48	16	16	0	0	16	16	0	0	0	0
+693	Tech - Iron Maiden - On	5	192	64	16	16	0	0	16	16	0	0	0	0
+694	Tech - Virtuous Scarlet - On	5	192	80	16	16	0	0	16	16	0	0	0	0
+695	Tech - Still Life - On	5	192	96	16	16	0	0	16	16	0	0	0	0
+696	Tech - Blood in the Water - On	5	192	112	16	16	0	0	16	16	0	0	0	0
+697	Tech - Sensivity - On	5	192	128	16	16	0	0	16	16	0	0	0	0
+698	Tech - Red Strings - On	5	192	144	16	16	0	0	16	16	0	0	0	0
+699	Tech - Last Stand - On	5	192	160	16	16	0	0	16	16	0	0	0	0
+700	Tech - Necrosis - On	5	192	176	16	16	0	0	16	16	0	0	0	0
+701	Tech - Raw Flesh - On	5	192	192	16	16	0	0	16	16	0	0	0	0
+702	Tech - Bleeding - On	5	192	208	16	16	0	0	16	16	0	0	0	0
+703	Tech - Blind - On	5	192	224	16	16	0	0	16	16	0	0	0	0
+704	Tech - Anemia - On	5	192	240	16	16	0	0	16	16	0	0	0	0
+705	Tech - Now You See Me - On	5	208	0	16	16	0	0	16	16	0	0	0	0
+706	Tech - Sleigh of Hands - On	5	208	16	16	16	0	0	16	16	0	0	0	0
+707	Tech - Bind - On	5	208	32	16	16	0	0	16	16	0	0	0	0
+708	Tech - Hearing - On	5	208	48	16	16	0	0	16	16	0	0	0	0
+709	Tech - Pause - On	5	208	64	16	16	0	0	16	16	0	0	0	0
+710	Tech - Conduit - On	5	208	80	16	16	0	0	16	16	0	0	0	0
+711	Tech - I'm Watching You - On	5	208	96	16	16	0	0	16	16	0	0	0	0
+712	Tech - Destruction - On	5	208	112	16	16	0	0	16	16	0	0	0	0
+713	Tech - Stop - On	5	208	128	16	16	0	0	16	16	0	0	0	0
+714	Tech - Drop - On	5	208	144	16	16	0	0	16	16	0	0	0	0
+715	Tech - Cry - On	5	208	160	16	16	0	0	16	16	0	0	0	0
+716	Tech - Flee - On	5	208	176	16	16	0	0	16	16	0	0	0	0
+717	Tech - Cooperate - On	5	208	192	16	16	0	0	16	16	0	0	0	0
+718	Tech - Halt - On	5	208	208	16	16	0	0	16	16	0	0	0	0
+719	Tech - Summon - On	5	208	224	16	16	0	0	16	16	0	0	0	0

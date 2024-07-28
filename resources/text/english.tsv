@@ -50,34 +50,34 @@ ID	Inglés
 49	Drama
 50	Kinship
 51	Passion
-52	NULL
-53	NULL
-54	NULL
-55	NULL
-56	NULL
-57	NULL
-58	NULL
-59	NULL
-60	NULL
-61	NULL
-62	NULL
-63	NULL
-64	NULL
-65	NULL
-66	NULL
-67	NULL
-68	NULL
-69	NULL
-70	NULL
-71	NULL
-72	NULL
-73	NULL
-74	NULL
-75	NULL
-76	NULL
-77	NULL
-78	NULL
-79	NULL
+52	Bleed
+53	Blinded
+54	Bruised
+55	Burning
+56	Confused
+57	Cursed
+58	Deafened
+59	Death
+60	Devoured
+61	Drowning
+62	Grappled
+63	Horrified
+64	Invisible
+65	Linked
+66	Mournful
+67	Oiled
+68	Paralyzed
+69	Passenger
+70	Poisoned
+71	Possession
+72	Prone
+73	Rage
+74	Scarred
+75	Sleeping
+76	Suffocating
+77	Major Action
+78	Bonus Action
+79	Reaction
 80	NULL
 81	NULL
 82	NULL
@@ -831,7 +831,7 @@ ID	Inglés
 830	Enkhjargal
 831	Tseren
 832	Unseelie
-833	Traveler
+833	Eerie Traveler
 834	
 835	
 836	

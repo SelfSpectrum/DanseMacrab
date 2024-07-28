@@ -38,7 +38,7 @@ enum DamageType {
 	DMG_HEALBLOODY = 11,
 	DMG_HEALPSY = 12,
 	DMG_HEALARMOR = 13,
-	DMG_HEALMEDICINE = 14
+	DMG_HEALMEDICINE = 14,
 	DMG_TRUE = 15
 };
 enum EntityType {

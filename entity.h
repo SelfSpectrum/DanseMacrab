@@ -38,7 +38,8 @@ enum DamageType {
 	DMG_HEALBLOODY = 11,
 	DMG_HEALPSY = 12,
 	DMG_HEALARMOR = 13,
-	DMG_TRUE = 14
+	DMG_HEALMEDICINE = 14
+	DMG_TRUE = 15
 };
 enum EntityType {
 	ENTITY_ENEMY = 0,
@@ -114,28 +115,32 @@ enum AttributeType {	// ATTR % 6 for index
 	ATTR_PASSION = 23
 };
 enum StatusType {
-	STATUS_NONE = 0,		// No effect
-	STATUS_BLEED = 1,		// Take damage everytime the entity moves
-	STATUS_BLINDED = 2,		// Must succeed on
-	STATUS_BURNING = 3,		// 1d10 fire damage, might destroy items
-	STATUS_CONFUSED = 4,		// If a tech don't hit, counts as critical fumble
-	STATUS_DEAFENED = 5,		// Can't communicate
-	STATUS_DEATH = 6,		// Die after some turns
-	STATUS_DEVOURED = 7,		// 1d10 acid damage, deal stress
-	STATUS_DROWNING = 8,		// Deal stress
-	STATUS_GRAPPLED = 9,		// Can't move or dodge
-	STATUS_HORRIFIED = 10,		// Can't be in front of an enemy
-	STATUS_INVISIBLE = 11,		// Must succeed a perception check before roll or attack
-	STATUS_LINKED = 12,		// Two or more creatures link, what happens to one, happens to all
-	STATUS_MOURNFUL = 13,		// Can't do anything
-	STATUS_PARALYZED = 14,		// Can't move or take actions
-	STATUS_PASSANGER = 15,		// Carry an entity
-	STATUS_POISONED = 16,		// Disadvantage on all rolls
-	STATUS_POSSESSION = 17,		// Another creature controls actions
-	STATUS_PRONE = 18,		// Melee are crits
-	STATUS_RAGE = 19,		// Attack the closest creature
-	STATUS_SLEEPING = 20,		// Attacks autohit
-	STATUS_SUFFOCATING = 21		// Deal stress
+	STATUS_NONE = 0, // No effect
+	STATUS_BLEED = 1, // Take damage everytime the entity moves
+	STATUS_BLINDED = 2, // Must succeed on 12 reflex check before attacks or checks
+	STATUS_BRUISED = 3, // Take extra bludgeoning damage
+	STATUS_BURNING = 4, // 1d10 fire damage, might destroy items
+	STATUS_CONFUSED = 5, // If a tech don't hit, counts as critical fumble
+	STATUS_CURSED = 6, //
+	STATUS_DEAFENED = 7, // Can't communicate
+	STATUS_DEATH = 8, // Die after some turns
+	STATUS_DEVOURED = 9, // 1d10 acid damage, deal stress
+	STATUS_DROWNING = 10, // Deal stress
+	STATUS_GRAPPLED = 11, // Can't move or dodge
+	STATUS_HORRIFIED = 12, // Can't be in front of an enemy
+	STATUS_INVISIBLE = 13, // Must succeed a 12 perception check before roll or attack
+	STATUS_LINKED = 14, // Two or more creatures link, what happens to one, happens to all
+	STATUS_MOURNFUL = 15, // Can't do anything
+	STATUS_OILED = 16, // Recieve extra fire damage
+	STATUS_PARALYZED = 17, // Can't move or take actions
+	STATUS_PASSENGER = 18, // Carry an entity
+	STATUS_POISONED = 19, // Disadvantage on all rolls
+	STATUS_POSSESSION = 20, // Another creature controls actions
+	STATUS_PRONE = 21, // Melee are crits
+	STATUS_RAGE = 22, // Attack the closest creature
+	STATUS_SCARRED = 23, // Recieve extra slashing damage
+	STATUS_SLEEPING = 24, // Attacks autohit
+	STATUS_SUFFOCATING = 25 // Deal stress
 };
 enum EconomyType {
 	ECO_ACTION = 0,

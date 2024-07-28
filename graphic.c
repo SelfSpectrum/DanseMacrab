@@ -258,14 +258,6 @@ Sprite *ParseSprite(char *line, bool useFile) {
 		sprite->origin.width = atof(token);
 		token = strtok_r(NULL, "	", &saveptr);
 		sprite->origin.height = atof(token);
-		// Let's ignore things useful for buttons
-		if (useFile) {
-			token = strtok_r(NULL, "	", &saveptr);
-			token = strtok_r(NULL, "	", &saveptr);
-			token = strtok_r(NULL, "	", &saveptr);
-			token = strtok_r(NULL, "	", &saveptr);
-		}
-		// Done
 		token = strtok_r(NULL, "	", &saveptr);
 		sprite->dest.x = atof(token);
 		token = strtok_r(NULL, "	", &saveptr);
@@ -288,15 +280,19 @@ Sprite *ParseSprite(char *line, bool useFile) {
 void DrawSprite(Sprite **sprites, SafeTexture *textures, int spriteAmount, Shader shader, Color color) {
 	int i;
 	for (i = 0; i < spriteAmount; i++) {
-		if (sprites[i]->shader) BeginShaderMode(shader);
-		DrawTexturePro(textures[sprites[i]->textureIndex].tex,
-				sprites[i]->origin,
-				sprites[i]->dest,
-				sprites[i]->position,
-				sprites[i]->rotation,
-				color);
-		if (sprites[i]->shader) EndShaderMode();
+		DrawSingleSprite(sprites[i], textures, shader, color);
 	}
+}
+void DrawSingleSprite(Sprite *sprite, SafeTexture *textures, Shader shader, Color color) {
+	if (sprite == NULL) return;
+	if (sprites->shader) BeginShaderMode(shader);
+	DrawTexturePro(textures[sprites[i]->textureIndex].tex,
+			sprites->origin,
+			sprites->dest,
+			sprites->position,
+			sprites->rotation,
+			color);
+	if (sprites->shader) EndShaderMode();
 }
 void UnloadSprite(Sprite **sprites, int *spriteAmount) {
 	int i;
@@ -336,39 +332,9 @@ Button *ParseButton(char *line, FILE *translationData, Font font) {
 	char *saveptr;
 	if (button != NULL) {
 		token = strtok_r(line, "	", &saveptr);
-		button->textureIndex = atoi(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		button->originOff.x = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		button->originOff.y = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		button->originOff.width = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		button->originOff.height = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		button->originOn.x = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		button->originOn.y = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		button->originOn.width = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		button->originOn.height = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		button->dest.x = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		button->dest.y = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		button->dest.width = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		button->dest.height = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		button->position.x = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		button->position.y = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		button->rotation = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		button->shader = (bool) atoi(token);
+		// Sprite off
+		token = strtok_r(line, "	", &saveptr);
+		// Sprite on
 		token = strtok_r(NULL, "	", &saveptr);
 		button->message = LoadSingleMessage(translationData,
 						    font,

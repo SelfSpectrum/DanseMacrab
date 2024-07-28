@@ -54,14 +54,8 @@ struct Sprite {
 };
 struct Button {
 	Message *message;
-	int textureIndex;
-	Rectangle originOff;
-	Rectangle originOn;
-	Rectangle dest;
-	Vector2 position;
-	float rotation;
-	bool shader;
-	bool selected;
+	Sprite *spriteOff;
+	Sprite *spriteOn;
 };
 struct Animable {
 	int frame; // Frame needed to change to the next event

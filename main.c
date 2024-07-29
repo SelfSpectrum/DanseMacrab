@@ -103,9 +103,12 @@ void SetState(StateData *state, GameState newState);
 void SavePrefs(PlayerPref prefs);
 PlayerPref LoadPrefs();
 // INFO: SFX functions
-void PlaySecSound(int id, StateData *state);
+void PlaySecSound(StateData *state, int id);
 //void LowPassFilter(void *buffer, unsigned int frames); // TODO
 //void Crossfade(); // TODO
+// INFO: Some shortcuts for graphics
+void LoadSprite(StateData *state, Vector2 position, float rotation, int id);
+void LoadButton(StateData *state, Vector2 position, float rotation, int idOff, int idOn, int idMessage);
 
 int main() {
 	//-------------------------------------------------------------
@@ -305,7 +308,7 @@ int main() {
 	return 0;
 }
 
-void PlaySecSound(int id, StateData *state) {
+void PlaySecSound(StateData *state, int id) {
 	id = id % SOUND_SIZE;
 	if (state->sfxAlias[state->sfxPosition].init)
 		UnloadSoundAlias(state->sfxAlias[state->sfxPosition].sound);
@@ -361,7 +364,7 @@ void Select(StateData *state) {
 void Accept(StateData *state) {
 	switch (state->state) {
 		case STATE_TITLE:
-			PlaySecSound(0, state);
+			PlaySecSound(state, 0);
 			SetState(state, STATE_FIGHT);// TODO: Change this when combat is done
 			break;
 		case STATE_MAINMENU:
@@ -369,16 +372,16 @@ void Accept(StateData *state) {
 		case STATE_FIGHT:
 			switch (state->buttonPosition) {
 				case 0:
-					PlaySecSound(1, state);
+					PlaySecSound(state, 1);
 					SetState(state, STATE_ATTACKMENU);
 					break;
 				default:
-					PlaySecSound(3, state);
+					PlaySecSound(state, 3);
 					break;
 			}
 			break;
 		case STATE_ATTACKMENU:
-			PlaySecSound(1, state);
+			PlaySecSound(state, 1);
 			break;
 		default:
 			break;
@@ -392,7 +395,7 @@ void Cancel(StateData *state) {
 		case STATE_MAINMENU:
 			break;
 		case STATE_ATTACKMENU:
-			PlaySecSound(2, state);
+			PlaySecSound(state, 2);
 			SetState(state, STATE_FIGHT);
 			break;
 		default:
@@ -539,12 +542,13 @@ void SetState(StateData *state, GameState newState) {
 
 
 			state->combat = (Combat) { { NULL }, { NULL }, NULL, { 0 }, 0, 0 }; // Data from position, entities and stuff
-			state->combat.player[2] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 1);
+			//state->combat.player[2] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 1);
 
 			SetState(state, STATE_TITLE);
 			break;
 		case STATE_TITLE:
-			LoadSprite("./resources/layout/mainTitle.tsv", state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE);
+			//LoadSpriteFromFile("./resources/layout/mainTitle.tsv", state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE);
+			LoadSprite(state, (Vector2) { 0, 0 }, 0, 1);
 			LoadAnimable(state->animsData, state->anims, (Vector2) { 0 }, &state->animAmount, ANIM_SIZE, 1);
 			LoadMessageIntoRegister(state->translationData, state->font, state->messages, &state->messageAmount, MSG_SIZE, (Vector2) {160.5f, 154.5f}, 16, 0, false, ALIGN_CENTER, 1);
 			LoadMessageIntoRegister(state->translationData, state->font, state->messages,
@@ -561,12 +565,13 @@ void SetState(StateData *state, GameState newState) {
 
 			break;
 		case STATE_MAINMENU:
-			LoadSprite("./resources/layout/mainMenu.tsv", state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE);
+			//LoadSprite("./resources/layout/mainMenu.tsv", state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE);
 			break;
 		case STATE_FIGHT:
-			LoadSpriteIntoRegister(state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE, (Vector2) { 0, -132 }, 102);
+			LoadSpriteIntoRegister(state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE, (Vector2) { 0, -132 }, 0, 102);
 			//LoadSpriteIntoRegister(state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE, (Vector2) { 0, -86 }, 100);
-			LoadButton("./resources/layout/fightButtons.tsv", state->spriteData, state->translationData, state->font, state->buttons, &state->buttonAmount, BUTTON_SIZE);
+			//LoadButton("./resources/layout/fightButtons.tsv", state->spriteData, state->translationData, state->font, state->buttons, &state->buttonAmount, BUTTON_SIZE);
+			LoadButton(state, (Vector2) {-112, -162}, 0, 756, 884, 0);
 			ChangeSelection(state);
 			state->buttonSkip = 2;
 			break;
@@ -611,4 +616,10 @@ PlayerPref LoadPrefs() {
 	prefs.language = (Language) lang;
 	UnloadFileText(buffer); // Unload this file data
 	return prefs;
+}
+void LoadSprite(StateData *state, Vector2 position, float rotation, int id) {
+	LoadSpriteIntoRegister(state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE, position, rotation, id);
+}
+void LoadButton(StateData *state, Vector2 position, float rotation, int idOff, int idOn, int idMessage) {
+	LoadButtonIntoRegister(state->spriteData, state->translationData, state->font, state->buttons, &state->buttonAmount, BUTTON_SIZE, position, rotation, idOff, idOn, idMessage);
 }

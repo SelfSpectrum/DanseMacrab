@@ -57,6 +57,7 @@ struct Button {
 	Sprite *spriteOff;
 	Sprite *spriteOn;
 	Vector2 position;
+	float rotation;
 	bool selected;
 };
 struct Animable {
@@ -89,9 +90,9 @@ void UnloadAnimable(Animable **animationArray, int *animAmount);
 void UnloadSingleAnimable(Animable **anims, int *animAmount, int position, int ANIM_SIZE);
 
 // Sprite work
-void LoadSprite(const char *spriteSheet, FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE);
-void LoadSpriteIntoRegister(FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE, Vector2 position, int id);
-Sprite *LoadSingleSprite(FILE *spriteData, int id);
+void LoadSpriteFromFile(const char *spriteSheet, FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE);
+void LoadSpriteIntoRegister(FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE, Vector2 position, float rotation, int id);
+Sprite *LoadSingleSprite(FILE *spriteData, Vector2 position, float rotation, int id);
 Sprite *ParseSprite(char *line);
 void DrawSprite(Sprite **sprites, SafeTexture *textures, int spriteAmount, Shader shader, Color color);
 void DrawSingleSprite(Sprite *sprite, SafeTexture *textures, Shader shader, Color color);
@@ -99,8 +100,19 @@ void UnloadSprite(Sprite **sprites, int *spriteAmount);
 void UnloadSingleSprite(Sprite **sprites, int *spriteAmount, int position, int SPRITE_SIZE);
 
 // Buttons stuff
-void LoadButton(const char *buttonSheet, FILE *spriteData, FILE *translationData, Font font, Button **button, int *buttonAmount, int BUTTON_SIZE);
-Button *ParseButton(char *line, FILE *spriteData, FILE *translationData, Font font);
+void LoadButtonFromFile(const char *buttonSheet, FILE *spriteData, FILE *translationData, Font font, Button **button, int *buttonAmount, int BUTTON_SIZE);
+void LoadButtonIntoRegister(FILE *spriteData,
+			    FILE *translationData,
+			    Font font,
+			    Button **button,
+			    int *buttonAmount,
+			    int BUTTON_SIZE,
+			    Vector2 position,
+			    float rotation,
+			    int idOff,
+			    int idOn,
+			    int idMessage);
+Button *LoadSingleButton(FILE *spriteData, FILE *translationData, Font font, int idOff, int idOn, int idMessage);
 void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Font font, Color color);
 void UnloadButton(Button **buttons, int *buttonAmount);
 

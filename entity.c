@@ -60,7 +60,7 @@ Entity *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id) {
 			token = strtok_r(NULL, "	", &saveptr);
 			enemy->enemy.description = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.sprite = LoadSingleSprite(spriteData, atoi(token));
+			enemy->enemy.sprite = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, atoi(token));
 			token = strtok_r(NULL, "	", &saveptr);
 			enemy->enemy.enemy = (EnemyType) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
@@ -148,7 +148,7 @@ Entity *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE
 			token = strtok_r(NULL, "	", &saveptr);
 			player->player.description = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			player->player.sprite = LoadSingleSprite(spriteData, atoi(token));
+			player->player.sprite = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, atoi(token));
 			token = strtok_r(NULL, "	", &saveptr);
 			player->player.physique[0] = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);

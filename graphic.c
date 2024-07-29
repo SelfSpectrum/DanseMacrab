@@ -198,34 +198,44 @@ void UnloadSingleAnimable(Animable **anims, int *animAmount, int position, int A
 	for (i = 0; i < (ANIM_SIZE - 1); i++)
 		if (anims[i] == NULL) anims[i] = anims[i + 1];
 }
-void LoadSprite(const char *spriteSheet, FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE) {
+void LoadSpriteFromFile(const char *spriteSheet, FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE) {
 	if (!FileExists(spriteSheet)) {
 		printf("INFO: SPRITE: Sprite file \"%s\" not available.\n", spriteSheet);
 		return;
 	}
 	FILE *file = fopen(spriteSheet, "r");
 	char line[256];
+	char *saveptr;
 	while (fgets(line, sizeof(line), file) != NULL) {
 		if ((*spriteAmount) >= SPRITE_SIZE) {
 			printf("WARNING: SPRITE: Sprites register full.\n");
 			return;
 		}
-		sprites[(*spriteAmount)] = ParseSprite(line);
+		Vector2 position = { 0 };
+		position.x = atoi(strtok_r(line, "	", &saveptr));
+		position.y = atoi(strtok_r(NULL, "	", &saveptr));
+		float rotation = atof(strtok_r(NULL, "	", &saveptr));
+		int id = atoi(strtok_r(NULL, "	", &saveptr));
+		sprites[(*spriteAmount)] = LoadSingleSprite(spriteData, position, rotation, id);
 		(*spriteAmount)++;
 	}
 	printf("INFO: SPRITE: Sprites loaded from \"%s\" correctly.\n", spriteSheet);
 	fclose(file);
 }
-void LoadSpriteIntoRegister(FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE, Vector2 position, int id) {
+void LoadSpriteIntoRegister(FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE, Vector2 position, float rotation, int id) {
 	if ((*spriteAmount) < SPRITE_SIZE) {
-		sprites[*spriteAmount] = LoadSingleSprite(spriteData, id);
-		sprites[*spriteAmount]->position = position;
-		if (sprites[*spriteAmount] != NULL) (*spriteAmount)++;
+		sprites[*spriteAmount] = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, id);
+		if (sprites[*spriteAmount] != NULL) {
+			sprites[*spriteAmount]->position = position;
+			sprites[*spriteAmount]->rotation = rotation;
+			(*spriteAmount)++;
+		}
 	}
 }
-Sprite *LoadSingleSprite(FILE *spriteData, int id) {
-	rewind(spriteData);
+Sprite *LoadSingleSprite(FILE *spriteData, Vector2 position, float rotation, int id) {
 	if (spriteData != NULL) {
+		rewind(spriteData);
+		Sprite *sprite;
 		char line[256];
 		char *token;
 		char *saveptr;
@@ -237,7 +247,12 @@ Sprite *LoadSingleSprite(FILE *spriteData, int id) {
 			if (spriteId == id) {
 				token = strtok_r(NULL, "	", &saveptr); //To delete the sprite name
 				printf("INFO: SPRITE: Parsing %s\n", token);
-				return ParseSprite(saveptr);
+				sprite = ParseSprite(saveptr);
+				if (sprite != NULL) {
+					sprite->position = position;
+					sprite->rotation = rotation;
+				}
+				return sprite;
 			}
 		}
 	}
@@ -266,12 +281,6 @@ Sprite *ParseSprite(char *line) {
 		sprite->dest.width = atof(token);
 		token = strtok_r(NULL, "	", &saveptr);
 		sprite->dest.height = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		sprite->position.x = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		sprite->position.y = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		sprite->rotation = atof(token);
 		token = strtok_r(NULL, "	", &saveptr);
 		sprite->shader = (bool) atoi(token);
 	}
@@ -311,14 +320,18 @@ void UnloadSingleSprite(Sprite **sprites, int *spriteAmount, int position, int S
 	for (i = 0; i < (SPRITE_SIZE - 1); i++)
 		if (sprites[i] == NULL) sprites[i] = sprites[i + 1];
 }
-void LoadButton(const char *buttonSheet, FILE *spriteData, FILE *translationData, Font font, Button **buttons, int *buttonAmount, int BUTTON_SIZE) {
+void LoadButtonFromFile(const char *buttonSheet, FILE *spriteData, FILE *translationData, Font font, Button **buttons, int *buttonAmount, int BUTTON_SIZE) {
 	if (FileExists(buttonSheet)) {
 		FILE *file = fopen(buttonSheet, "r");
 		char line[256];
+		char *saveptr;
 		while (fgets(line, sizeof(line), file) != NULL) {
 			for ( ; (*buttonAmount) < BUTTON_SIZE; (*buttonAmount)++) {
 				if (buttons[(*buttonAmount)] == NULL) {
-					buttons[(*buttonAmount)] = ParseButton(line, spriteData, translationData, font);
+					int idOff = atoi(strtok_r(line, "	", &saveptr));
+					int idOn = atoi(strtok_r(NULL, "	", &saveptr));
+					int idMessage = atoi(strtok_r(NULL, "	", &saveptr));
+					buttons[(*buttonAmount)] = LoadSingleButton(spriteData, translationData, font, idOff, idOn, idMessage);
 					break;
 				}
 			}
@@ -326,19 +339,24 @@ void LoadButton(const char *buttonSheet, FILE *spriteData, FILE *translationData
 		fclose(file);
 	}
 }
-Button *ParseButton(char *line, FILE *spriteData, FILE *translationData, Font font) {
+void LoadButtonIntoRegister(FILE *spriteData, FILE *translationData, Font font, Button **buttons, int *buttonAmount, int BUTTON_SIZE, Vector2 position, float rotation, int idOff, int idOn, int idMessage) {
+	if ((*buttonAmount) < BUTTON_SIZE) {
+		buttons[(*buttonAmount)] = LoadSingleButton(spriteData, translationData, font, idOff, idOn, idMessage);
+		if (buttons[(*buttonAmount)] != NULL) {
+			buttons[(*buttonAmount)]->position = position;
+			buttons[(*buttonAmount)]->rotation = rotation;
+			(*buttonAmount)++;
+		}
+	}
+}
+Button *LoadSingleButton(FILE *spriteData, FILE *translationData, Font font, int idOff, int idOn, int idMessage) {
 	Button *button = (Button *) malloc(sizeof(Button));
-	char *token;
-	char *saveptr;
 	if (button != NULL) {
-		token = strtok_r(line, "	", &saveptr);
-		button->spriteOff = LoadSingleSprite(spriteData, atoi(token));
-		token = strtok_r(NULL, "	", &saveptr);
-		button->spriteOn = LoadSingleSprite(spriteData, atoi(token));
-		token = strtok_r(NULL, "	", &saveptr);
+		button->spriteOff = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, idOff);
+		button->spriteOn = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, idOn);
 		button->message = LoadSingleMessage(translationData,
 						    font,
-						    atoi(token),
+						    idMessage,
 						    (Vector2) { -button->position.x + 16, -button->position.y },
 						    16, 0, true, ALIGN_LEFT);
 		//printf("Button's Pos (%f, %f)\n", button->position.x, button->position.y);

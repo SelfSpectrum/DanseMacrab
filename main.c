@@ -109,6 +109,7 @@ void PlaySecSound(StateData *state, int id);
 // INFO: Some shortcuts for graphics
 void LoadSprite(StateData *state, Vector2 position, float rotation, int id);
 void LoadButton(StateData *state, Vector2 position, float rotation, int idOff, int idOn, int idMessage);
+void LoadMessage(StateData *state, Vector2 position, float fontSize, float spacing, bool useColor, Align align, int id);
 
 int main() {
 	//-------------------------------------------------------------
@@ -209,93 +210,73 @@ int main() {
 	}
 
 	StopMusicStream(state.music);
-	printf("Breakpoint base 0\n");
 	UnloadShader(shader);
-	printf("Breakpoint base 1\n");
 	UnloadRenderTexture(target);
-	printf("Breakpoint base 2\n");
 	UnloadSprite(state.sprites, &state.spriteAmount);
-	printf("Breakpoint base 3\n");
 	UnloadButton(state.buttons, &state.buttonAmount);
-	printf("Breakpoint base 4\n");
 	UnloadCombat(&state.combat);
-	printf("Breakpoint base 5\n");
 	UnloadAnimable(state.anims, &state.animAmount);
-	printf("Breakpoint base 6\n");
 	UnloadMessage(state.messages, &state.messageAmount);
-	printf("Breakpoint base 7\n");
 	UnloadMusicStream(state.music); // Unload music stream buffers from RAM
-	printf("Breakpoint base 8\n");
 	UnloadFont(state.font);
-	printf("Breakpoint base 9\n");
 
 	if (state.animsData != NULL) {
 		fclose(state.animsData);
 		state.animsData = NULL;
-		printf("Breakpoint 0\n");
 	}
 	if (state.spriteData != NULL) {
 		fclose(state.spriteData);
 		state.spriteData = NULL;
-		printf("Breakpoint 1\n");
 	}
 	if (state.charmData != NULL) {
 		fclose(state.charmData);
 		state.charmData = NULL;
-		printf("Breakpoint 2\n");
 	}
 	if (state.armorData != NULL) {
 		fclose(state.armorData);
 		state.armorData = NULL;
-		printf("Breakpoint 3\n");
 	}
 	if (state.weaponData != NULL) {
 		fclose(state.weaponData);
 		state.weaponData = NULL;
-		printf("Breakpoint 4\n");
 	}
 	if (state.techData != NULL) {
 		fclose(state.techData);
 		state.techData = NULL;
-		printf("Breakpoint 5\n");
 	}
 	if (state.characterData != NULL) {
 		fclose(state.characterData);
 		state.characterData = NULL;
-		printf("Breakpoint 6\n");
 	}
 	if (state.enemyData != NULL) {
 		fclose(state.enemyData);
 		state.enemyData = NULL;
-		printf("Breakpoint 7\n");
 	}
 	if (state.dialogData != NULL) {
 		fclose(state.dialogData);
 		state.dialogData = NULL;
-		printf("Breakpoint 8\n");
 	}
 	if (state.translationData != NULL) {
 		fclose(state.translationData);
 		state.translationData = NULL;
-		printf("Breakpoint 9\n");
 	}
 
 	for (i = 0; i < TEX_SIZE; i++) {
-		printf("Tex %d\n", i);
+		//printf("Tex %d\n", i);
 		if (state.textures[i].init) {
 			UnloadTexture(state.textures[i].tex);
 			state.textures[i].init = false;
 		}
 	}
 	for (i = 0; i < SFXALIAS_SIZE; i++) {
-		printf("Sfx %d\n", i);
+		//printf("Sfx %d\n", i);
 		if (state.sfxAlias[i].init) {
 			UnloadSoundAlias(state.sfxAlias[i].sound);
 			state.sfxAlias[i].init = false;
 		}
 	}
 	for (i = 0; i < SOUND_SIZE; i++) {
-		printf("Snd %d\n", i);
+		//printf("Snd %d\n", i);
 		if (state.sounds[i].init) {
 			UnloadSound(state.sounds[i].sound);
 			state.sounds[i].init = false;
@@ -345,6 +326,41 @@ void ChangeSelection(StateData *state) {
 	if (state->buttonPosition < 0) state->buttonPosition += state->buttonAmount;
 	else if (state->buttonPosition > (state->buttonAmount - 1)) state->buttonPosition -= state->buttonAmount;
 	state->buttons[state->buttonPosition]->selected = true;
+	switch (state->state) {
+		case STATE_FIGHT:
+			switch (state->buttonPosition) {
+				case 0:
+					UnloadMessage(state->messages, &state->messageAmount);
+					LoadMessage(state, (Vector2) {146, 128}, 16, 0, true, ALIGN_LEFT, 5);
+					break;
+				case 1:
+					UnloadMessage(state->messages, &state->messageAmount);
+					LoadMessage(state, (Vector2) {146, 128}, 16, 0, true, ALIGN_LEFT, 6);
+					break;
+				case 2:
+					UnloadMessage(state->messages, &state->messageAmount);
+					LoadMessage(state, (Vector2) {146, 128}, 16, 0, true, ALIGN_LEFT, 81);
+					break;
+				case 3:
+					UnloadMessage(state->messages, &state->messageAmount);
+					LoadMessage(state, (Vector2) {146, 128}, 16, 0, true, ALIGN_LEFT, 7);
+					break;
+				case 4:
+					UnloadMessage(state->messages, &state->messageAmount);
+					LoadMessage(state, (Vector2) {146, 128}, 16, 0, true, ALIGN_LEFT, 8);
+					break;
+				case 5:
+					UnloadMessage(state->messages, &state->messageAmount);
+					LoadMessage(state, (Vector2) {146, 128}, 16, 0, true, ALIGN_LEFT, 80);
+					break;
+				default:
+					UnloadMessage(state->messages, &state->messageAmount);
+					break;
+			}
+			break;
+		default:
+			break;
+	}
 	//ChangeText();
 }
 void Start(StateData *state) {
@@ -552,12 +568,8 @@ void SetState(StateData *state, GameState newState) {
 			LoadSprite(state, (Vector2) { -80, -38 }, 0, 2);
 			LoadSprite(state, (Vector2) { -60, -140 }, 0, 7);
 			//LoadAnimable(state->animsData, state->anims, (Vector2) { 0 }, &state->animAmount, ANIM_SIZE, 1);
-			LoadMessageIntoRegister(state->translationData, state->font, state->messages, &state->messageAmount, MSG_SIZE, (Vector2) {160.5f, 154.5f}, 16, 0, false, ALIGN_CENTER, 1);
-			LoadMessageIntoRegister(state->translationData, state->font, state->messages,
-						&state->messageAmount,
-						MSG_SIZE, (Vector2) {160, 154}, // Position
-						16, 0, // Font size and Spacing
-						true, ALIGN_CENTER, 1);
+			LoadMessage(state, (Vector2) {160.5f, 154.5f}, 16, 0, false, ALIGN_CENTER, 1);
+			LoadMessage(state, (Vector2) {160, 154}, 16, 0, true, ALIGN_CENTER, 1);
 
 			state->music = LoadMusicStream("./resources/sfx/title.mp3");
 			state->music.looping = true;
@@ -629,4 +641,17 @@ void LoadSprite(StateData *state, Vector2 position, float rotation, int id) {
 }
 void LoadButton(StateData *state, Vector2 position, float rotation, int idOff, int idOn, int idMessage) {
 	LoadButtonIntoRegister(state->spriteData, state->translationData, state->font, state->buttons, &state->buttonAmount, BUTTON_SIZE, position, rotation, idOff, idOn, idMessage);
+}
+void LoadMessage(StateData *state, Vector2 position, float fontSize, float spacing, bool useColor, Align align, int id) {
+	LoadMessageIntoRegister(state->translationData,
+				state->font,
+				state->messages,
+				&state->messageAmount,
+				MSG_SIZE,
+				position,
+				fontSize,
+				spacing,
+				useColor,
+				align,
+				id);
 }

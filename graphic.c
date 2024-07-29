@@ -446,10 +446,10 @@ Message *LoadSingleMessage(FILE *translationData, Font font, int id, Vector2 pos
 			//printf("%s\n", token);
 
 			message->codepoints = LoadCodepoints(token, &message->codepointAmount);
-			int i;
-			for (i = 0; i < message->codepointAmount; i++) printf("%c", message->codepoints[i]);
-			for (i = 0; i < message->codepointAmount; i++) printf(" %d", message->codepoints[i]);
-			printf("\n");
+			//int i;
+			//for (i = 0; i < message->codepointAmount; i++) printf("%c", message->codepoints[i]);
+			//for (i = 0; i < message->codepointAmount; i++) printf(" %d", message->codepoints[i]);
+			//printf("\n");
 
 			Vector2 mesVec = MeasureTextEx(font, token, message->fontSize, spacing);
 
@@ -459,7 +459,7 @@ Message *LoadSingleMessage(FILE *translationData, Font font, int id, Vector2 pos
 			message->position.x = round(message->position.x);
 			message->position.y = round(message->position.y);
 
-			printf("Message's Pos (%f, %f)\n", message->position.x, message->position.y);
+			//printf("Message's Pos (%f, %f)\n", message->position.x, message->position.y);
 			return message;
 		}
 	}

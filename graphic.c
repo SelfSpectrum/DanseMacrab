@@ -367,10 +367,26 @@ Button *LoadSingleButton(FILE *spriteData, FILE *translationData, Font font, int
 void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Font font, Color color) {
 	int i;
 	for (i = 0; i < buttonAmount; i++) {
-		if (buttons[i]->selected)
-			DrawSingleSprite(buttons[i]->spriteOn, textures, shader, color);
-		else 
-			DrawSingleSprite(buttons[i]->spriteOff, textures, shader, color);
+		if (buttons[i]->selected) {
+			if (buttons[i]->spriteOn->shader) BeginShaderMode(shader);
+			DrawTexturePro(textures[buttons[i]->spriteOn->textureIndex].tex,
+						buttons[i]->spriteOn->origin,
+						buttons[i]->spriteOn->dest,
+						buttons[i]->position,
+						buttons[i]->rotation,
+						color);
+			if (buttons[i]->spriteOn->shader) EndShaderMode();
+		}
+		else {
+			if (buttons[i]->spriteOff->shader) BeginShaderMode(shader);
+			DrawTexturePro(textures[buttons[i]->spriteOff->textureIndex].tex,
+						buttons[i]->spriteOff->origin,
+						buttons[i]->spriteOff->dest,
+						buttons[i]->position,
+						buttons[i]->rotation,
+					color);
+			if (buttons[i]->spriteOff->shader) EndShaderMode();
+		}
 		DrawButtonMessage(buttons[i], font, color);
 	}
 }

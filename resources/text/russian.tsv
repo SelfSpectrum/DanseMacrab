@@ -1,14 +1,14 @@
 ID	Ruso
-1	Presione cualquier tecla para empezar
-2	¿Quieres salir del juego?
-3	Sí
-4	No
-5	Atacar
-6	Mover
-7	Enemgo
-8	Perspicacia
+1	Нажмите любую клавишу, чтобы начать
+2	Вы уверены, что хотите выйти из игры?
+3	Да
+4	Нет
+5	Атака
+6	Движение
+7	Враг
+8	Понимание
 9	Listo
-10	Cancelar
+10	Отменя
 11	Equipo
 12	Amuleto
 13	Magia
@@ -22,29 +22,29 @@ ID	Ruso
 21	Tirar
 22	Volver
 23	Aceptar
-24	FIS
-25	REF
-26	CON
-27	CAR
-28	Físico
+24	ТЕЛ
+25	РЕФ
+26	ПРЕ
+27	ХАР
+28	Телосложение
 29	Atletismo
 30	Constitución
 31	Medicina
 32	Combate
 33	Vibras
-34	Reflejos
+34	Рефлексы
 35	Precisión
 36	Acrobacias
 37	Travesuras
 38	Percepción
 39	Tácto
-40	Conocimiento
+40	Предания
 41	Arcana
 42	Bestias
 43	Sueños
 44	Mazmorras
 45	Naturaleza
-46	Carisma
+46	Харизма
 47	Álma
 48	Autoridad
 49	Drama
@@ -75,19 +75,19 @@ ID	Ruso
 74	Desgarramiento
 75	Adormilamiento
 76	Sofoco
-77	Acción Mayor
-78	Acción Menor
-79	Reacción
-80	No Disponible
-81	Habilidad Sangrienta
-82	Artes Violentas
-83	Manos Demoniacas
-84	Canciones
-85	Palabras Dracónidas
-86	Invocar
-87	Cicatrices
-88	Poderes Psíquicos
-89	Vampirismo
+77	Главное Действие
+78	Незначительное Действие
+79	Реакция
+80	Сейчас недостыпно
+81	Кровавый навык
+82	Искусств Гора
+83	Руки Демона
+84	Песни
+85	Драконьи Слова
+86	Вызывать
+87	Шрамы
+88	Психические Силы
+89	Вампиризм
 90	Nigromancia
 91	Acompañante
 92	Auxiliar
@@ -98,7 +98,7 @@ ID	Ruso
 97	Gafería
 98	A
 99	E
-100	Elige un idioma
+100	Выберите язык
 101	English
 102	Español
 103	Русский

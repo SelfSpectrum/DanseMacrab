@@ -107,6 +107,9 @@ void PlaySecSound(StateData *state, int id);
 //void LowPassFilter(void *buffer, unsigned int frames); // TODO
 //void Crossfade(); // TODO
 // INFO: Some shortcuts for graphics
+void SetHorizontalKeys(StateData *state);
+void SetVerticalKeys(StateData *state);
+void SetOnlyVerticalKeys(StateData *state);
 void LoadSprite(StateData *state, Vector2 position, float rotation, int id);
 void LoadButton(StateData *state, Vector2 position, float rotation, int idOff, int idOn, int idMessage);
 void LoadMessage(StateData *state, Vector2 position, float fontSize, float spacing, bool useColor, Align align, int id);
@@ -327,31 +330,34 @@ void ChangeSelection(StateData *state) {
 	else if (state->buttonPosition > (state->buttonAmount - 1)) state->buttonPosition -= state->buttonAmount;
 	state->buttons[state->buttonPosition]->selected = true;
 	switch (state->state) {
+		case STATE_SELECTLANGUAGE:
+			//LoadMessage(state, (Vector2) { 160, 20 }, 18, 0, true, ALIGN_CENTER, 100);
+			break;
 		case STATE_FIGHT:
 			switch (state->buttonPosition) {
 				case 0:
 					UnloadMessage(state->messages, &state->messageAmount);
-					LoadMessage(state, (Vector2) {146, 128}, 16, 0, true, ALIGN_LEFT, 5);
+					LoadMessage(state, (Vector2) {146, 128}, 18, 0, true, ALIGN_LEFT, 5);
 					break;
 				case 1:
 					UnloadMessage(state->messages, &state->messageAmount);
-					LoadMessage(state, (Vector2) {146, 128}, 16, 0, true, ALIGN_LEFT, 6);
+					LoadMessage(state, (Vector2) {146, 128}, 18, 0, true, ALIGN_LEFT, 6);
 					break;
 				case 2:
 					UnloadMessage(state->messages, &state->messageAmount);
-					LoadMessage(state, (Vector2) {146, 128}, 16, 0, true, ALIGN_LEFT, 81);
+					LoadMessage(state, (Vector2) {146, 128}, 18, 0, true, ALIGN_LEFT, 81);
 					break;
 				case 3:
 					UnloadMessage(state->messages, &state->messageAmount);
-					LoadMessage(state, (Vector2) {146, 128}, 16, 0, true, ALIGN_LEFT, 7);
+					LoadMessage(state, (Vector2) {146, 128}, 18, 0, true, ALIGN_LEFT, 7);
 					break;
 				case 4:
 					UnloadMessage(state->messages, &state->messageAmount);
-					LoadMessage(state, (Vector2) {146, 128}, 16, 0, true, ALIGN_LEFT, 8);
+					LoadMessage(state, (Vector2) {146, 128}, 18, 0, true, ALIGN_LEFT, 8);
 					break;
 				case 5:
 					UnloadMessage(state->messages, &state->messageAmount);
-					LoadMessage(state, (Vector2) {146, 128}, 16, 0, true, ALIGN_LEFT, 80);
+					LoadMessage(state, (Vector2) {146, 128}, 18, 0, true, ALIGN_LEFT, 80);
 					break;
 				default:
 					UnloadMessage(state->messages, &state->messageAmount);
@@ -361,7 +367,6 @@ void ChangeSelection(StateData *state) {
 		default:
 			break;
 	}
-	//ChangeText();
 }
 void Start(StateData *state) {
 	switch (state->state) {
@@ -382,7 +387,10 @@ void Accept(StateData *state) {
 	switch (state->state) {
 		case STATE_TITLE:
 			PlaySecSound(state, 0);
-			SetState(state, STATE_FIGHT);// TODO: Change this when combat is done
+			if (state->pref.firstTime)
+				SetState(state, STATE_SELECTLANGUAGE);// TODO: Change this when combat is done
+			else
+				SetState(state, STATE_FIGHT);
 			break;
 		case STATE_MAINMENU:
 			break;
@@ -420,6 +428,14 @@ void Cancel(StateData *state) {
 	}
 }
 void ExtraA(StateData *state) {
+	switch (state->state) {
+		case STATE_TITLE:
+			Accept(state);
+			break;
+		default:
+			break;
+	}
+	/*
 	state->pref.language = (Language) (((int) state->pref.language - 1) % 3);
 	if ((int)state->pref.language < 0)
 		state->pref.language = (Language) ((int) state->pref.language + 3);
@@ -431,8 +447,17 @@ void ExtraA(StateData *state) {
 			  state->buttonAmount,
 			  state->pref.language);
 	SavePrefs(state->pref);
+	*/
 }
 void ExtraB(StateData *state) {
+	switch (state->state) {
+		case STATE_TITLE:
+			Accept(state);
+			break;
+		default:
+			break;
+	}
+	/*
 	state->pref.language = (Language) (((int) state->pref.language + 1) % 3);
 	ChangeTranslation(&state->translationData,
 			  state->font,
@@ -442,6 +467,7 @@ void ExtraB(StateData *state) {
 			  state->buttonAmount,
 			  state->pref.language);
 	SavePrefs(state->pref);
+	*/
 }
 void SetState(StateData *state, GameState newState) {
 	int i;
@@ -468,10 +494,7 @@ void SetState(StateData *state, GameState newState) {
 			state->selectKey = KEY_BACKSPACE;
 			state->acceptKey = KEY_Z;
 			state->cancelKey = KEY_X;
-			state->leftKey = KEY_LEFT;
-			state->rightKey = KEY_RIGHT;
-			state->upKey = KEY_UP;
-			state->downKey = KEY_DOWN;
+			SetHorizontalKeys(state);
 			state->extraAKey = KEY_A;
 			state->extraBKey = KEY_S;
 			
@@ -523,7 +546,7 @@ void SetState(StateData *state, GameState newState) {
 
 			state->translationData = NULL;
 			int codepoints[210] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 1041, 1042, 1043, 1044, 1045, 1046, 1047, 1048, 1049, 160, 1050, 1051, 1052, 176, 1053, 1054, 1055, 191, 1025, 193, 1056, 1057, 201, 1058, 205, 209, 1059, 211, 1060, 215, 218, 1061, 1062, 225, 1063, 233, 1064, 237, 1065, 241, 243, 1066, 247, 1067, 250, 1068, 1069, 1070, 1071, 1072, 1040, 1073, 1074, 1075, 1076, 1077, 1078, 1079, 1080, 1081, 1082, 1083, 1084, 1085, 1086, 1087, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1099, 1100, 1101, 1102, 1103, 1105};
-			state->font = LoadFontEx("./resources/fonts/Pixel-UniCode.ttf", 32, codepoints, 210);
+			state->font = LoadFontEx("./resources/fonts/Pixel-UniCode.ttf", 1024, codepoints, 210);
 
 			ChangeTranslation(&state->translationData,
 					  state->font,
@@ -568,9 +591,9 @@ void SetState(StateData *state, GameState newState) {
 			LoadSprite(state, (Vector2) { -80, -38 }, 0, 2);
 			LoadSprite(state, (Vector2) { -60, -140 }, 0, 7);
 			//LoadAnimable(state->animsData, state->anims, (Vector2) { 0 }, &state->animAmount, ANIM_SIZE, 1);
-			LoadMessage(state, (Vector2) {161, 154}, 16, 0, false, ALIGN_CENTER, 1);
-			LoadMessage(state, (Vector2) {160, 155}, 16, 0, false, ALIGN_CENTER, 1);
-			LoadMessage(state, (Vector2) {160, 154}, 16, 0, true, ALIGN_CENTER, 1);
+			LoadMessage(state, (Vector2) { 161, 154 }, 18, 0, false, ALIGN_CENTER, 1);
+			LoadMessage(state, (Vector2) { 160, 155 }, 18, 0, false, ALIGN_CENTER, 1);
+			LoadMessage(state, (Vector2) { 160, 154 }, 18, 0, true, ALIGN_CENTER, 1);
 
 			state->music = LoadMusicStream("./resources/sfx/title.mp3");
 			state->music.looping = true;
@@ -579,19 +602,25 @@ void SetState(StateData *state, GameState newState) {
 			SetMusicVolume(state->music, 1.0f);
 
 			break;
+		case STATE_SELECTLANGUAGE:
+			SetOnlyVerticalKeys(state);
+			LoadButton(state, (Vector2) { -138, -100 }, 0, 10, 11, 101);
+			LoadButton(state, (Vector2) { -138, -116 }, 0, 10, 11, 102);
+			LoadButton(state, (Vector2) { -138, -132 }, 0, 10, 11, 103);
 		case STATE_MAINMENU:
 			//LoadSprite("./resources/layout/mainMenu.tsv", state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE);
 			break;
 		case STATE_FIGHT:
+			SetHorizontalKeys(state);
 			LoadSprite(state, (Vector2) { 0, -132 }, 0, 102);
 			//LoadSprite(state, (Vector2) { 0, -86 }, 100);
 			//LoadButton("./resources/layout/fightButtons.tsv", state->spriteData, state->translationData, state->font, state->buttons, &state->buttonAmount, BUTTON_SIZE);
-			LoadButton(state, (Vector2) {-112, -130}, 0, 756, 884, 0);
-			LoadButton(state, (Vector2) {-128, -130}, 0, 772, 900, 0);
-			LoadButton(state, (Vector2) {-112, -146}, 0, 777, 905, 0);
-			LoadButton(state, (Vector2) {-128, -146}, 0, 762, 890, 0);
-			LoadButton(state, (Vector2) {-112, -162}, 0, 757, 885, 0);
-			LoadButton(state, (Vector2) {-128, -162}, 0, 515, 643, 0);
+			LoadButton(state, (Vector2) { -112, -130 }, 0, 756, 884, 0);
+			LoadButton(state, (Vector2) { -128, -130 }, 0, 772, 900, 0);
+			LoadButton(state, (Vector2) { -112, -146 }, 0, 777, 905, 0);
+			LoadButton(state, (Vector2) { -128, -146 }, 0, 762, 890, 0);
+			LoadButton(state, (Vector2) { -112, -162 }, 0, 757, 885, 0);
+			LoadButton(state, (Vector2) { -128, -162 }, 0, 515, 643, 0);
 			ChangeSelection(state);
 			state->buttonSkip = 2;
 			break;
@@ -636,6 +665,24 @@ PlayerPref LoadPrefs() {
 	prefs.language = (Language) lang;
 	UnloadFileText(buffer); // Unload this file data
 	return prefs;
+}
+void SetHorizontalKeys(StateData *state) {
+	state->leftKey = KEY_LEFT;
+	state->rightKey = KEY_RIGHT;
+	state->upKey = KEY_UP;
+	state->downKey = KEY_DOWN;
+}
+void SetVerticalKeys(StateData *state) {
+	state->leftKey = KEY_UP;
+	state->rightKey = KEY_DOWN;
+	state->upKey = KEY_LEFT;
+	state->downKey = KEY_RIGHT;
+}
+void SetOnlyVerticalKeys(StateData *state) {
+	state->leftKey = KEY_UP;
+	state->rightKey = KEY_DOWN;
+	state->upKey = KEY_NULL;
+	state->downKey = KEY_NULL;
 }
 void LoadSprite(StateData *state, Vector2 position, float rotation, int id) {
 	LoadSpriteIntoRegister(state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE, position, rotation, id);

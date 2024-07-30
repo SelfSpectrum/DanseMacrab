@@ -568,7 +568,8 @@ void SetState(StateData *state, GameState newState) {
 			LoadSprite(state, (Vector2) { -80, -38 }, 0, 2);
 			LoadSprite(state, (Vector2) { -60, -140 }, 0, 7);
 			//LoadAnimable(state->animsData, state->anims, (Vector2) { 0 }, &state->animAmount, ANIM_SIZE, 1);
-			LoadMessage(state, (Vector2) {160.5f, 154.5f}, 16, 0, false, ALIGN_CENTER, 1);
+			LoadMessage(state, (Vector2) {161, 154}, 16, 0, false, ALIGN_CENTER, 1);
+			LoadMessage(state, (Vector2) {160, 155}, 16, 0, false, ALIGN_CENTER, 1);
 			LoadMessage(state, (Vector2) {160, 154}, 16, 0, true, ALIGN_CENTER, 1);
 
 			state->music = LoadMusicStream("./resources/sfx/title.mp3");

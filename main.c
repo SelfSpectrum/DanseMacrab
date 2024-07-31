@@ -331,7 +331,40 @@ void ChangeSelection(StateData *state) {
 	state->buttons[state->buttonPosition]->selected = true;
 	switch (state->state) {
 		case STATE_SELECTLANGUAGE:
-			//LoadMessage(state, (Vector2) { 160, 20 }, 18, 0, true, ALIGN_CENTER, 100);
+			switch (state->buttonPosition) {
+				case 0:
+					state->pref.language = (Language) 0;
+					ChangeTranslation(&state->translationData,
+							  state->font,
+							  state->messages,
+							  state->messageAmount,
+							  state->buttons,
+							  state->buttonAmount,
+							  state->pref.language);
+					break;
+				case 1:
+					state->pref.language = (Language) 1;
+					ChangeTranslation(&state->translationData,
+							  state->font,
+							  state->messages,
+							  state->messageAmount,
+							  state->buttons,
+							  state->buttonAmount,
+							  state->pref.language);
+					break;
+				case 2:
+					state->pref.language = (Language) 2;
+					ChangeTranslation(&state->translationData,
+							  state->font,
+							  state->messages,
+							  state->messageAmount,
+							  state->buttons,
+							  state->buttonAmount,
+							  state->pref.language);
+					break;
+				default:
+					break;
+			}
 			break;
 		case STATE_FIGHT:
 			switch (state->buttonPosition) {
@@ -370,6 +403,9 @@ void ChangeSelection(StateData *state) {
 }
 void Start(StateData *state) {
 	switch (state->state) {
+		case STATE_SELECTLANGUAGE:
+			Accept(state);
+			break;
 		case STATE_TITLE:
 			Accept(state);
 			break;
@@ -391,6 +427,11 @@ void Accept(StateData *state) {
 				SetState(state, STATE_SELECTLANGUAGE);// TODO: Change this when combat is done
 			else
 				SetState(state, STATE_FIGHT);
+			break;
+		case STATE_SELECTLANGUAGE:
+			state->pref.firstTime = false;
+			SavePrefs(state->pref);
+			SetState(state, STATE_FIGHT);
 			break;
 		case STATE_MAINMENU:
 			break;
@@ -477,9 +518,6 @@ void SetState(StateData *state, GameState newState) {
 		UnloadButton(state->buttons, &state->buttonAmount);
 		UnloadMessage(state->messages, &state->messageAmount);
 	}
-	
-	printf("State Breakpoint 4\n");
-
 	state->state = newState;
 	printf("INFO: STATE: Loading state %d.\n", (int) newState);
 	switch (state->state) {
@@ -580,9 +618,8 @@ void SetState(StateData *state, GameState newState) {
 			state->sounds[3].sound = LoadSound("./resources/sfx/error.wav");
 			state->sounds[3].init = true;
 
-
 			state->combat = (Combat) { { NULL }, { NULL }, NULL, { 0 }, 0, 0 }; // Data from position, entities and stuff
-			//state->combat.player[2] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 1);
+			state->combat.player[2] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 1);
 
 			SetState(state, STATE_TITLE);
 			break;
@@ -604,9 +641,14 @@ void SetState(StateData *state, GameState newState) {
 			break;
 		case STATE_SELECTLANGUAGE:
 			SetOnlyVerticalKeys(state);
-			LoadButton(state, (Vector2) { -138, -100 }, 0, 10, 11, 101);
-			LoadButton(state, (Vector2) { -138, -116 }, 0, 10, 11, 102);
+
+			LoadMessage(state, (Vector2) { 160, 20 }, 18, 0, true, ALIGN_CENTER, 100);
+			LoadButton(state, (Vector2) { -138, -100 }, 0, 10, 11, 102);
+			LoadButton(state, (Vector2) { -138, -116 }, 0, 10, 11, 101);
 			LoadButton(state, (Vector2) { -138, -132 }, 0, 10, 11, 103);
+			ChangeSelection(state);
+
+			break;
 		case STATE_MAINMENU:
 			//LoadSprite("./resources/layout/mainMenu.tsv", state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE);
 			break;

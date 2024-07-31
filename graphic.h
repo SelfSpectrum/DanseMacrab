@@ -112,7 +112,7 @@ void LoadButtonIntoRegister(FILE *spriteData,
 			    int idOff,
 			    int idOn,
 			    int idMessage);
-Button *LoadSingleButton(FILE *spriteData, FILE *translationData, Font font, int idOff, int idOn, int idMessage);
+Button *LoadSingleButton(FILE *spriteData, FILE *translationData, Font font, Vector2 position, float rotation, int idOff, int idOn, int idMessage);
 void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Font font, Color color);
 void UnloadButton(Button **buttons, int *buttonAmount);
 

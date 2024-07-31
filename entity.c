@@ -181,10 +181,10 @@ Entity *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE
 			player->player.charm = LoadCharm(charmData, atoi(token));
 			token = strtok_r(NULL, "	", &saveptr);
 			feature = strtok_r(token, ",", &saveptr);
-			while (token != NULL) {
+			while (feature != NULL) {
+				printf("%s\n", feature);
 				SetFeature(weaponData, charmData, techData, player, (Feature) atoi(feature));
 				feature = strtok_r(NULL, ",", &saveptr);
-				player->player.featuresAmount++;
 			}
 			return player;
 		}
@@ -282,11 +282,21 @@ void DrawCombat(Combat combat, SafeTexture *textures, Color color) {
 	for (i = 0; i < 5; i++) {
 		if (combat.enemy[i] != NULL) {
 			sprite = combat.enemy[i]->enemy.sprite;
-			DrawTexturePro(textures[sprite->textureIndex].tex, sprite->origin, sprite->dest, Vector2Add(sprite->position, (Vector2) { -64 * combat.enemy[i]->enemy.position, 0 }), sprite->rotation, color);
+			DrawTexturePro(textures[sprite->textureIndex].tex,
+				       sprite->origin,
+				       sprite->dest,
+				       Vector2Add(sprite->position, (Vector2) { -64 * combat.enemy[i]->enemy.position, 0 }),
+				       sprite->rotation,
+				       color);
 		}
 		if (combat.player[i] != NULL) {
 			sprite = combat.player[i]->player.sprite;
-			DrawTexturePro(textures[sprite->textureIndex].tex, sprite->origin, sprite->dest, Vector2Add(sprite->position, (Vector2) { -64 * combat.player[i]->player.position, 0 }), sprite->rotation, color);
+			DrawTexturePro(textures[sprite->textureIndex].tex,
+				       sprite->origin,
+				       sprite->dest,
+				       Vector2Add(sprite->position, (Vector2) { -64 * combat.player[i]->player.position, 0 }),
+				       sprite->rotation,
+				       color);
 		}
 	}
 }

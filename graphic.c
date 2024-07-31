@@ -331,7 +331,7 @@ void LoadButtonFromFile(const char *buttonSheet, FILE *spriteData, FILE *transla
 					int idOff = atoi(strtok_r(line, "	", &saveptr));
 					int idOn = atoi(strtok_r(NULL, "	", &saveptr));
 					int idMessage = atoi(strtok_r(NULL, "	", &saveptr));
-					buttons[(*buttonAmount)] = LoadSingleButton(spriteData, translationData, font, idOff, idOn, idMessage);
+					buttons[(*buttonAmount)] = LoadSingleButton(spriteData, translationData, font, (Vector2) { 0, 0 }, 0, idOff, idOn, idMessage);
 					break;
 				}
 			}
@@ -341,7 +341,7 @@ void LoadButtonFromFile(const char *buttonSheet, FILE *spriteData, FILE *transla
 }
 void LoadButtonIntoRegister(FILE *spriteData, FILE *translationData, Font font, Button **buttons, int *buttonAmount, int BUTTON_SIZE, Vector2 position, float rotation, int idOff, int idOn, int idMessage) {
 	if ((*buttonAmount) < BUTTON_SIZE) {
-		buttons[(*buttonAmount)] = LoadSingleButton(spriteData, translationData, font, idOff, idOn, idMessage);
+		buttons[(*buttonAmount)] = LoadSingleButton(spriteData, translationData, font, position, rotation, idOff, idOn, idMessage);
 		if (buttons[(*buttonAmount)] != NULL) {
 			buttons[(*buttonAmount)]->position = position;
 			buttons[(*buttonAmount)]->rotation = rotation;
@@ -349,16 +349,18 @@ void LoadButtonIntoRegister(FILE *spriteData, FILE *translationData, Font font, 
 		}
 	}
 }
-Button *LoadSingleButton(FILE *spriteData, FILE *translationData, Font font, int idOff, int idOn, int idMessage) {
+Button *LoadSingleButton(FILE *spriteData, FILE *translationData, Font font, Vector2 position, float rotation, int idOff, int idOn, int idMessage) {
 	Button *button = (Button *) malloc(sizeof(Button));
 	if (button != NULL) {
-		button->spriteOff = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, idOff);
-		button->spriteOn = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, idOn);
+		button->position = position;
+		button->rotation = rotation;
+		button->spriteOff = LoadSingleSprite(spriteData, position, rotation, idOff);
+		button->spriteOn = LoadSingleSprite(spriteData, position, rotation, idOn);
 		button->message = LoadSingleMessage(translationData,
 						    font,
 						    idMessage,
-						    (Vector2) { -button->position.x + 16, -button->position.y },
-						    16, 0, true, ALIGN_LEFT);
+						    (Vector2) { -position.x + 24, -position.y },
+						    18, 0, true, ALIGN_CENTER);
 		//printf("Button's Pos (%f, %f)\n", button->position.x, button->position.y);
 		button->selected = false;
 	}

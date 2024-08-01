@@ -370,27 +370,27 @@ void ChangeSelection(StateData *state) {
 			switch (state->buttonPosition) {
 				case 0:
 					UnloadMessage(state->messages, &state->messageAmount);
-					LoadMessage(state, (Vector2) {146, 128}, 18, 0, true, ALIGN_LEFT, 5);
+					LoadMessage(state, (Vector2) {147, 128}, 18, 0, true, ALIGN_LEFT, 5);
 					break;
 				case 1:
 					UnloadMessage(state->messages, &state->messageAmount);
-					LoadMessage(state, (Vector2) {146, 128}, 18, 0, true, ALIGN_LEFT, 6);
+					LoadMessage(state, (Vector2) {147, 128}, 18, 0, true, ALIGN_LEFT, 6);
 					break;
 				case 2:
 					UnloadMessage(state->messages, &state->messageAmount);
-					LoadMessage(state, (Vector2) {146, 128}, 18, 0, true, ALIGN_LEFT, 81);
+					LoadMessage(state, (Vector2) {147, 128}, 18, 0, true, ALIGN_LEFT, 98);
 					break;
 				case 3:
 					UnloadMessage(state->messages, &state->messageAmount);
-					LoadMessage(state, (Vector2) {146, 128}, 18, 0, true, ALIGN_LEFT, 7);
+					LoadMessage(state, (Vector2) {147, 128}, 18, 0, true, ALIGN_LEFT, 7);
 					break;
 				case 4:
 					UnloadMessage(state->messages, &state->messageAmount);
-					LoadMessage(state, (Vector2) {146, 128}, 18, 0, true, ALIGN_LEFT, 8);
+					LoadMessage(state, (Vector2) {147, 128}, 18, 0, true, ALIGN_LEFT, 8);
 					break;
 				case 5:
 					UnloadMessage(state->messages, &state->messageAmount);
-					LoadMessage(state, (Vector2) {146, 128}, 18, 0, true, ALIGN_LEFT, 80);
+					LoadMessage(state, (Vector2) {147, 128}, 18, 0, true, ALIGN_LEFT, 80);
 					break;
 				default:
 					UnloadMessage(state->messages, &state->messageAmount);
@@ -658,15 +658,15 @@ void SetState(StateData *state, GameState newState) {
 			break;
 		case STATE_FIGHT:
 			SetHorizontalKeys(state);
-			LoadSprite(state, (Vector2) { 0, -132 }, 0, 102);
+			LoadSprite(state, (Vector2) { 0, -131 }, 0, 102);
 			//LoadSprite(state, (Vector2) { 0, -86 }, 100);
 			//LoadButton("./resources/layout/fightButtons.tsv", state->spriteData, state->translationData, state->font, state->buttons, &state->buttonAmount, BUTTON_SIZE);
-			LoadButton(state, (Vector2) { -112, -132 }, 0, 756, 884, 0);
-			LoadButton(state, (Vector2) { -128, -132 }, 0, 772, 900, 0);
-			LoadButton(state, (Vector2) { -112, -148 }, 0, 777, 905, 0);
-			LoadButton(state, (Vector2) { -128, -148 }, 0, 762, 890, 0);
-			LoadButton(state, (Vector2) { -112, -164 }, 0, 757, 885, 0);
-			LoadButton(state, (Vector2) { -128, -164 }, 0, 515, 643, 0);
+			LoadButton(state, (Vector2) { -112, -131 }, 0, 756, 884, 0);
+			LoadButton(state, (Vector2) { -128, -131 }, 0, 772, 900, 0);
+			LoadButton(state, (Vector2) { -112, -147 }, 0, 777, 905, 0);
+			LoadButton(state, (Vector2) { -128, -147 }, 0, 762, 890, 0);
+			LoadButton(state, (Vector2) { -112, -163 }, 0, 757, 885, 0);
+			LoadButton(state, (Vector2) { -128, -163 }, 0, 515, 643, 0);
 			ChangeSelection(state);
 			state->buttonSkip = 2;
 			break;

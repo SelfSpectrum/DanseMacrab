@@ -297,12 +297,13 @@ void DrawCombat(Combat combat, SafeTexture *textures, Shader shader, Color color
 			DrawTexturePro(textures[sprite->textureIndex].tex,
 				       sprite->origin,
 				       sprite->dest,
-				       (Vector2) { -48 * combat.player[i]->player.position - 48, -84 },
+				       (Vector2) { -48 * combat.player[i]->player.position - 48, -82 },
 				       sprite->rotation,
 				       color);
 			if (sprite->shader) EndShaderMode();
 		}
 	}
+	DrawRectangle(0, 130, 360, 1, color);
 }
 Technique LoadTech(FILE *techData, int id) {
 	Technique tech;

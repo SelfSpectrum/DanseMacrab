@@ -440,7 +440,7 @@ void DamageEntity(Combat *combat, Entity attacker, Technique tech);
 void KillEntity(Combat *combat, Entity *entity); //TODO
 void UnloadCombat(Combat *combat);
 void UnloadEntity(EntityType type, Combat *combat, int position);
-void DrawCombat(Combat combat, SafeTexture *textures, Color color);
+void DrawCombat(Combat combat, SafeTexture *textures, Shader shader, Color color);
 // Techniques
 Technique LoadTech(FILE *techData, int id);
 void PlayerLoadTech(FILE *techData, Entity *player); //TODO

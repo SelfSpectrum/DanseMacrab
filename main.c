@@ -190,7 +190,7 @@ int main() {
 					DrawText("Are you sure you want to exit program?", 50, 90, 8, state.globalColor);
 				}
 				else {
-					DrawCombat(state.combat, state.textures, state.globalColor);
+					DrawCombat(state.combat, state.textures, shader, state.globalColor);
 					DrawAnimable(state.anims, state.textures, state.animAmount, shader, state.globalColor);
 					DrawSprite(state.sprites, state.textures, state.spriteAmount, shader, state.globalColor);
 					DrawButton(state.buttons, state.textures, state.buttonAmount, shader, state.font, state.globalColor);
@@ -423,10 +423,7 @@ void Accept(StateData *state) {
 	switch (state->state) {
 		case STATE_TITLE:
 			PlaySecSound(state, 0);
-			if (state->pref.firstTime)
-				SetState(state, STATE_SELECTLANGUAGE);// TODO: Change this when combat is done
-			else
-				SetState(state, STATE_FIGHT);
+			SetState(state, STATE_FIGHT);
 			break;
 		case STATE_SELECTLANGUAGE:
 			state->pref.firstTime = false;
@@ -620,8 +617,13 @@ void SetState(StateData *state, GameState newState) {
 
 			state->combat = (Combat) { { NULL }, { NULL }, NULL, { 0 }, 0, 0 }; // Data from position, entities and stuff
 			state->combat.player[2] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 1);
+			state->combat.player[2]->player.position = 2;
 
-			SetState(state, STATE_TITLE);
+			if (state->pref.firstTime)
+				SetState(state, STATE_SELECTLANGUAGE);
+			else
+				SetState(state, STATE_TITLE);
+
 			break;
 		case STATE_TITLE:
 			//LoadSpriteFromFile("./resources/layout/mainTitle.tsv", state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE);
@@ -630,6 +632,8 @@ void SetState(StateData *state, GameState newState) {
 			//LoadAnimable(state->animsData, state->anims, (Vector2) { 0 }, &state->animAmount, ANIM_SIZE, 1);
 			LoadMessage(state, (Vector2) { 161, 154 }, 18, 0, false, ALIGN_CENTER, 1);
 			LoadMessage(state, (Vector2) { 160, 155 }, 18, 0, false, ALIGN_CENTER, 1);
+			LoadMessage(state, (Vector2) { 159, 154 }, 18, 0, false, ALIGN_CENTER, 1);
+			LoadMessage(state, (Vector2) { 160, 153 }, 18, 0, false, ALIGN_CENTER, 1);
 			LoadMessage(state, (Vector2) { 160, 154 }, 18, 0, true, ALIGN_CENTER, 1);
 
 			state->music = LoadMusicStream("./resources/sfx/title.mp3");
@@ -657,12 +661,12 @@ void SetState(StateData *state, GameState newState) {
 			LoadSprite(state, (Vector2) { 0, -132 }, 0, 102);
 			//LoadSprite(state, (Vector2) { 0, -86 }, 100);
 			//LoadButton("./resources/layout/fightButtons.tsv", state->spriteData, state->translationData, state->font, state->buttons, &state->buttonAmount, BUTTON_SIZE);
-			LoadButton(state, (Vector2) { -112, -130 }, 0, 756, 884, 0);
-			LoadButton(state, (Vector2) { -128, -130 }, 0, 772, 900, 0);
-			LoadButton(state, (Vector2) { -112, -146 }, 0, 777, 905, 0);
-			LoadButton(state, (Vector2) { -128, -146 }, 0, 762, 890, 0);
-			LoadButton(state, (Vector2) { -112, -162 }, 0, 757, 885, 0);
-			LoadButton(state, (Vector2) { -128, -162 }, 0, 515, 643, 0);
+			LoadButton(state, (Vector2) { -112, -132 }, 0, 756, 884, 0);
+			LoadButton(state, (Vector2) { -128, -132 }, 0, 772, 900, 0);
+			LoadButton(state, (Vector2) { -112, -148 }, 0, 777, 905, 0);
+			LoadButton(state, (Vector2) { -128, -148 }, 0, 762, 890, 0);
+			LoadButton(state, (Vector2) { -112, -164 }, 0, 757, 885, 0);
+			LoadButton(state, (Vector2) { -128, -164 }, 0, 515, 643, 0);
 			ChangeSelection(state);
 			state->buttonSkip = 2;
 			break;

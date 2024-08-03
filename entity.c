@@ -8,14 +8,15 @@ void LoadEnemiesFile(FILE **file, const char *enemySheet) {
 	if (FileExists(enemySheet)) *file = fopen(enemySheet, "r");
 }
 void LoadEnemiesOnCombat(FILE *file, FILE *enemyData, FILE *spriteData, FILE *techData, Combat *combat, int id) {
+	if (file == NULL) return;
 	char line[512];
 	char *token;
 	char *saveptr;
-	int i = 1;
 	fgets(line, sizeof(line), file);
 	while (fgets(line, sizeof(line), file) != NULL) {
-		if (i == id) {
-			token = strtok_r(line, "	", &saveptr);
+		token = strtok_r(line, "	", &saveptr);
+		if (atoi(token) == id) {
+			token = strtok_r(NULL, "	", &saveptr);
 			combat->enemy[0] = LoadEnemy(enemyData, spriteData, techData, atoi(token));
 			if (token[0] != '0') combat->enemy[0]->enemy.position = 0;
 			token = strtok_r(NULL, "	", &saveptr);
@@ -31,7 +32,6 @@ void LoadEnemiesOnCombat(FILE *file, FILE *enemyData, FILE *spriteData, FILE *te
 			combat->enemy[4] = LoadEnemy(enemyData, spriteData, techData, atoi(token));
 			if (token[0] != '0') combat->enemy[4]->enemy.position = 4;
 		}
-		i++;
 	}
 }
 Entity *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id) {
@@ -54,7 +54,7 @@ Entity *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id) {
 		token = strtok_r(line, "	", &saveptr);
 		enemyId = atoi(token);
 		if (enemyId == id) {
-			enemy->enemy.id = atoi(token);
+			enemy->enemy.id = enemyId;
 			token = strtok_r(NULL, "	", &saveptr);
 			enemy->enemy.name = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
@@ -88,11 +88,15 @@ Entity *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id) {
 			token = strtok_r(NULL, "	", &saveptr);
 			enemy->enemy.resistances[1] = (DamageType) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.inmunities[0] = (StatusType) atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			enemy->enemy.inmunities[1] = (StatusType) atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
 			enemy->enemy.multiattack = atoi(token);
 			// Loading techniques
 			token = strtok_r(NULL, "	", &saveptr);
 			tech = strtok_r(token, ",", &saveptr);
-			while (token != NULL) {
+			while (tech != NULL) {
 				enemy->enemy.tech[enemy->enemy.techAmount] = LoadTech(techData, atoi(tech));
 				tech = strtok_r(NULL, ",", &saveptr);
 				enemy->enemy.techAmount++;
@@ -182,7 +186,6 @@ Entity *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE
 			token = strtok_r(NULL, "	", &saveptr);
 			feature = strtok_r(token, ",", &saveptr);
 			while (feature != NULL) {
-				printf("%s\n", feature);
 				SetFeature(weaponData, charmData, techData, player, (Feature) atoi(feature));
 				feature = strtok_r(NULL, ",", &saveptr);
 			}

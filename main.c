@@ -87,6 +87,7 @@ struct StateData {
 	FILE *enemyData;
 	FILE *dialogData;
 	FILE *translationData;
+	FILE *combatData;
 };
 
 // INFO: Input functions
@@ -263,6 +264,10 @@ int main() {
 		fclose(state.translationData);
 		state.translationData = NULL;
 	}
+	if (state.combatData != NULL) {
+		fclose(state.combatData);
+		state.combatData = NULL;
+	}
 
 	for (i = 0; i < TEX_SIZE; i++) {
 		//printf("Tex %d\n", i);
@@ -378,7 +383,7 @@ void ChangeSelection(StateData *state) {
 					break;
 				case 2:
 					UnloadMessage(state->messages, &state->messageAmount);
-					LoadMessage(state, (Vector2) {147, 128}, 18, 0, true, ALIGN_LEFT, 98);
+					LoadMessage(state, (Vector2) {147, 128}, 18, 0, true, ALIGN_LEFT, 13);
 					break;
 				case 3:
 					UnloadMessage(state->messages, &state->messageAmount);
@@ -386,7 +391,7 @@ void ChangeSelection(StateData *state) {
 					break;
 				case 4:
 					UnloadMessage(state->messages, &state->messageAmount);
-					LoadMessage(state, (Vector2) {147, 128}, 18, 0, true, ALIGN_LEFT, 8);
+					LoadMessage(state, (Vector2) {147, 128}, 18, 0, true, ALIGN_LEFT, 98);
 					break;
 				case 5:
 					UnloadMessage(state->messages, &state->messageAmount);
@@ -578,6 +583,9 @@ void SetState(StateData *state, GameState newState) {
 			if (FileExists("./resources/text/dialogs.tsv"))
 				state->dialogData = fopen("./resources/text/dialogs.tsv", "r");
 			else state->dialogData = NULL;
+			if (FileExists("./resources/combat/dispairHill.tsv"))
+				state->combatData = fopen("./resources/combat/dispairHill.tsv", "r");
+			else state->combatData = NULL;
 
 			state->translationData = NULL;
 			int codepoints[210] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 1041, 1042, 1043, 1044, 1045, 1046, 1047, 1048, 1049, 160, 1050, 1051, 1052, 176, 1053, 1054, 1055, 191, 1025, 193, 1056, 1057, 201, 1058, 205, 209, 1059, 211, 1060, 215, 218, 1061, 1062, 225, 1063, 233, 1064, 237, 1065, 241, 243, 1066, 247, 1067, 250, 1068, 1069, 1070, 1071, 1072, 1040, 1073, 1074, 1075, 1076, 1077, 1078, 1079, 1080, 1081, 1082, 1083, 1084, 1085, 1086, 1087, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1099, 1100, 1101, 1102, 1103, 1105};
@@ -618,6 +626,7 @@ void SetState(StateData *state, GameState newState) {
 			state->combat = (Combat) { { NULL }, { NULL }, NULL, { 0 }, 0, 0 }; // Data from position, entities and stuff
 			state->combat.player[2] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 1);
 			state->combat.player[2]->player.position = 2;
+			LoadEnemiesOnCombat(state->combatData, state->enemyData, state->spriteData, state->techData, &state->combat, 1);
 
 			if (state->pref.firstTime)
 				SetState(state, STATE_SELECTLANGUAGE);
@@ -665,7 +674,7 @@ void SetState(StateData *state, GameState newState) {
 			LoadButton(state, (Vector2) { -128, -131 }, 0, 772, 900, 0);
 			LoadButton(state, (Vector2) { -112, -147 }, 0, 777, 905, 0);
 			LoadButton(state, (Vector2) { -128, -147 }, 0, 762, 890, 0);
-			LoadButton(state, (Vector2) { -112, -163 }, 0, 757, 885, 0);
+			LoadButton(state, (Vector2) { -112, -163 }, 0, 766, 894, 0);
 			LoadButton(state, (Vector2) { -128, -163 }, 0, 515, 643, 0);
 			ChangeSelection(state);
 			state->buttonSkip = 2;

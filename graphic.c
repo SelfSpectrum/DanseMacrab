@@ -1,6 +1,6 @@
 #include "graphic.h"
 
-void LoadAnimable(FILE *animsData, FILE *spriteData, Animable **anims, Vector2 offset, int *animAmount, int ANIM_SIZE, int id) {
+void LoadAnimationIntoRegister(FILE *animsData, FILE *spriteData, Animable **anims, int *animAmount, int ANIM_SIZE, Vector2 position, float rotation, int id) {
 	if (animsData == NULL) {
 		printf("ERROR: ANIMATION: Error opening animation file\n");
 		return;
@@ -34,112 +34,54 @@ void LoadAnimable(FILE *animsData, FILE *spriteData, Animable **anims, Vector2 o
 		}
 	}
 }
-Animable *LoadSingleAnimable(const char *animSheet, bool repeat, int index, Vector2 offset) {
+Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet, Vector2 position, float rotation) {
 	if (FileExists(animSheet)) {
-		// Line from the file that contains all the struct data
+		// Alocación dinámica, ya que muchos de los animables pueden y deben ser creados y destruidos en sucesiones rápidas, no olvidar liberar la memoria luego
+		Animable *anim = (Animable *) malloc(sizeof(Animable));	
+		if (anim == NULL) {
+			printf("INFO: ANIMABLE: Animable load failed\n");
+			return NULL;
+		}
+
+		char *token; // Para ir partiendo el string
+		char *saveptr; // String cortado restante tras cada partición
+		// Línea del archivo que contiene toda la información del struct
 		char line[256];
 		FILE *file = fopen(animSheet, "r");
 		if (fgets(line, sizeof(line), file) != NULL) {
-			Animable *anim = ParseAnimable(line, anim);
+			token = strtok_r(line, "	", &saveptr);
+			anim->frame = atoi(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			anim->sprite = LoadSingleSprite(spriteData, position, rotation, atoi(token));
+			token = strtok_r(NULL, "	", &saveptr);
+			anim->deltaOrigin.width = atof(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			anim->deltaOrigin.height = atof(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			anim->deltaOrigin.x = atof(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			anim->deltaOrigin.y = atof(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			anim->deltaDest.width = atof(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			anim->deltaDest.height = atof(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			anim->deltaDest.x = atof(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			anim->deltaDest.y = atof(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			anim->deltaPos.x = atof(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			anim->deltaPos.y = atof(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			anim->deltaRotation = atof(token);
 
-			if (anim == NULL) printf("INFO: ANIMABLE: Animable load failed\n");
-			else printf("INFO: ANIMABLE: Animable loaded succesfully\n");
+			printf("INFO: ANIMABLE: Animable loaded succesfully\n");
 
 			return anim;
 		}
 	}
 	else printf("INFO: ANIMABLE: Error opening the animation file %s!\n", animSheet);
-	return anim;
-}
-Animable *ParseAnimable(FILE *spriteData, char *line) {
-	// Alocación dinámica, ya que muchos de los animables pueden y deben ser creados y destruidos en sucesiones rápidas, no olvidar liberar la memoria luego
-	Animable *anim = (Animable *) malloc(sizeof(Animable));	
-	if (anim == NULL) return NULL;
-	anim->currentFrame = 0;
-	anim->data = file;
-	anim->repeat = repeat;
-	anim->index = index;
-	anim->offset = offset;
-	anim->onUse = true;
-
-	char *token;
-	char *saveptr;
-	//printf("INFO: ANIMABLE: Parsing line \"%s\".\n", line);
-	token = strtok_r(line, "	", &saveptr);
-	anim->frame = atoi(token);
-	//printf("INFO: ANIMABLE: Frame %d parsed successfuly.\n", anim->frame);
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->textureIndex = atoi(token);
-	//printf("INFO: ANIMABLE: Texture Index %d parsed successfuly.\n", anim->textureIndex);
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->origin.w = atof(token);
-	//printf("INFO: ANIMABLE: Origin W parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->origin.x = atof(token);
-	//printf("INFO: ANIMABLE: Origin X parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->origin.y = atof(token);
-	//printf("INFO: ANIMABLE: Origin Y parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->origin.z = atof(token);
-	//printf("INFO: ANIMABLE: Origin Z parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->dest.w = atof(token);
-	//printf("INFO: ANIMABLE: Dest W parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->dest.x = atof(token);
-	//printf("INFO: ANIMABLE: Dest X parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->dest.y = atof(token);
-	//printf("INFO: ANIMABLE: Dest Y parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->dest.z = atof(token);
-	//printf("INFO: ANIMABLE: Dest Z parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->position.x = atof(token);
-	//printf("INFO: ANIMABLE: Pos X parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->position.y = atof(token);
-	//printf("INFO: ANIMABLE: Pos Y parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->rotation = atof(token);
-	//printf("INFO: ANIMABLE: Rotation parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaOrigin.w = atof(token);
-	//printf("INFO: ANIMABLE: Delta Origin W parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaOrigin.x = atof(token);
-	//printf("INFO: ANIMABLE: Delta Origin X parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaOrigin.y = atof(token);
-	//printf("INFO: ANIMABLE: Delta Origin Y parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaOrigin.z = atof(token);
-	//printf("INFO: ANIMABLE: Delta Origin Z parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaDest.w = atof(token);
-	//printf("INFO: ANIMABLE: Delta Dest W parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaDest.x = atof(token);
-	//printf("INFO: ANIMABLE: Delta Dest X parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaDest.y = atof(token);
-	//printf("INFO: ANIMABLE: Delta Dest Y parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaDest.z = atof(token);
-	//printf("INFO: ANIMABLE: Delta Dest Z parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaPos.x = atof(token);
-	//printf("INFO: ANIMABLE: Delta Pos X parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaPos.y = atof(token);
-	//printf("INFO: ANIMABLE: Delta Pos Y parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaRotation = atof(token);
-	//printf("INFO: ANIMABLE: Delta Rotation parsed successfuly.\n");
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->shader = (bool) atoi(token);
-	//printf("INFO: ANIMABLE: Shader use parsed successfuly.\n");
 	return anim;
 }
 void UpdateAnimable(Animable **anims, int *animAmount, int ANIM_SIZE) {

@@ -14,7 +14,7 @@ typedef struct PlayerPref PlayerPref;
 typedef struct SafeSound SafeSound;
 
 enum GameState {
-	STATE_INIT,
+	STATE_INIT, // Inicialziacion y carga del estado del juego y todos los archivos necesarios, si hay errores de archivos, se detectan aquí
 	STATE_SELECTLANGUAGE,
 	STATE_INITIALSCENE,
 	STATE_TITLE,
@@ -37,9 +37,9 @@ struct PlayerPref {
 	int textSpeed;
 };
 struct StateData {
-	// State
+	// Estado
 	GameState state;
-	bool exitWindowRequested; // Flag to request window to exit
+	bool exitWindowRequested; // Bandera para solicitar que se cierre la ventana
 	bool exitWindow; // Flag to set window to exit
 	//bool runGame; // To know if the game should run
 	int randomValue;
@@ -48,8 +48,8 @@ struct StateData {
 	Color globalColor; // Used to render the white lines in all textures as colors
 	Font font;
 	SafeTexture textures[TEX_SIZE]; // Here I hold all the texture used in the game
-	Animable *anims[ANIM_SIZE]; // Animation handling and rendering
-	Sprite *sprites[SPRITE_SIZE]; // INFO: What and where to render
+	Animation *anims[ANIM_SIZE];
+	Sprite *sprites[SPRITE_SIZE];
 	Message *messages[MSG_SIZE];
 	int animAmount;
 	int spriteAmount;

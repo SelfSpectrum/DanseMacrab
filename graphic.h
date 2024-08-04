@@ -33,20 +33,19 @@ struct SafeTexture {
 	bool init;
 };
 struct Message {
-	int *codepoints;
-	int codepointAmount;
-	//char data[256];
+	int *codepoints; // Array de números que representan en Unicode las letras del mensaje
+	int codepointAmount; // Cantidad de números dentro del array
 	int id;
 	Vector2 position;
 	Vector2 origin;
 	float fontSize;
 	float spacing;
-	bool useColor;
+	bool useColor; // Utiliza el color universal como tinte (de manera multiplicativa)
 	Align align;
 };
 struct Sprite {
 	int textureIndex;
-	Rectangle origin;
+	Rectangle origin; // Origen del sprite dentro de la textura
 	Rectangle dest;
 	Vector2 position;
 	float rotation;
@@ -62,7 +61,6 @@ struct Button {
 };
 struct Animable {
 	int frame; // Frame needed to change to the next event
-	int currentFrame; // Current frame of animation
 	int index;
 	FILE *data; // File that contains the animation data
 	int textureIndex; // Index in the Texture array from where the sample will come
@@ -75,15 +73,21 @@ struct Animable {
 	Vector2 deltaPos;
 	float deltaRotation;
 	Vector2 offset;
-	bool shader; // Draw inside shader mode?
-	bool repeat; // Upon finishing, rewind animation?
+	bool shader; // ¿Dibujar animable dentro del modo sombreador?
 	bool onUse;
 };
+struct Animation {
+	int id;
+	int currentFrame; // Frame actual de la animación
+	int animsAmount;
+	Animable *anims[8];
+	bool repeat; // ¿Reiniciar la animación al terminar?
+}
 
 // Animation work?
-void LoadAnimable(FILE *animsData, Animable **anims, Vector2 offset, int *animAmount, int ANIM_SIZE, int id);
+void LoadAnimableIntoRegister(FILE *animsData, FILE *spriteData, Animable **anims, Vector2 offset, int *animAmount, int ANIM_SIZE, int id);
 Animable *LoadSingleAnimable(const char *animSheet, bool repeat, int index, Vector2 offset);
-void ParseAnimable(char *line, Animable *anim);
+Animable *ParseAnimable(FILE *spriteData, char *line);
 void UpdateAnimable(Animable **anims, int *animAmount, int ANIM_SIZE);
 void DrawAnimable(Animable **anims, SafeTexture *textures, int animAmount, Shader shader, Color color);
 void UnloadAnimable(Animable **animationArray, int *animAmount);

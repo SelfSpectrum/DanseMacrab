@@ -1,7 +1,11 @@
 #include "graphic.h"
 
-void LoadAnimable(FILE *animsData, Animable **anims, Vector2 offset, int *animAmount, int ANIM_SIZE, int id) {
+void LoadAnimable(FILE *animsData, FILE *spriteData, Animable **anims, Vector2 offset, int *animAmount, int ANIM_SIZE, int id) {
 	if (animsData == NULL) {
+		printf("ERROR: ANIMATION: Error opening animation file\n");
+		return;
+	}
+	if (spriteData == NULL) {
 		printf("ERROR: ANIMATION: Error opening animation file\n");
 		return;
 	}
@@ -31,29 +35,33 @@ void LoadAnimable(FILE *animsData, Animable **anims, Vector2 offset, int *animAm
 	}
 }
 Animable *LoadSingleAnimable(const char *animSheet, bool repeat, int index, Vector2 offset) {
-	// Dynamic allocation since many animables might be created and destroyed in quick successions, don't forget to free later
-	Animable *anim = (Animable *) malloc(sizeof(Animable));	
-	// If the file has problems to open, lack of memory won't be a problem, I hope
-	if (anim == NULL) return NULL;
 	if (FileExists(animSheet)) {
 		// Line from the file that contains all the struct data
 		char line[256];
 		FILE *file = fopen(animSheet, "r");
 		if (fgets(line, sizeof(line), file) != NULL) {
-			ParseAnimable(line, anim);
-			printf("INFO: ANIMABLE: Animable loaded succesfully\n");
-			anim->currentFrame = 0;
-			anim->data = file;
-			anim->repeat = repeat;
-			anim->index = index;
-			anim->offset = offset;
-			anim->onUse = true;
+			Animable *anim = ParseAnimable(line, anim);
+
+			if (anim == NULL) printf("INFO: ANIMABLE: Animable load failed\n");
+			else printf("INFO: ANIMABLE: Animable loaded succesfully\n");
+
+			return anim;
 		}
 	}
 	else printf("INFO: ANIMABLE: Error opening the animation file %s!\n", animSheet);
 	return anim;
 }
-void ParseAnimable(char *line, Animable *anim) {
+Animable *ParseAnimable(FILE *spriteData, char *line) {
+	// Alocación dinámica, ya que muchos de los animables pueden y deben ser creados y destruidos en sucesiones rápidas, no olvidar liberar la memoria luego
+	Animable *anim = (Animable *) malloc(sizeof(Animable));	
+	if (anim == NULL) return NULL;
+	anim->currentFrame = 0;
+	anim->data = file;
+	anim->repeat = repeat;
+	anim->index = index;
+	anim->offset = offset;
+	anim->onUse = true;
+
 	char *token;
 	char *saveptr;
 	//printf("INFO: ANIMABLE: Parsing line \"%s\".\n", line);
@@ -132,6 +140,7 @@ void ParseAnimable(char *line, Animable *anim) {
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->shader = (bool) atoi(token);
 	//printf("INFO: ANIMABLE: Shader use parsed successfuly.\n");
+	return anim;
 }
 void UpdateAnimable(Animable **anims, int *animAmount, int ANIM_SIZE) {
 	int i;

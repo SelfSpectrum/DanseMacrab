@@ -168,7 +168,7 @@ int main() {
 			else if (IsKeyPressed(state.cancelKey)) state.exitWindowRequested = false;
 		}
 		else {
-			UpdateAnimable(state.anims, &state.animAmount, ANIM_SIZE);
+			UpdateAnimation(state.spriteData, state.anims, &state.animAmount, ANIM_SIZE);
 			for (i = 0; i < TEX_SIZE; i++) {
 				SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), state.textures[i].tex);
 			}
@@ -192,7 +192,7 @@ int main() {
 				}
 				else {
 					DrawCombat(state.combat, state.textures, shader, state.globalColor);
-					DrawAnimable(state.anims, state.textures, state.animAmount, shader, state.globalColor);
+					DrawAnimation(state.anims, state.textures, state.animAmount, shader, state.globalColor);
 					DrawSprite(state.sprites, state.textures, state.spriteAmount, shader, state.globalColor);
 					DrawButton(state.buttons, state.textures, state.buttonAmount, shader, state.font, state.globalColor);
 					DrawMessage(state.messages, state.messageAmount, state.font, state.globalColor);

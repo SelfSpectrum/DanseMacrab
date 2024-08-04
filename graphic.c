@@ -9,8 +9,16 @@ void LoadAnimationIntoRegister(FILE *animsData, FILE *spriteData, Animation **an
 		printf("ERROR: SPRITE: Sprite file is not open.\n");
 		return;
 	}
+	if ((*animAmount) < ANIM_SIZE) {
+		anims[*animAmount] = LoadSingleAnimation(animsData, spriteData, id);
+		if (anims[*animAmount] != NULL) {
+			anims[*animAmount]->position = position;
+			anims[*animAmount]->rotation = rotation;
+			(*spriteAmount)++;
+		}
+	}
 }
-Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, Vector2 position, float rotation, int id) {
+Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 	if (spriteData == NULL) {
 		printf("ERROR: SPRITE: Sprite file is not open.\n");
 		return;
@@ -22,6 +30,9 @@ Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, Vector2 positi
 	}
 	anim->currentFrame = 0;
 	anim->onUse = true;
+
+	Vector2 position = { 0 };
+	float rotation = 0;
 
 	char line[256];
 	char *token;
@@ -37,11 +48,17 @@ Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, Vector2 positi
 		if (animId == id) {
 			anim->id = animId;
 			token = strtok_r(NULL, "	", &saveptr);
+			position.x = atof(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			position.y = atof(token);
+			token = strtok_r(NULL, "	", &saveptr);
+			rotation = atof(token);
+			token = strtok_r(NULL, "	", &saveptr);
 			anim->repeat = (bool) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
 			animables = strtok_r(token, ",", &saveptr);
-			for (anim->animsAmount = 0; (anim->animsAmount < 8) && (animables != NULL); anim->animsAmount++) {
-				anim->anims[anims->animsAmount] = LoadSingleAnimable(spriteData, animables, position, rotation);
+			for (anim->animAmount = 0; (anim->animAmount < 8) && (animables != NULL); anim->animAmount++) {
+				anim->anims[anim->animsAmount] = LoadSingleAnimable(spriteData, animables, position, rotation);
 				animables = strtok_r(NULL, ",", &saveptr);
 			}
 			break;
@@ -100,31 +117,41 @@ Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet, Vector2 position
 	else printf("INFO: ANIMABLE: Error opening the animation file %s!\n", animSheet);
 	return anim;
 }
-void UpdateAnimable(Animable **anims, int *animAmount, int ANIM_SIZE) {
+void UpdateAnimation(FILE *spriteData, Animation **anims, int animAmount, int ANIM_SIZE) {
 	int i;
-	for (i = 0; i < (*animAmount); i++) {
-		if (!anims[i]->onUse) continue;
-		char line[256];
-		anims[i]->origin = QuaternionAdd(anims[i]->origin, anims[i]->deltaOrigin);
-		anims[i]->dest = QuaternionAdd(anims[i]->dest, anims[i]->deltaDest);
-		anims[i]->position = Vector2Add(anims[i]->position, anims[i]->deltaPos);
-		anims[i]->rotation += anims[i]->deltaRotation;
-		anims[i]->currentFrame++;
-		if (anims[i]->currentFrame >= anims[i]->frame) {
-			if (anims[i]->frame != 0) {
-				if (fgets(line, sizeof(line), anims[i]->data) != NULL) {
-					//printf("INFO: ANIMABLE: Next animable line loaded.\n");
-					ParseAnimable(line, anims[i]);
-					//printf("INFO: ANIMABLE: Next animable line parsed.\n");
-				}
+	int j;
+	for (i = 0; i < animAmount; i++) {
+		if (anims[i]->onUse) {
+			for (j = 0; j < anims[i]->animAmount; j++) {
+				UpdateAnimable(spriteData, anims[i]->anims[j], anims[i]->currentFrame);
 			}
-			else if (anims[i]->repeat) {
-				anims[i]->currentFrame = 0;
-				rewind(anims[i]->data);
-				if (fgets(line, sizeof(line), anims[i]->data) != NULL) ParseAnimable(line, anims[i]);
-			}
-			else UnloadSingleAnimable(anims, animAmount, i, ANIM_SIZE);
+			anims[i]->currentFrame++;
 		}
+	}
+}
+void UpdateAnimable(FILE *spriteData, Animable *anim, int currentFrame) {
+	char line[256];
+	anim->sprite->origin = (Rectangle) { anim->sprite->origin.width + anim->deltaOrigin.width,
+       					     anim->sprite->origin.height + anim->deltaOrigin.height,
+					     anim->sprite->origin.x + anim->deltaOrigin.x,
+					     anim->sprite->origin.y + anim->deltaOrigin.y};
+	anim->sprite->dest = (Rectangle) { anim->sprite->dest, anim->deltaDest };
+	anim->sprite->position = Vector2Add(anim->sprite->position, anim->deltaPos);
+	anim->sprite->rotation += anim->deltaRotation;
+	if (currentFrame >= anims[i]->frame) {
+		if (anims[i]->frame != 0) {
+			if (fgets(line, sizeof(line), anims[i]->data) != NULL) {
+				//printf("INFO: ANIMABLE: Next animable line loaded.\n");
+				ParseAnimable(line, anims[i]);
+				//printf("INFO: ANIMABLE: Next animable line parsed.\n");
+			}
+		}
+		else if (anims[i]->repeat) {
+			anims[i]->currentFrame = 0;
+			rewind(anims[i]->data);
+			if (fgets(line, sizeof(line), anims[i]->data) != NULL) ParseAnimable(line, anims[i]);
+		}
+		else UnloadSingleAnimable(anims, animAmount, i, ANIM_SIZE);
 	}
 }
 void DrawAnimable(Animable **anims, SafeTexture *textures, int animAmount, Shader shader, Color color) {
@@ -191,7 +218,7 @@ void LoadSpriteFromFile(const char *spriteSheet, FILE *spriteData, Sprite **spri
 }
 void LoadSpriteIntoRegister(FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE, Vector2 position, float rotation, int id) {
 	if (spriteData == NULL) {
-		printf("ERROR: ANIMATION: Sprite file is not open.\n");
+		printf("ERROR: SPRITE: Sprite file is not open.\n");
 		return;
 	}
 	if ((*spriteAmount) < SPRITE_SIZE) {
@@ -333,7 +360,7 @@ void LoadButtonIntoRegister(FILE *spriteData, FILE *translationData, Font font, 
 Button *LoadSingleButton(FILE *spriteData, FILE *translationData, Font font, Vector2 position, float rotation, int idOff, int idOn, int idMessage) {
 	if (spriteData == NULL) {
 		printf("ERROR: SPRITE: Sprite file is not open.\n");
-		return;
+		return NULL;
 	}
 	Button *button = (Button *) malloc(sizeof(Button));
 	if (button != NULL) {

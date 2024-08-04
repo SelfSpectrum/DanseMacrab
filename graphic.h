@@ -74,18 +74,20 @@ struct Animable {
 struct Animation {
 	int id;
 	int currentFrame; // Frame actual de la animación
-	int animsAmount;
+	int animAmount;
 	Animable *anims[8];
+	Vector2 position;
+	float rotation;
 	bool repeat; // ¿Reiniciar la animación al terminar?
 	bool onUse;
-}
+};
 
 // Funciones para animaciones
 void LoadAnimationIntoRegister(FILE *animsData, FILE *spriteData, Animation **anims, int *animAmount, int ANIM_SIZE, Vector2 position, float rotation, int id);
-Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, Vector2 position, float rotation, int id);
+Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id);
 Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet, Vector2 position, float rotation);
-void UpdateAnimation(Animation *anims, int *animAmount, int ANIM_SIZE);
-void UpdateAnimable(Animable *anims, int *animAmount, int ANIM_SIZE);
+void UpdateAnimation(FILE *spriteData, Animation **anims, int animAmount, int ANIM_SIZE) {
+void UpdateAnimable(FILE *spriteData, Animable *anim, int currentFrame) {
 void DrawAnimable(Animable *anims, SafeTexture *textures, int animAmount, Shader shader, Color color);
 void UnloadAnimable(Animation *anims, int *animAmount);
 void UnloadSingleAnimable(Animable *anims, int *animAmount, int position, int ANIM_SIZE);

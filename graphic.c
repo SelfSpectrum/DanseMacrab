@@ -1,45 +1,60 @@
 #include "graphic.h"
 
-void LoadAnimationIntoRegister(FILE *animsData, FILE *spriteData, Animable **anims, int *animAmount, int ANIM_SIZE, Vector2 position, float rotation, int id) {
+void LoadAnimationIntoRegister(FILE *animsData, FILE *spriteData, Animation **anims, int *animAmount, int ANIM_SIZE, Vector2 position, float rotation, int id) {
 	if (animsData == NULL) {
-		printf("ERROR: ANIMATION: Error opening animation file\n");
+		printf("ERROR: ANIMATION: Animation file is not open.\n");
 		return;
 	}
 	if (spriteData == NULL) {
-		printf("ERROR: ANIMATION: Error opening animation file\n");
+		printf("ERROR: SPRITE: Sprite file is not open.\n");
 		return;
 	}
+}
+Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, Vector2 position, float rotation, int id) {
+	if (spriteData == NULL) {
+		printf("ERROR: SPRITE: Sprite file is not open.\n");
+		return;
+	}
+	Animation *anim = (Animation *) malloc(sizeof(Animation));
+	if (anim == NULL) {
+		printf("ERROR: ANIMATION: Animation load failed.\n");
+		return NULL;
+	}
+	anim->currentFrame = 0;
+	anim->onUse = true;
+
 	char line[256];
 	char *token;
+	char *animables;
 	char *saveptr;
 	bool repeat;
 	int animId;
 	rewind(animsData);
-	if (fgets(line, sizeof(line), animsData) == NULL) return;
+	if (fgets(line, sizeof(line), animsData) == NULL) return NULL;
 	while (fgets(line, sizeof(line), animsData) != NULL) {
 		token = strtok_r(line, "	", &saveptr);
 		animId = atoi(token);
 		if (animId == id) {
+			anim->id = animId;
 			token = strtok_r(NULL, "	", &saveptr);
-			printf("INFO: ANIMATION: Loading %s with ID %d in the %d register\n", token, animId, (*animAmount));
+			anim->repeat = (bool) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			for ( ; (*animAmount) < ANIM_SIZE && token != NULL; (*animAmount)++) {
-				printf("INFO: ANIMATION: Direction %s\n", token);
-				repeat = (bool) atoi(strtok_r(NULL, "	", &saveptr));
-				printf("INFO: ANIMATION: Repeat %d\n", repeat);
-				anims[(*animAmount)] = LoadSingleAnimable(token, repeat, *animAmount, offset);
-				token = strtok_r(NULL, "	", &saveptr);
+			animables = strtok_r(token, ",", &saveptr);
+			for (anim->animsAmount = 0; (anim->animsAmount < 8) && (animables != NULL); anim->animsAmount++) {
+				anim->anims[anims->animsAmount] = LoadSingleAnimable(spriteData, animables, position, rotation);
+				animables = strtok_r(NULL, ",", &saveptr);
 			}
 			break;
 		}
 	}
+	return anim;
 }
 Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet, Vector2 position, float rotation) {
 	if (FileExists(animSheet)) {
 		// Alocación dinámica, ya que muchos de los animables pueden y deben ser creados y destruidos en sucesiones rápidas, no olvidar liberar la memoria luego
 		Animable *anim = (Animable *) malloc(sizeof(Animable));	
 		if (anim == NULL) {
-			printf("INFO: ANIMABLE: Animable load failed\n");
+			printf("ERROR: ANIMABLE: Animable load failed.\n");
 			return NULL;
 		}
 
@@ -49,6 +64,7 @@ Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet, Vector2 position
 		char line[256];
 		FILE *file = fopen(animSheet, "r");
 		if (fgets(line, sizeof(line), file) != NULL) {
+			anim->data = file;
 			token = strtok_r(line, "	", &saveptr);
 			anim->frame = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
@@ -174,6 +190,10 @@ void LoadSpriteFromFile(const char *spriteSheet, FILE *spriteData, Sprite **spri
 	fclose(file);
 }
 void LoadSpriteIntoRegister(FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE, Vector2 position, float rotation, int id) {
+	if (spriteData == NULL) {
+		printf("ERROR: ANIMATION: Sprite file is not open.\n");
+		return;
+	}
 	if ((*spriteAmount) < SPRITE_SIZE) {
 		sprites[*spriteAmount] = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, id);
 		if (sprites[*spriteAmount] != NULL) {
@@ -184,27 +204,29 @@ void LoadSpriteIntoRegister(FILE *spriteData, Sprite **sprites, int *spriteAmoun
 	}
 }
 Sprite *LoadSingleSprite(FILE *spriteData, Vector2 position, float rotation, int id) {
-	if (spriteData != NULL) {
-		rewind(spriteData);
-		Sprite *sprite;
-		char line[256];
-		char *token;
-		char *saveptr;
-		int spriteId = 0;
-		if (fgets(line, sizeof(line), spriteData) == NULL) return NULL;
-		while (fgets(line, sizeof(line), spriteData) != NULL) {
-			token = strtok_r(line, "	", &saveptr);
-			spriteId = atoi(token);
-			if (spriteId == id) {
-				token = strtok_r(NULL, "	", &saveptr); //To delete the sprite name
-				printf("INFO: SPRITE: Parsing %s\n", token);
-				sprite = ParseSprite(saveptr);
-				if (sprite != NULL) {
-					sprite->position = position;
-					sprite->rotation = rotation;
-				}
-				return sprite;
+	if (spriteData == NULL) {
+		printf("ERROR: SPRITE: Sprite file is not open.\n");
+		return NULL;
+	}
+	rewind(spriteData);
+	Sprite *sprite;
+	char line[256];
+	char *token;
+	char *saveptr;
+	int spriteId = 0;
+	if (fgets(line, sizeof(line), spriteData) == NULL) return NULL;
+	while (fgets(line, sizeof(line), spriteData) != NULL) {
+		token = strtok_r(line, "	", &saveptr);
+		spriteId = atoi(token);
+		if (spriteId == id) {
+			token = strtok_r(NULL, "	", &saveptr); //To delete the sprite name
+			printf("INFO: SPRITE: Parsing %s\n", token);
+			sprite = ParseSprite(saveptr);
+			if (sprite != NULL) {
+				sprite->position = position;
+				sprite->rotation = rotation;
 			}
+			return sprite;
 		}
 	}
 	return NULL;
@@ -272,6 +294,10 @@ void UnloadSingleSprite(Sprite **sprites, int *spriteAmount, int position, int S
 		if (sprites[i] == NULL) sprites[i] = sprites[i + 1];
 }
 void LoadButtonFromFile(const char *buttonSheet, FILE *spriteData, FILE *translationData, Font font, Button **buttons, int *buttonAmount, int BUTTON_SIZE) {
+	if (spriteData == NULL) {
+		printf("ERROR: SPRITE: Sprite file is not open.\n");
+		return;
+	}
 	if (FileExists(buttonSheet)) {
 		FILE *file = fopen(buttonSheet, "r");
 		char line[256];
@@ -291,6 +317,10 @@ void LoadButtonFromFile(const char *buttonSheet, FILE *spriteData, FILE *transla
 	}
 }
 void LoadButtonIntoRegister(FILE *spriteData, FILE *translationData, Font font, Button **buttons, int *buttonAmount, int BUTTON_SIZE, Vector2 position, float rotation, int idOff, int idOn, int idMessage) {
+	if (spriteData == NULL) {
+		printf("ERROR: SPRITE: Sprite file is not open.\n");
+		return;
+	}
 	if ((*buttonAmount) < BUTTON_SIZE) {
 		buttons[(*buttonAmount)] = LoadSingleButton(spriteData, translationData, font, position, rotation, idOff, idOn, idMessage);
 		if (buttons[(*buttonAmount)] != NULL) {
@@ -301,6 +331,10 @@ void LoadButtonIntoRegister(FILE *spriteData, FILE *translationData, Font font, 
 	}
 }
 Button *LoadSingleButton(FILE *spriteData, FILE *translationData, Font font, Vector2 position, float rotation, int idOff, int idOn, int idMessage) {
+	if (spriteData == NULL) {
+		printf("ERROR: SPRITE: Sprite file is not open.\n");
+		return;
+	}
 	Button *button = (Button *) malloc(sizeof(Button));
 	if (button != NULL) {
 		button->position = position;

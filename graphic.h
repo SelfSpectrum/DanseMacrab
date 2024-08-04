@@ -16,6 +16,7 @@ typedef struct SafeTexture SafeTexture;
 typedef struct Message Message;
 typedef struct Sprite Sprite;
 typedef struct Animable Animable;
+typedef struct Animation Animation;
 typedef struct Button Button;
 
 enum Language {
@@ -80,7 +81,8 @@ struct Animation {
 }
 
 // Funciones para animaciones
-void LoadAnimationIntoRegister(FILE *animsData, FILE *spriteData, Animable **anims, int *animAmount, int ANIM_SIZE, Vector2 position, float rotation, int id);
+void LoadAnimationIntoRegister(FILE *animsData, FILE *spriteData, Animation **anims, int *animAmount, int ANIM_SIZE, Vector2 position, float rotation, int id);
+Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, Vector2 position, float rotation, int id);
 Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet, Vector2 position, float rotation);
 void UpdateAnimation(Animation *anims, int *animAmount, int ANIM_SIZE);
 void UpdateAnimable(Animable *anims, int *animAmount, int ANIM_SIZE);

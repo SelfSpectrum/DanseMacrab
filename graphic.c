@@ -14,14 +14,14 @@ void LoadAnimationIntoRegister(FILE *animsData, FILE *spriteData, Animation **an
 		if (anims[*animAmount] != NULL) {
 			anims[*animAmount]->position = position;
 			anims[*animAmount]->rotation = rotation;
-			(*spriteAmount)++;
+			(*animAmount)++;
 		}
 	}
 }
 Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 	if (spriteData == NULL) {
 		printf("ERROR: SPRITE: Sprite file is not open.\n");
-		return;
+		return NULL;
 	}
 	Animation *anim = (Animation *) malloc(sizeof(Animation));
 	if (anim == NULL) {
@@ -29,17 +29,12 @@ Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 		return NULL;
 	}
 	anim->currentFrame = 0;
-	anim->freedAnims = 0;
-	anim->onUse = true;
-
-	Vector2 position = { 0 };
-	float rotation = 0;
+	anim->freedAmount = 0;
 
 	char line[512];
 	char *token;
 	char *animables;
 	char *saveptr;
-	bool repeat;
 	int animId;
 	rewind(animsData);
 	if (fgets(line, sizeof(line), animsData) == NULL) return NULL;
@@ -53,7 +48,7 @@ Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 			token = strtok_r(NULL, "	", &saveptr);
 			animables = strtok_r(token, ",", &saveptr);
 			for (anim->animAmount = 0; (anim->animAmount < 8) && (animables != NULL); anim->animAmount++) {
-				anim->anims[anim->animsAmount] = LoadSingleAnimable(spriteData, animables, position, rotation);
+				anim->anims[anim->animAmount] = LoadSingleAnimable(spriteData, animables);
 				animables = strtok_r(NULL, ",", &saveptr);
 			}
 			break;
@@ -61,14 +56,14 @@ Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 	}
 	return anim;
 }
-Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet, Vector2 position, float rotation) {
+Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet) {
 	// Línea del archivo que contiene toda la información del struct
 	if (!FileExists(animSheet)) return NULL;
 
 	FILE *file = fopen(animSheet, "r");
 	char line[256];
 	if (fgets(line, sizeof(line), file) != NULL) {
-		Animable *anim = ParseAnimable(line);
+		Animable *anim = ParseAnimable(spriteData, line);
 		anim->data = file;
 
 		printf("INFO: ANIMABLE: Animable loaded succesfully\n");
@@ -78,7 +73,7 @@ Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet, Vector2 position
 	else printf("INFO: ANIMABLE: Error opening the animation file %s!\n", animSheet);
 	return NULL;
 }
-Animable *ParseAnimable(char *line) {
+Animable *ParseAnimable(FILE *spriteData, char *line) {
 	// Alocación dinámica, ya que muchos de los animables pueden y deben ser creados y destruidos en sucesiones rápidas, no olvidar liberar la memoria luego
 	Animable *anim = (Animable *) malloc(sizeof(Animable));	
 	if (anim == NULL) {
@@ -87,19 +82,21 @@ Animable *ParseAnimable(char *line) {
 	}
 	char *token; // Para ir partiendo el string
 	char *saveptr; // String cortado restante tras cada partición
+	Vector2 position = { 0 };
+	float rotation = 0;
 
 	token = strtok_r(line, "	", &saveptr);
 	anim->frame = atoi(token);
 
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->position.x = atof(token);
+	position.x = atof(token);
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->position.y = atof(token);
+	position.y = atof(token);
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->rotation = atof(token);
+	rotation = atof(token);
 
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->sprite = LoadSingleSprite(spriteData, anim->position, anim->rotation, atoi(token));
+	anim->sprite = LoadSingleSprite(spriteData, position, rotation, atoi(token));
 
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaOrigin.width = atof(token);
@@ -128,37 +125,40 @@ Animable *ParseAnimable(char *line) {
 
 	return anim;
 }
-void UpdateAnimation(FILE *spriteData, Animation **anims, int animAmount, int ANIM_SIZE) {
+void UpdateAnimation(FILE *animsData, FILE *spriteData, Animation **anims, int *animAmount) {
 	int i;
 	int j;
-	for (i = 0; i < animAmount; i++) {
-		if (anims[i]->onUse) {
-			for (j = 0; j < anims[i]->animAmount; j++) {
-				if (anims[i]->anims[j] != NULL)
-					UpdateAnimable(spriteData, anims[i]->anims, j, anims[i]->currentFrame);
+	int id;
+	for (i = 0; i < (*animAmount); i++) {
+		if (anims[i]->freedAmount == anims[i]->animAmount) {
+			if (anims[i]->repeat) {
+				id = anims[i]->id;
+				free(anims[i]);
+				anims[i] = NULL;
+				anims[i] = LoadSingleAnimation(animsData, spriteData, id);
 			}
-			anims[i]->currentFrame++;
+			else UnloadSingleAnimationFromRegister(anims, animAmount, i);
 		}
-		//else if (anims[index]->repeat) {
-		//	anims[i]->currentFrame = 0;
-		//	rewind(anims[i]->data);
-		//	if (fgets(line, sizeof(line), anims[index]->data) != NULL) ParseAnimable(line, anims[index]);
-		//}
+		for (j = 0; j < anims[i]->animAmount; j++) {
+			if (anims[i]->anims[j] != NULL)
+				UpdateAnimable(spriteData, anims[i], anims[i]->anims, j, anims[i]->currentFrame);
+		}
+		anims[i]->currentFrame++;
 	}
 }
 void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, int index, int currentFrame) {
 	char line[256];
 	Animable *aux;
 
-	anims->sprite->origin = (Rectangle) { anims[index]->sprite->origin.width + anims[index]->deltaOrigin.width,
-       					      anims[index]->sprite->origin.height + anims[index]->deltaOrigin.height,
-					      anims[index]->sprite->origin.x + anims[index]->deltaOrigin.x,
-					      anims[index]->sprite->origin.y + anims[index]->deltaOrigin.y };
+	anims[index]->sprite->origin = (Rectangle) { anims[index]->sprite->origin.width + anims[index]->deltaOrigin.width,
+ 	      					     anims[index]->sprite->origin.height + anims[index]->deltaOrigin.height,
+						     anims[index]->sprite->origin.x + anims[index]->deltaOrigin.x,
+						     anims[index]->sprite->origin.y + anims[index]->deltaOrigin.y };
 
-	anims->sprite->dest = (Rectangle) { anims[index]->sprite->dest.width, anims[index]->deltaDest.width,
-					    anims[index]->sprite->dest.height, anims[index]->deltaDest.height,
-					    anims[index]->sprite->dest.x, anims[index]->deltaDest.x,
-					    anims[index]->sprite->dest.y, anims[index]->deltaDest.y };
+	anims[index]->sprite->dest = (Rectangle) { anims[index]->sprite->dest.width + anims[index]->deltaDest.width,
+						   anims[index]->sprite->dest.height + anims[index]->deltaDest.height,
+						   anims[index]->sprite->dest.x + anims[index]->deltaDest.x,
+						   anims[index]->sprite->dest.y + anims[index]->deltaDest.y };
 
 	anims[index]->sprite->position = Vector2Add(anims[index]->sprite->position, anims[index]->deltaPos);
 	anims[index]->sprite->rotation += anims[index]->deltaRotation;
@@ -168,12 +168,9 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 			if (fgets(line, sizeof(line), anims[index]->data) != NULL) {
 				free(anims[index]->sprite);
 				anims[index]->sprite = NULL;
-				aux = ParseAnimable(line, anims[index]);
+				aux = ParseAnimable(spriteData, line);
 
 				anims[index]->frame = aux->frame;
-				anims[index]->position = aux->position;
-				anims[index]->rotation = aux->rotation;
-
 				anims[index]->sprite = aux->sprite;
 				aux->sprite = NULL;
 
@@ -193,46 +190,61 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 			free(anims[index]);
 			anims[index] = NULL;
 
-			animation->freedAnims++;
+			animation->freedAmount++;
 		}
 	}
 }
-void DrawAnimable(Animable **anims, SafeTexture *textures, int animAmount, Shader shader, Color color) {
+void DrawAnimation(Animation **anims, SafeTexture *textures, int animAmount, Shader shader, Color color) {
 	int i;
+	int j;
 	for (i = 0; i < animAmount; i++) {
-		if (!anims[i]->onUse) continue;
-		//printf("%u\n", anim->currentFrame);   // TODO: A good way of view the frame count as debug inside game
-		if (anims[i]->shader) BeginShaderMode(shader);
-		DrawTexturePro(textures[anims[i]->textureIndex].tex,
-				(Rectangle) { anims[i]->origin.w, anims[i]->origin.x, anims[i]->origin.y, anims[i]->origin.z },
-				(Rectangle) { anims[i]->dest.w, anims[i]->dest.x, anims[i]->dest.y, anims[i]->dest.z },
-				Vector2Add(anims[i]->position, anims[i]->offset),
-				anims[i]->rotation,
-				color);
-		if (anims[i]->shader) EndShaderMode();
+		for (j = 0; j < anims[i]->animAmount; j++) {
+			DrawAnimable(anims[i]->anims[j], textures, shader, color, anims[i]->position, anims[i]->rotation);
+		}
 	}
 }
-void UnloadAnimable(Animable **anims, int *animAmount) {
+void DrawAnimable(Animable *anim, SafeTexture *textures, Shader shader, Color color, Vector2 position, float rotation) {
+	if (anim->sprite->shader) BeginShaderMode(shader);
+	DrawTexturePro( textures[anim->sprite->textureIndex].tex,
+			anim->sprite->origin,
+			anim->sprite->dest,
+			Vector2Add(anim->sprite->position, position),
+			anim->sprite->rotation + rotation,
+			color);
+	if (anim->sprite->shader) EndShaderMode();
+}
+void UnloadAnimationRegister(Animation **anims, int *animAmount) {
 	int i;
-	for (i = 0; i < (*animAmount); i++) {
-		anims[i]->onUse = false;
-		fclose(anims[i]->data); // TODO: must ensure safety on the file
-		anims[i]->data = NULL;
-		free(anims[i]);
-		anims[i] = NULL;
-	}
-	(*animAmount) = 0;
+	int amount = *animAmount;
+	for (i = 0; i < amount; i++) UnloadSingleAnimationFromRegister(anims, animAmount, 0);
 	printf("INFO: ANIMATION: Animable array data unloaded.\n");
 }
-void UnloadSingleAnimable(Animable **anims, int *animAmount, int position, int ANIM_SIZE) {
-	anims[position]->onUse = false;
-	fclose(anims[position]->data);
-	anims[position]->data = NULL;
-	free(anims[position]);
-	anims[position] = NULL;
-	(*animAmount)--;
+void UnloadSingleAnimationFromRegister(Animation **anims, int *animAmount, int index) {
+	if (anims[index] == NULL) return;
+
 	int i;
-	for (i = 0; i < (ANIM_SIZE - 1); i++)
+	for (i = 0; i < anims[index]->animAmount; i++) {
+		if (anims[index]->anims[i] != NULL) {
+			if (anims[index]->anims[i]->sprite != NULL) {
+				free(anims[index]->anims[i]->sprite);
+				anims[index]->anims[i]->sprite = NULL;
+			}
+			if (anims[index]->anims[i]->data != NULL) {
+				fclose(anims[index]->anims[i]->data);
+				anims[index]->anims[i]->data = NULL;
+			}
+			free(anims[index]->anims[i]);
+			anims[index]->anims[i] = NULL;
+
+			anims[index]->freedAmount++;
+		}
+	}
+
+	free(anims[index]);
+	anims[index] = NULL;
+	(*animAmount)--;
+
+	for (i = 0; i < (*animAmount); i++)
 		if (anims[i] == NULL) anims[i] = anims[i + 1];
 }
 void LoadSpriteFromFile(const char *spriteSheet, FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE) {
@@ -346,21 +358,20 @@ void DrawSingleSprite(Sprite *sprite, SafeTexture *textures, Shader shader, Colo
 			color);
 	if (sprite->shader) EndShaderMode();
 }
-void UnloadSprite(Sprite **sprites, int *spriteAmount) {
+void UnloadSpriteRegister(Sprite **sprites, int *spriteAmount) {
 	int i;
-	for (i = 0; i < (*spriteAmount); i++) {
-		free(sprites[i]);
-		sprites[i] = NULL;
-	}
-	(*spriteAmount) = 0;
+	int amount = *spriteAmount;
+	for (i = 0; i < amount; i++) UnloadSingleSpriteFromRegister(sprites, spriteAmount, 0);
 	printf("INFO: SPRITE: Sprites unloaded correctly\n");
 }
-void UnloadSingleSprite(Sprite **sprites, int *spriteAmount, int position, int SPRITE_SIZE) {
-	free(sprites[position]);
-	sprites[position] = NULL;
+void UnloadSingleSpriteFromRegister(Sprite **sprites, int *spriteAmount, int index) {
+	if (sprites[index] == NULL) return;
+
+	free(sprites[index]);
+	sprites[index] = NULL;
 	(*spriteAmount)--;
 	int i;
-	for (i = 0; i < (SPRITE_SIZE - 1); i++)
+	for (i = 0; i < (*spriteAmount); i++)
 		if (sprites[i] == NULL) sprites[i] = sprites[i + 1];
 }
 void LoadButtonFromFile(const char *buttonSheet, FILE *spriteData, FILE *translationData, Font font, Button **buttons, int *buttonAmount, int BUTTON_SIZE) {
@@ -447,7 +458,7 @@ void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shade
 		DrawButtonMessage(buttons[i], font, color);
 	}
 }
-void UnloadButton(Button **buttons, int *buttonAmount) {
+void UnloadButtonRegister(Button **buttons, int *buttonAmount) {
 	int i;
 	for (i = 0; i < (*buttonAmount); i++) {
 		if (buttons[i]->message != NULL) UnloadSingleMessage(&buttons[i]->message);
@@ -541,11 +552,10 @@ void DrawButtonMessage(Button *button, Font font, Color color) {
 	DrawSingleMessage(button->message, font, button->selected ? BLACK : color);
 
 }
-void UnloadMessage(Message **messages, int *messageAmount) {
+void UnloadMessageRegister(Message **messages, int *messageAmount) {
 	int i;
-	for (i = 0; i < (*messageAmount); i++) {
+	for (i = 0; i < (*messageAmount); i++)
 		UnloadSingleMessage(&messages[i]);
-	}
 	(*messageAmount) = 0;
 	printf("INFO: MESSAGE: Messages unloaded correctly\n");
 }

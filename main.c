@@ -168,7 +168,7 @@ int main() {
 			else if (IsKeyPressed(state.cancelKey)) state.exitWindowRequested = false;
 		}
 		else {
-			UpdateAnimation(state.spriteData, state.anims, &state.animAmount, ANIM_SIZE);
+			UpdateAnimation(state.animsData, state.spriteData, state.anims, &state.animAmount);
 			for (i = 0; i < TEX_SIZE; i++) {
 				SetShaderValueTexture(shader, GetShaderLocationAttrib(shader, "textureSampler"), state.textures[i].tex);
 			}
@@ -216,11 +216,11 @@ int main() {
 	StopMusicStream(state.music);
 	UnloadShader(shader);
 	UnloadRenderTexture(target);
-	UnloadSprite(state.sprites, &state.spriteAmount);
-	UnloadButton(state.buttons, &state.buttonAmount);
+	UnloadSpriteRegister(state.sprites, &state.spriteAmount);
+	UnloadButtonRegister(state.buttons, &state.buttonAmount);
 	UnloadCombat(&state.combat);
-	UnloadAnimable(state.anims, &state.animAmount);
-	UnloadMessage(state.messages, &state.messageAmount);
+	UnloadAnimationRegister(state.anims, &state.animAmount);
+	UnloadMessageRegister(state.messages, &state.messageAmount);
 	UnloadMusicStream(state.music); // Unload music stream buffers from RAM
 	UnloadFont(state.font);
 
@@ -374,31 +374,31 @@ void ChangeSelection(StateData *state) {
 		case STATE_FIGHT:
 			switch (state->buttonPosition) {
 				case 0:
-					UnloadMessage(state->messages, &state->messageAmount);
+					UnloadMessageRegister(state->messages, &state->messageAmount);
 					LoadMessage(state, (Vector2) {147, 128}, 18, 0, true, ALIGN_LEFT, 5);
 					break;
 				case 1:
-					UnloadMessage(state->messages, &state->messageAmount);
+					UnloadMessageRegister(state->messages, &state->messageAmount);
 					LoadMessage(state, (Vector2) {147, 128}, 18, 0, true, ALIGN_LEFT, 6);
 					break;
 				case 2:
-					UnloadMessage(state->messages, &state->messageAmount);
+					UnloadMessageRegister(state->messages, &state->messageAmount);
 					LoadMessage(state, (Vector2) {147, 128}, 18, 0, true, ALIGN_LEFT, 13);
 					break;
 				case 3:
-					UnloadMessage(state->messages, &state->messageAmount);
+					UnloadMessageRegister(state->messages, &state->messageAmount);
 					LoadMessage(state, (Vector2) {147, 128}, 18, 0, true, ALIGN_LEFT, 7);
 					break;
 				case 4:
-					UnloadMessage(state->messages, &state->messageAmount);
+					UnloadMessageRegister(state->messages, &state->messageAmount);
 					LoadMessage(state, (Vector2) {147, 128}, 18, 0, true, ALIGN_LEFT, 98);
 					break;
 				case 5:
-					UnloadMessage(state->messages, &state->messageAmount);
+					UnloadMessageRegister(state->messages, &state->messageAmount);
 					LoadMessage(state, (Vector2) {147, 128}, 18, 0, true, ALIGN_LEFT, 80);
 					break;
 				default:
-					UnloadMessage(state->messages, &state->messageAmount);
+					UnloadMessageRegister(state->messages, &state->messageAmount);
 					break;
 			}
 			break;
@@ -515,10 +515,10 @@ void ExtraB(StateData *state) {
 void SetState(StateData *state, GameState newState) {
 	int i;
 	if (newState != STATE_INIT) {
-		UnloadSprite(state->sprites, &state->spriteAmount);
-		UnloadAnimable(state->anims, &state->animAmount);
-		UnloadButton(state->buttons, &state->buttonAmount);
-		UnloadMessage(state->messages, &state->messageAmount);
+		UnloadSpriteRegister(state->sprites, &state->spriteAmount);
+		UnloadAnimationRegister(state->anims, &state->animAmount);
+		UnloadButtonRegister(state->buttons, &state->buttonAmount);
+		UnloadMessageRegister(state->messages, &state->messageAmount);
 	}
 	state->state = newState;
 	printf("INFO: STATE: Loading state %d.\n", (int) newState);

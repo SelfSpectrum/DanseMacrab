@@ -65,8 +65,6 @@ struct Button {
 struct Animable {
 	FILE *data; // Archivo que contiene la información de la animación
 	int frame; // Frame necesario para cambiar al siguiente evento
-	Vector2 position;
-	float rotation;
 	Sprite *sprite; // Sprite que será modificado en el tiempo. Para tener cambios bruscos, se requiere un nuevo sprite (ID)
 	Rectangle deltaOrigin;
 	Rectangle deltaDest;
@@ -77,24 +75,24 @@ struct Animation {
 	int id;
 	int currentFrame; // Frame actual de la animación
 	int animAmount;
-	int freedAnims;
+	int freedAmount;
 	Animable *anims[8];
 	Vector2 position;
 	float rotation;
 	bool repeat; // ¿Reiniciar la animación al terminar?
-	bool onUse;
 };
 
 // Funciones para animaciones
 void LoadAnimationIntoRegister(FILE *animsData, FILE *spriteData, Animation **anims, int *animAmount, int ANIM_SIZE, Vector2 position, float rotation, int id);
 Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id);
-Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet, Vector2 position, float rotation);
-Animable *ParseAnimable(char *line);
-void UpdateAnimation(FILE *spriteData, Animation **anims, int animAmount, int ANIM_SIZE) {
-void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, int index, int currentFrame) {
-void DrawAnimable(Animable *anims, SafeTexture *textures, int animAmount, Shader shader, Color color);
-void UnloadAnimable(Animation *anims, int *animAmount);
-void UnloadSingleAnimable(Animable *anims, int *animAmount, int position, int ANIM_SIZE);
+Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet);
+Animable *ParseAnimable(FILE *spriteData, char *line);
+void UpdateAnimation(FILE *animsData, FILE *spriteData, Animation **anims, int *animAmount);
+void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, int index, int currentFrame);
+void DrawAnimation(Animation **anims, SafeTexture *textures, int animAmount, Shader shader, Color color);
+void DrawAnimable(Animable *anims, SafeTexture *textures, Shader shader, Color color, Vector2 Position, float rotation);
+void UnloadAnimationRegister(Animation **anims, int *animAmount);
+void UnloadSingleAnimationFromRegister(Animation **anims, int *animAmount, int index);
 
 // Funciones para sprites
 void LoadSpriteFromFile(const char *spriteSheet, FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE);
@@ -103,8 +101,8 @@ Sprite *LoadSingleSprite(FILE *spriteData, Vector2 position, float rotation, int
 Sprite *ParseSprite(char *line);
 void DrawSprite(Sprite **sprites, SafeTexture *textures, int spriteAmount, Shader shader, Color color);
 void DrawSingleSprite(Sprite *sprite, SafeTexture *textures, Shader shader, Color color);
-void UnloadSprite(Sprite **sprites, int *spriteAmount);
-void UnloadSingleSprite(Sprite **sprites, int *spriteAmount, int position, int SPRITE_SIZE);
+void UnloadSpriteRegister(Sprite **sprites, int *spriteAmount);
+void UnloadSingleSpriteFromRegister(Sprite **sprites, int *spriteAmount, int index);
 
 // Funciones para botones
 void LoadButtonFromFile(const char *buttonSheet, FILE *spriteData, FILE *translationData, Font font, Button **button, int *buttonAmount, int BUTTON_SIZE);
@@ -121,7 +119,7 @@ void LoadButtonIntoRegister(FILE *spriteData,
 			    int idMessage);
 Button *LoadSingleButton(FILE *spriteData, FILE *translationData, Font font, Vector2 position, float rotation, int idOff, int idOn, int idMessage);
 void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Font font, Color color);
-void UnloadButton(Button **buttons, int *buttonAmount);
+void UnloadButtonRegister(Button **buttons, int *buttonAmount);
 
 // Funciones para traducciones y texto
 void LoadMessageIntoRegister(FILE *translationData,
@@ -139,7 +137,7 @@ Message *LoadSingleMessage(FILE *translationData, Font font, int id, Vector2 pos
 void DrawMessage(Message **messages, int messageAmount, Font font, Color color);
 void DrawSingleMessage(Message *message, Font font, Color color);
 void DrawButtonMessage(Button *button, Font font, Color color);
-void UnloadMessage(Message **messages, int *menssageAmount);
+void UnloadMessageRegister(Message **messages, int *menssageAmount);
 void UnloadSingleMessage(Message **message);
 void ChangeTranslation(FILE **translationData, Font font,  Message **messages, int messageAmount, Button **buttons, int buttonAmount, Language language);
 void UpdateMessage(FILE *translationData, Font font, Message **messages, int messageAmount, Button **buttons, int buttonAmount);

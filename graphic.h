@@ -63,8 +63,10 @@ struct Button {
 };
 // Los animables son las piezas que componen una animación, son sprites que cambian en el tiempo
 struct Animable {
-	int frame; // Frame necesario para cambiar al siguiente evento
 	FILE *data; // Archivo que contiene la información de la animación
+	int frame; // Frame necesario para cambiar al siguiente evento
+	Vector2 position;
+	float rotation;
 	Sprite *sprite; // Sprite que será modificado en el tiempo. Para tener cambios bruscos, se requiere un nuevo sprite (ID)
 	Rectangle deltaOrigin;
 	Rectangle deltaDest;
@@ -75,6 +77,7 @@ struct Animation {
 	int id;
 	int currentFrame; // Frame actual de la animación
 	int animAmount;
+	int freedAnims;
 	Animable *anims[8];
 	Vector2 position;
 	float rotation;
@@ -86,8 +89,9 @@ struct Animation {
 void LoadAnimationIntoRegister(FILE *animsData, FILE *spriteData, Animation **anims, int *animAmount, int ANIM_SIZE, Vector2 position, float rotation, int id);
 Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id);
 Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet, Vector2 position, float rotation);
+Animable *ParseAnimable(char *line);
 void UpdateAnimation(FILE *spriteData, Animation **anims, int animAmount, int ANIM_SIZE) {
-void UpdateAnimable(FILE *spriteData, Animable *anim, int currentFrame) {
+void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, int index, int currentFrame) {
 void DrawAnimable(Animable *anims, SafeTexture *textures, int animAmount, Shader shader, Color color);
 void UnloadAnimable(Animation *anims, int *animAmount);
 void UnloadSingleAnimable(Animable *anims, int *animAmount, int position, int ANIM_SIZE);

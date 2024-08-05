@@ -29,12 +29,13 @@ Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 		return NULL;
 	}
 	anim->currentFrame = 0;
+	anim->freedAnims = 0;
 	anim->onUse = true;
 
 	Vector2 position = { 0 };
 	float rotation = 0;
 
-	char line[256];
+	char line[512];
 	char *token;
 	char *animables;
 	char *saveptr;
@@ -47,12 +48,6 @@ Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 		animId = atoi(token);
 		if (animId == id) {
 			anim->id = animId;
-			token = strtok_r(NULL, "	", &saveptr);
-			position.x = atof(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			position.y = atof(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			rotation = atof(token);
 			token = strtok_r(NULL, "	", &saveptr);
 			anim->repeat = (bool) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
@@ -67,54 +62,70 @@ Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 	return anim;
 }
 Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet, Vector2 position, float rotation) {
-	if (FileExists(animSheet)) {
-		// Alocación dinámica, ya que muchos de los animables pueden y deben ser creados y destruidos en sucesiones rápidas, no olvidar liberar la memoria luego
-		Animable *anim = (Animable *) malloc(sizeof(Animable));	
-		if (anim == NULL) {
-			printf("ERROR: ANIMABLE: Animable load failed.\n");
-			return NULL;
-		}
+	// Línea del archivo que contiene toda la información del struct
+	if (!FileExists(animSheet)) return NULL;
 
-		char *token; // Para ir partiendo el string
-		char *saveptr; // String cortado restante tras cada partición
-		// Línea del archivo que contiene toda la información del struct
-		char line[256];
-		FILE *file = fopen(animSheet, "r");
-		if (fgets(line, sizeof(line), file) != NULL) {
-			anim->data = file;
-			token = strtok_r(line, "	", &saveptr);
-			anim->frame = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			anim->sprite = LoadSingleSprite(spriteData, position, rotation, atoi(token));
-			token = strtok_r(NULL, "	", &saveptr);
-			anim->deltaOrigin.width = atof(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			anim->deltaOrigin.height = atof(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			anim->deltaOrigin.x = atof(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			anim->deltaOrigin.y = atof(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			anim->deltaDest.width = atof(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			anim->deltaDest.height = atof(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			anim->deltaDest.x = atof(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			anim->deltaDest.y = atof(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			anim->deltaPos.x = atof(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			anim->deltaPos.y = atof(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			anim->deltaRotation = atof(token);
+	FILE *file = fopen(animSheet, "r");
+	char line[256];
+	if (fgets(line, sizeof(line), file) != NULL) {
+		Animable *anim = ParseAnimable(line);
+		anim->data = file;
 
-			printf("INFO: ANIMABLE: Animable loaded succesfully\n");
+		printf("INFO: ANIMABLE: Animable loaded succesfully\n");
 
-			return anim;
-		}
+		return anim;
 	}
 	else printf("INFO: ANIMABLE: Error opening the animation file %s!\n", animSheet);
+	return NULL;
+}
+Animable *ParseAnimable(char *line) {
+	// Alocación dinámica, ya que muchos de los animables pueden y deben ser creados y destruidos en sucesiones rápidas, no olvidar liberar la memoria luego
+	Animable *anim = (Animable *) malloc(sizeof(Animable));	
+	if (anim == NULL) {
+		printf("ERROR: ANIMABLE: Animable load failed.\n");
+		return NULL;
+	}
+	char *token; // Para ir partiendo el string
+	char *saveptr; // String cortado restante tras cada partición
+
+	token = strtok_r(line, "	", &saveptr);
+	anim->frame = atoi(token);
+
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->position.x = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->position.y = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->rotation = atof(token);
+
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->sprite = LoadSingleSprite(spriteData, anim->position, anim->rotation, atoi(token));
+
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->deltaOrigin.width = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->deltaOrigin.height = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->deltaOrigin.x = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->deltaOrigin.y = atof(token);
+
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->deltaDest.width = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->deltaDest.height = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->deltaDest.x = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->deltaDest.y = atof(token);
+
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->deltaPos.x = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->deltaPos.y = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->deltaRotation = atof(token);
+
 	return anim;
 }
 void UpdateAnimation(FILE *spriteData, Animation **anims, int animAmount, int ANIM_SIZE) {
@@ -123,35 +134,67 @@ void UpdateAnimation(FILE *spriteData, Animation **anims, int animAmount, int AN
 	for (i = 0; i < animAmount; i++) {
 		if (anims[i]->onUse) {
 			for (j = 0; j < anims[i]->animAmount; j++) {
-				UpdateAnimable(spriteData, anims[i]->anims[j], anims[i]->currentFrame);
+				if (anims[i]->anims[j] != NULL)
+					UpdateAnimable(spriteData, anims[i]->anims, j, anims[i]->currentFrame);
 			}
 			anims[i]->currentFrame++;
 		}
+		//else if (anims[index]->repeat) {
+		//	anims[i]->currentFrame = 0;
+		//	rewind(anims[i]->data);
+		//	if (fgets(line, sizeof(line), anims[index]->data) != NULL) ParseAnimable(line, anims[index]);
+		//}
 	}
 }
-void UpdateAnimable(FILE *spriteData, Animable *anim, int currentFrame) {
+void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, int index, int currentFrame) {
 	char line[256];
-	anim->sprite->origin = (Rectangle) { anim->sprite->origin.width + anim->deltaOrigin.width,
-       					     anim->sprite->origin.height + anim->deltaOrigin.height,
-					     anim->sprite->origin.x + anim->deltaOrigin.x,
-					     anim->sprite->origin.y + anim->deltaOrigin.y};
-	anim->sprite->dest = (Rectangle) { anim->sprite->dest, anim->deltaDest };
-	anim->sprite->position = Vector2Add(anim->sprite->position, anim->deltaPos);
-	anim->sprite->rotation += anim->deltaRotation;
-	if (currentFrame >= anims[i]->frame) {
-		if (anims[i]->frame != 0) {
-			if (fgets(line, sizeof(line), anims[i]->data) != NULL) {
-				//printf("INFO: ANIMABLE: Next animable line loaded.\n");
-				ParseAnimable(line, anims[i]);
-				//printf("INFO: ANIMABLE: Next animable line parsed.\n");
+	Animable *aux;
+
+	anims->sprite->origin = (Rectangle) { anims[index]->sprite->origin.width + anims[index]->deltaOrigin.width,
+       					      anims[index]->sprite->origin.height + anims[index]->deltaOrigin.height,
+					      anims[index]->sprite->origin.x + anims[index]->deltaOrigin.x,
+					      anims[index]->sprite->origin.y + anims[index]->deltaOrigin.y };
+
+	anims->sprite->dest = (Rectangle) { anims[index]->sprite->dest.width, anims[index]->deltaDest.width,
+					    anims[index]->sprite->dest.height, anims[index]->deltaDest.height,
+					    anims[index]->sprite->dest.x, anims[index]->deltaDest.x,
+					    anims[index]->sprite->dest.y, anims[index]->deltaDest.y };
+
+	anims[index]->sprite->position = Vector2Add(anims[index]->sprite->position, anims[index]->deltaPos);
+	anims[index]->sprite->rotation += anims[index]->deltaRotation;
+
+	if (currentFrame >= anims[index]->frame) {
+		if (anims[index]->frame != 0) {
+			if (fgets(line, sizeof(line), anims[index]->data) != NULL) {
+				free(anims[index]->sprite);
+				anims[index]->sprite = NULL;
+				aux = ParseAnimable(line, anims[index]);
+
+				anims[index]->frame = aux->frame;
+				anims[index]->position = aux->position;
+				anims[index]->rotation = aux->rotation;
+
+				anims[index]->sprite = aux->sprite;
+				aux->sprite = NULL;
+
+				anims[index]->deltaOrigin = aux->deltaOrigin;
+				anims[index]->deltaDest = aux->deltaDest;
+				anims[index]->deltaPos = aux->deltaPos;
+				anims[index]->deltaRotation = aux->deltaRotation;
+
+				free(aux);
 			}
 		}
-		else if (anims[i]->repeat) {
-			anims[i]->currentFrame = 0;
-			rewind(anims[i]->data);
-			if (fgets(line, sizeof(line), anims[i]->data) != NULL) ParseAnimable(line, anims[i]);
+		else {
+			free(anims[index]->sprite);
+			anims[index]->sprite = NULL;
+			fclose(anims[index]->data);
+			anims[index]->data = NULL;
+			free(anims[index]);
+			anims[index] = NULL;
+
+			animation->freedAnims++;
 		}
-		else UnloadSingleAnimable(anims, animAmount, i, ANIM_SIZE);
 	}
 }
 void DrawAnimable(Animable **anims, SafeTexture *textures, int animAmount, Shader shader, Color color) {

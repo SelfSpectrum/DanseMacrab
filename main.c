@@ -112,6 +112,7 @@ void SetHorizontalKeys(StateData *state);
 void SetVerticalKeys(StateData *state);
 void SetOnlyVerticalKeys(StateData *state);
 void LoadSprite(StateData *state, Vector2 position, float rotation, int id);
+void LoadAnimation(StateData *state, Vector2 position, float rotation, int id);
 void LoadButton(StateData *state, Vector2 position, float rotation, int idOff, int idOn, int idMessage);
 void LoadMessage(StateData *state, Vector2 position, float fontSize, float spacing, bool useColor, Align align, int id);
 
@@ -639,6 +640,7 @@ void SetState(StateData *state, GameState newState) {
 			LoadSprite(state, (Vector2) { -80, -38 }, 0, 2);
 			LoadSprite(state, (Vector2) { -60, -140 }, 0, 7);
 			//LoadAnimable(state->animsData, state->anims, (Vector2) { 0 }, &state->animAmount, ANIM_SIZE, 1);
+			LoadAnimation(state, (Vector2) { 1, 0 }, 0, 1);
 			LoadMessage(state, (Vector2) { 161, 154 }, 18, 0, false, ALIGN_CENTER, 1);
 			LoadMessage(state, (Vector2) { 160, 155 }, 18, 0, false, ALIGN_CENTER, 1);
 			LoadMessage(state, (Vector2) { 159, 154 }, 18, 0, false, ALIGN_CENTER, 1);
@@ -744,6 +746,9 @@ void LoadSprite(StateData *state, Vector2 position, float rotation, int id) {
 }
 void LoadButton(StateData *state, Vector2 position, float rotation, int idOff, int idOn, int idMessage) {
 	LoadButtonIntoRegister(state->spriteData, state->translationData, state->font, state->buttons, &state->buttonAmount, BUTTON_SIZE, position, rotation, idOff, idOn, idMessage);
+}
+void LoadAnimation(StateData *state, Vector2 position, float rotation, int id) {
+	LoadAnimationIntoRegister(state->animsData, state->spriteData, state->anims, &state->animAmount, ANIM_SIZE, position, rotation, id);
 }
 void LoadMessage(StateData *state, Vector2 position, float fontSize, float spacing, bool useColor, Align align, int id) {
 	LoadMessageIntoRegister(state->translationData,

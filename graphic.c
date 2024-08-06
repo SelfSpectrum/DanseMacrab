@@ -32,6 +32,7 @@ Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 	anim->freedAmount = 0;
 
 	char line[512];
+	char dir[128];
 	char *token;
 	char *animables;
 	char *saveptr;
@@ -44,11 +45,14 @@ Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 		if (animId == id) {
 			anim->id = animId;
 			token = strtok_r(NULL, "	", &saveptr);
+			printf("INFO: ANIMATION: Loading %s.\n", token);
+			token = strtok_r(NULL, "	", &saveptr);
 			anim->repeat = (bool) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
 			animables = strtok_r(token, ",", &saveptr);
 			for (anim->animAmount = 0; (anim->animAmount < 8) && (animables != NULL); anim->animAmount++) {
-				anim->anims[anim->animAmount] = LoadSingleAnimable(spriteData, animables);
+				sprintf(dir, "./resources/anims/%s.tsv", strtok(animables, "\n"));
+				anim->anims[anim->animAmount] = LoadSingleAnimable(spriteData, dir);
 				animables = strtok_r(NULL, ",", &saveptr);
 			}
 			break;
@@ -60,6 +64,7 @@ Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet) {
 	// Línea del archivo que contiene toda la información del struct
 	if (!FileExists(animSheet)) return NULL;
 
+	//printf("INFO: ANIMATION: Reading from %s.\n", animSheet);
 	FILE *file = fopen(animSheet, "r");
 	char line[256];
 	if (fgets(line, sizeof(line), file) != NULL) {
@@ -129,13 +134,20 @@ void UpdateAnimation(FILE *animsData, FILE *spriteData, Animation **anims, int *
 	int i;
 	int j;
 	int id;
+	Vector2 pos;
+	float rot;
 	for (i = 0; i < (*animAmount); i++) {
+		//printf("Frame: %d	Amount: %d	Freed: %d\n", anims[i]->currentFrame, anims[i]->animAmount, anims[i]->freedAmount);
 		if (anims[i]->freedAmount == anims[i]->animAmount) {
 			if (anims[i]->repeat) {
 				id = anims[i]->id;
+				pos = anims[i]->position;
+				rot = anims[i]->rotation;
 				free(anims[i]);
 				anims[i] = NULL;
 				anims[i] = LoadSingleAnimation(animsData, spriteData, id);
+				anims[i]->position = pos;
+				anims[i]->rotation = rot;
 			}
 			else UnloadSingleAnimationFromRegister(anims, animAmount, i);
 		}
@@ -150,15 +162,15 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 	char line[256];
 	Animable *aux;
 
-	anims[index]->sprite->origin = (Rectangle) { anims[index]->sprite->origin.width + anims[index]->deltaOrigin.width,
- 	      					     anims[index]->sprite->origin.height + anims[index]->deltaOrigin.height,
-						     anims[index]->sprite->origin.x + anims[index]->deltaOrigin.x,
-						     anims[index]->sprite->origin.y + anims[index]->deltaOrigin.y };
+	anims[index]->sprite->origin.width += anims[index]->deltaOrigin.width;
+ 	anims[index]->sprite->origin.height += anims[index]->deltaOrigin.height;
+	anims[index]->sprite->origin.x += anims[index]->deltaOrigin.x;
+	anims[index]->sprite->origin.y += anims[index]->deltaOrigin.y;
 
-	anims[index]->sprite->dest = (Rectangle) { anims[index]->sprite->dest.width + anims[index]->deltaDest.width,
-						   anims[index]->sprite->dest.height + anims[index]->deltaDest.height,
-						   anims[index]->sprite->dest.x + anims[index]->deltaDest.x,
-						   anims[index]->sprite->dest.y + anims[index]->deltaDest.y };
+	anims[index]->sprite->dest.width += anims[index]->deltaDest.width;
+	anims[index]->sprite->dest.height += anims[index]->deltaDest.height;
+	anims[index]->sprite->dest.x += anims[index]->deltaDest.x;
+	anims[index]->sprite->dest.y += anims[index]->deltaDest.y;
 
 	anims[index]->sprite->position = Vector2Add(anims[index]->sprite->position, anims[index]->deltaPos);
 	anims[index]->sprite->rotation += anims[index]->deltaRotation;
@@ -180,6 +192,7 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 				anims[index]->deltaRotation = aux->deltaRotation;
 
 				free(aux);
+				//printf("INFO: ANIMABLE: Next animable loaded.\n");
 			}
 		}
 		else {
@@ -191,6 +204,7 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 			anims[index] = NULL;
 
 			animation->freedAmount++;
+			//printf("INFO: ANIMABLE: Animable %d freed.\n", index);
 		}
 	}
 }
@@ -204,6 +218,7 @@ void DrawAnimation(Animation **anims, SafeTexture *textures, int animAmount, Sha
 	}
 }
 void DrawAnimable(Animable *anim, SafeTexture *textures, Shader shader, Color color, Vector2 position, float rotation) {
+	if (anim == NULL) return;
 	if (anim->sprite->shader) BeginShaderMode(shader);
 	DrawTexturePro( textures[anim->sprite->textureIndex].tex,
 			anim->sprite->origin,

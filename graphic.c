@@ -138,6 +138,11 @@ void UpdateAnimation(FILE *animsData, FILE *spriteData, Animation **anims, int *
 	float rot;
 	for (i = 0; i < (*animAmount); i++) {
 		//printf("Frame: %d	Amount: %d	Freed: %d\n", anims[i]->currentFrame, anims[i]->animAmount, anims[i]->freedAmount);
+		for (j = 0; j < anims[i]->animAmount; j++) {
+			if (anims[i]->anims[j] != NULL)
+				UpdateAnimable(spriteData, anims[i], anims[i]->anims, j, anims[i]->currentFrame);
+		}
+		anims[i]->currentFrame++;
 		if (anims[i]->freedAmount == anims[i]->animAmount) {
 			if (anims[i]->repeat) {
 				id = anims[i]->id;
@@ -149,28 +154,28 @@ void UpdateAnimation(FILE *animsData, FILE *spriteData, Animation **anims, int *
 				anims[i]->position = pos;
 				anims[i]->rotation = rot;
 			}
-			else UnloadSingleAnimationFromRegister(anims, animAmount, i);
+			else {
+				UnloadSingleAnimationFromRegister(anims, animAmount, i);
+				i--;
+			}
 		}
-		for (j = 0; j < anims[i]->animAmount; j++) {
-			if (anims[i]->anims[j] != NULL)
-				UpdateAnimable(spriteData, anims[i], anims[i]->anims, j, anims[i]->currentFrame);
-		}
-		anims[i]->currentFrame++;
 	}
 }
 void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, int index, int currentFrame) {
 	char line[256];
 	Animable *aux;
 
-	anims[index]->sprite->origin.width += anims[index]->deltaOrigin.width;
- 	anims[index]->sprite->origin.height += anims[index]->deltaOrigin.height;
-	anims[index]->sprite->origin.x += anims[index]->deltaOrigin.x;
-	anims[index]->sprite->origin.y += anims[index]->deltaOrigin.y;
+	anims[index]->sprite->origin = (Rectangle)
+	{ anims[index]->sprite->origin.width + anims[index]->deltaOrigin.width,
+ 	  anims[index]->sprite->origin.height + anims[index]->deltaOrigin.height,
+	  anims[index]->sprite->origin.x + anims[index]->deltaOrigin.x,
+	  anims[index]->sprite->origin.y + anims[index]->deltaOrigin.y };
 
-	anims[index]->sprite->dest.width += anims[index]->deltaDest.width;
-	anims[index]->sprite->dest.height += anims[index]->deltaDest.height;
-	anims[index]->sprite->dest.x += anims[index]->deltaDest.x;
-	anims[index]->sprite->dest.y += anims[index]->deltaDest.y;
+	anims[index]->sprite->dest = (Rectangle)
+	{ anims[index]->sprite->dest.width + anims[index]->deltaDest.width,
+	  anims[index]->sprite->dest.height + anims[index]->deltaDest.height,
+	  anims[index]->sprite->dest.x + anims[index]->deltaDest.x,
+	  anims[index]->sprite->dest.y + anims[index]->deltaDest.y };
 
 	anims[index]->sprite->position = Vector2Add(anims[index]->sprite->position, anims[index]->deltaPos);
 	anims[index]->sprite->rotation += anims[index]->deltaRotation;

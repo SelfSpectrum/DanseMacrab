@@ -279,31 +279,29 @@ void UnloadEntity(EntityType type, Combat *combat, int position) {
 			return;
 	}
 }
-void DrawCombat(Combat combat, SafeTexture *textures, Shader shader, Color color) {
+void DrawCombat(Combat combat, SafeTexture *textures, Color color, bool shader) {
 	int i;
 	Sprite *sprite;
 	for (i = 0; i < 5; i++) {
 		if (combat.enemy[i] != NULL) {
 			sprite = combat.enemy[i]->enemy.sprite;
-			if (sprite->shader) BeginShaderMode(shader);
+			if (shader != sprite->shader) continue;
 			DrawTexturePro(textures[sprite->textureIndex].tex,
 				       sprite->origin,
 				       sprite->dest,
 				       (Vector2) { -48 * combat.enemy[i]->enemy.position - 48, -36 },
 				       sprite->rotation,
 				       color);
-			if (sprite->shader) EndShaderMode();
 		}
 		if (combat.player[i] != NULL) {
 			sprite = combat.player[i]->player.sprite;
-			if (sprite->shader) BeginShaderMode(shader);
+			if (shader != sprite->shader) continue;
 			DrawTexturePro(textures[sprite->textureIndex].tex,
 				       sprite->origin,
 				       sprite->dest,
 				       (Vector2) { -48 * combat.player[i]->player.position - 48, -82 },
 				       sprite->rotation,
 				       color);
-			if (sprite->shader) EndShaderMode();
 		}
 	}
 	DrawRectangle(0, 130, 360, 1, color);

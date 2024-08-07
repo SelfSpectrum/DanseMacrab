@@ -192,11 +192,17 @@ int main() {
 					DrawText("Are you sure you want to exit program?", 50, 90, 8, state.globalColor);
 				}
 				else {
-					DrawCombat(state.combat, state.textures, shader, state.globalColor);
-					DrawAnimation(state.anims, state.textures, state.animAmount, shader, state.globalColor);
-					DrawSprite(state.sprites, state.textures, state.spriteAmount, shader, state.globalColor);
-					DrawButton(state.buttons, state.textures, state.buttonAmount, shader, state.font, state.globalColor);
-					DrawMessage(state.messages, state.messageAmount, state.font, state.globalColor);
+					BeginShaderMode(shader);
+						//DrawCombat(state.combat, state.textures, state.globalColor, true);
+						DrawAnimation(state.anims, state.textures, state.animAmount, state.globalColor, true);
+						//DrawSprite(state.sprites, state.textures, state.spriteAmount, state.globalColor, true);
+						//DrawButton(state.buttons, state.textures, state.buttonAmount, state.font, state.globalColor, true);
+					EndShaderMode();
+					//DrawCombat(state.combat, state.textures, state.globalColor, false);
+					DrawAnimation(state.anims, state.textures, state.animAmount, state.globalColor, false);
+					//DrawSprite(state.sprites, state.textures, state.spriteAmount, state.globalColor, false);
+					//DrawButton(state.buttons, state.textures, state.buttonAmount, state.font, state.globalColor, false);
+					//DrawMessage(state.messages, state.messageAmount, state.font, state.globalColor);
 				}
 			EndMode2D();
 		EndTextureMode();

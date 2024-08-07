@@ -133,18 +133,18 @@ Animable *ParseAnimable(FILE *spriteData, char *line) {
 void UpdateAnimation(FILE *animsData, FILE *spriteData, Animation **anims, int *animAmount) {
 	int i;
 	int j;
-	int id;
-	Vector2 pos;
-	float rot;
+
 	for (i = 0; i < (*animAmount); i++) {
 		//printf("Frame: %d	Amount: %d	Freed: %d\n", anims[i]->currentFrame, anims[i]->animAmount, anims[i]->freedAmount);
-		for (j = 0; j < anims[i]->animAmount; j++) {
-			if (anims[i]->anims[j] != NULL)
-				UpdateAnimable(spriteData, anims[i], anims[i]->anims, j, anims[i]->currentFrame);
-		}
+		for (j = 0; j < anims[i]->animAmount; j++)
+			UpdateAnimable(spriteData, anims[i], anims[i]->anims, j, anims[i]->currentFrame);
 		anims[i]->currentFrame++;
 		if (anims[i]->freedAmount == anims[i]->animAmount) {
 			if (anims[i]->repeat) {
+				int id;
+				Vector2 pos;
+				float rot;
+
 				id = anims[i]->id;
 				pos = anims[i]->position;
 				rot = anims[i]->rotation;
@@ -162,23 +162,25 @@ void UpdateAnimation(FILE *animsData, FILE *spriteData, Animation **anims, int *
 	}
 }
 void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, int index, int currentFrame) {
+	if (anims[index] == NULL) return;
 	char line[256];
 	Animable *aux;
 
-	anims[index]->sprite->origin = (Rectangle)
-	{ anims[index]->sprite->origin.width + anims[index]->deltaOrigin.width,
- 	  anims[index]->sprite->origin.height + anims[index]->deltaOrigin.height,
-	  anims[index]->sprite->origin.x + anims[index]->deltaOrigin.x,
-	  anims[index]->sprite->origin.y + anims[index]->deltaOrigin.y };
+	anims[index]->sprite->origin = (Rectangle) { anims[index]->sprite->origin.x + anims[index]->deltaOrigin.x,
+						     anims[index]->sprite->origin.y + anims[index]->deltaOrigin.y,
+						     anims[index]->sprite->origin.width + anims[index]->deltaOrigin.width,
+						     anims[index]->sprite->origin.height + anims[index]->deltaOrigin.height };
 
-	anims[index]->sprite->dest = (Rectangle)
-	{ anims[index]->sprite->dest.width + anims[index]->deltaDest.width,
-	  anims[index]->sprite->dest.height + anims[index]->deltaDest.height,
-	  anims[index]->sprite->dest.x + anims[index]->deltaDest.x,
-	  anims[index]->sprite->dest.y + anims[index]->deltaDest.y };
+	anims[index]->sprite->dest = (Rectangle) { anims[index]->sprite->dest.x + anims[index]->deltaDest.x,
+						   anims[index]->sprite->dest.y + anims[index]->deltaDest.y,
+						   anims[index]->sprite->dest.width + anims[index]->deltaDest.width,
+						   anims[index]->sprite->dest.height + anims[index]->deltaDest.height };
 
 	anims[index]->sprite->position = Vector2Add(anims[index]->sprite->position, anims[index]->deltaPos);
 	anims[index]->sprite->rotation += anims[index]->deltaRotation;
+	//printf("Origin - W: %f\tH: %f\tX: %f\tY: %f\n", anims[index]->sprite->origin.width, anims[index]->sprite->origin.height, anims[index]->sprite->origin.x, anims[index]->sprite->origin.y);
+	//printf("Dest - W: %f\tH: %f\tX: %f\tY: %f\n", anims[index]->sprite->dest.width, anims[index]->sprite->dest.height, anims[index]->sprite->dest.x, anims[index]->sprite->dest.y);
+	//printf("Position - X: %f\tY: %f\n", anims[index]->sprite->position.x, anims[index]->sprite->position.y);
 
 	if (currentFrame >= anims[index]->frame) {
 		if (anims[index]->frame != 0) {
@@ -213,25 +215,22 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 		}
 	}
 }
-void DrawAnimation(Animation **anims, SafeTexture *textures, int animAmount, Shader shader, Color color) {
+void DrawAnimation(Animation **anims, SafeTexture *textures, int animAmount, Color color, bool shader) {
 	int i;
 	int j;
-	for (i = 0; i < animAmount; i++) {
-		for (j = 0; j < anims[i]->animAmount; j++) {
-			DrawAnimable(anims[i]->anims[j], textures, shader, color, anims[i]->position, anims[i]->rotation);
-		}
-	}
+	for (i = 0; i < animAmount; i++)
+		for (j = 0; j < anims[i]->animAmount; j++)
+			DrawAnimable(anims[i]->anims[j], textures, color, anims[i]->position, anims[i]->rotation, shader);
 }
-void DrawAnimable(Animable *anim, SafeTexture *textures, Shader shader, Color color, Vector2 position, float rotation) {
+void DrawAnimable(Animable *anim, SafeTexture *textures, Color color, Vector2 position, float rotation, bool shader) {
 	if (anim == NULL) return;
-	if (anim->sprite->shader) BeginShaderMode(shader);
+	if (shader != anim->sprite->shader) return;
 	DrawTexturePro( textures[anim->sprite->textureIndex].tex,
 			anim->sprite->origin,
 			anim->sprite->dest,
 			Vector2Add(anim->sprite->position, position),
 			anim->sprite->rotation + rotation,
 			color);
-	if (anim->sprite->shader) EndShaderMode();
 }
 void UnloadAnimationRegister(Animation **anims, int *animAmount) {
 	int i;
@@ -361,22 +360,21 @@ Sprite *ParseSprite(char *line) {
 	}
 	return sprite;
 }
-void DrawSprite(Sprite **sprites, SafeTexture *textures, int spriteAmount, Shader shader, Color color) {
+void DrawSprite(Sprite **sprites, SafeTexture *textures, int spriteAmount, Color color, bool shader) {
 	int i;
 	for (i = 0; i < spriteAmount; i++) {
-		DrawSingleSprite(sprites[i], textures, shader, color);
+		DrawSingleSprite(sprites[i], textures, color, shader);
 	}
 }
-void DrawSingleSprite(Sprite *sprite, SafeTexture *textures, Shader shader, Color color) {
+void DrawSingleSprite(Sprite *sprite, SafeTexture *textures, Color color, bool shader) {
 	if (sprite == NULL) return;
-	if (sprite->shader) BeginShaderMode(shader);
+	if (shader != sprite->shader) return;
 	DrawTexturePro(textures[sprite->textureIndex].tex,
 			sprite->origin,
 			sprite->dest,
 			sprite->position,
 			sprite->rotation,
 			color);
-	if (sprite->shader) EndShaderMode();
 }
 void UnloadSpriteRegister(Sprite **sprites, int *spriteAmount) {
 	int i;
@@ -452,28 +450,26 @@ Button *LoadSingleButton(FILE *spriteData, FILE *translationData, Font font, Vec
 	}
 	return button;
 }
-void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Font font, Color color) {
+void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Font font, Color color, bool shader) {
 	int i;
 	for (i = 0; i < buttonAmount; i++) {
 		if (buttons[i]->selected) {
-			if (buttons[i]->spriteOn->shader) BeginShaderMode(shader);
+			if (shader != buttons[i]->spriteOn->shader) continue;
 			DrawTexturePro(textures[buttons[i]->spriteOn->textureIndex].tex,
 						buttons[i]->spriteOn->origin,
 						buttons[i]->spriteOn->dest,
 						buttons[i]->position,
 						buttons[i]->rotation,
 						color);
-			if (buttons[i]->spriteOn->shader) EndShaderMode();
 		}
 		else {
-			if (buttons[i]->spriteOff->shader) BeginShaderMode(shader);
+			if (shader != buttons[i]->spriteOff->shader) continue;
 			DrawTexturePro(textures[buttons[i]->spriteOff->textureIndex].tex,
 						buttons[i]->spriteOff->origin,
 						buttons[i]->spriteOff->dest,
 						buttons[i]->position,
 						buttons[i]->rotation,
 					color);
-			if (buttons[i]->spriteOff->shader) EndShaderMode();
 		}
 		DrawButtonMessage(buttons[i], font, color);
 	}

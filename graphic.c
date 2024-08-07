@@ -166,17 +166,25 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 	char line[256];
 	Animable *aux;
 
-	anims[index]->sprite->origin = (Rectangle) { anims[index]->sprite->origin.x + anims[index]->deltaOrigin.x,
-						     anims[index]->sprite->origin.y + anims[index]->deltaOrigin.y,
-						     anims[index]->sprite->origin.width + anims[index]->deltaOrigin.width,
-						     anims[index]->sprite->origin.height + anims[index]->deltaOrigin.height };
+	anims[index]->sprite->origin = (Rectangle)
+	{ anims[index]->sprite->origin.x + anims[index]->deltaOrigin.x,
+	  anims[index]->sprite->origin.y + anims[index]->deltaOrigin.y,
+	  anims[index]->sprite->origin.width + anims[index]->deltaOrigin.width,
+	  anims[index]->sprite->origin.height + anims[index]->deltaOrigin.height };
 
-	anims[index]->sprite->dest = (Rectangle) { anims[index]->sprite->dest.x + anims[index]->deltaDest.x,
-						   anims[index]->sprite->dest.y + anims[index]->deltaDest.y,
-						   anims[index]->sprite->dest.width + anims[index]->deltaDest.width,
-						   anims[index]->sprite->dest.height + anims[index]->deltaDest.height };
+	Rectangle dest = anims[index]->sprite->dest;
 
-	anims[index]->sprite->position = Vector2Add(anims[index]->sprite->position, anims[index]->deltaPos);
+	//anims[index]->sprite->dest = (Rectangle)
+	//{ anims[index]->sprite->dest.x + anims[index]->deltaDest.x,
+	//  anims[index]->sprite->dest.y + anims[index]->deltaDest.y,
+	anims[index]->sprite->dest = (Rectangle)
+	{ anims[index]->sprite->position.x + anims[index]->deltaPos.x,
+	  anims[index]->sprite->position.y + anims[index]->deltaPos.y,
+	  anims[index]->sprite->dest.width + anims[index]->deltaDest.width,
+	  anims[index]->sprite->dest.height + anims[index]->deltaDest.height };
+
+	//anims[index]->sprite->position = Vector2Add(anims[index]->sprite->position, anims[index]->deltaPos);
+	anims[index]->sprite->position = Vector2Add(anims[index]->sprite->position, (Vector2) { dest.x, dest.y });
 	anims[index]->sprite->rotation += anims[index]->deltaRotation;
 	//printf("Origin - W: %f\tH: %f\tX: %f\tY: %f\n", anims[index]->sprite->origin.width, anims[index]->sprite->origin.height, anims[index]->sprite->origin.x, anims[index]->sprite->origin.y);
 	//printf("Dest - W: %f\tH: %f\tX: %f\tY: %f\n", anims[index]->sprite->dest.width, anims[index]->sprite->dest.height, anims[index]->sprite->dest.x, anims[index]->sprite->dest.y);
@@ -225,10 +233,17 @@ void DrawAnimation(Animation **anims, SafeTexture *textures, int animAmount, Col
 void DrawAnimable(Animable *anim, SafeTexture *textures, Color color, Vector2 position, float rotation, bool shader) {
 	if (anim == NULL) return;
 	if (shader != anim->sprite->shader) return;
+
+	Rectangle dest = anim->sprite->dest;
+	dest.x += position.x;
+	dest.y += position.y;
+
 	DrawTexturePro( textures[anim->sprite->textureIndex].tex,
 			anim->sprite->origin,
-			anim->sprite->dest,
-			Vector2Add(anim->sprite->position, position),
+			// anim->sprite->dest,
+			dest,
+			// Vector2Add(anim->sprite->position, position),
+			(Vector2) { anim->sprite->dest.x, anim->sprite->dest.y },
 			anim->sprite->rotation + rotation,
 			color);
 }
@@ -576,6 +591,8 @@ void UnloadMessageRegister(Message **messages, int *messageAmount) {
 	printf("INFO: MESSAGE: Messages unloaded correctly\n");
 }
 void UnloadSingleMessage(Message **message) {
+	if ((*message) == NULL) return;
+
 	UnloadCodepoints((*message)->codepoints);
 	free(*message);
 	(*message) = NULL;

@@ -42,6 +42,7 @@ struct StateData {
 	bool exitWindowRequested; // Bandera para solicitar que se cierre la ventana
 	bool exitWindow; // Flag to set window to exit
 	//bool runGame; // To know if the game should run
+	bool debug;
 	int randomValue;
 	PlayerPref pref;
 	// Visuals
@@ -192,17 +193,19 @@ int main() {
 					DrawText("Are you sure you want to exit program?", 50, 90, 8, state.globalColor);
 				}
 				else {
-					BeginShaderMode(shader);
-						//DrawCombat(state.combat, state.textures, state.globalColor, true);
-						DrawAnimation(state.anims, state.textures, state.animAmount, state.globalColor, true);
-						//DrawSprite(state.sprites, state.textures, state.spriteAmount, state.globalColor, true);
-						//DrawButton(state.buttons, state.textures, state.buttonAmount, state.font, state.globalColor, true);
-					EndShaderMode();
-					//DrawCombat(state.combat, state.textures, state.globalColor, false);
+					DrawCombat(state.combat, state.textures, state.globalColor, false);
 					DrawAnimation(state.anims, state.textures, state.animAmount, state.globalColor, false);
-					//DrawSprite(state.sprites, state.textures, state.spriteAmount, state.globalColor, false);
-					//DrawButton(state.buttons, state.textures, state.buttonAmount, state.font, state.globalColor, false);
-					//DrawMessage(state.messages, state.messageAmount, state.font, state.globalColor);
+					DrawSprite(state.sprites, state.textures, state.spriteAmount, state.globalColor, false);
+					DrawButton(state.buttons, state.textures, state.buttonAmount, state.font, state.globalColor, false);
+
+					BeginShaderMode(shader);
+						DrawCombat(state.combat, state.textures, state.globalColor, true);
+						DrawAnimation(state.anims, state.textures, state.animAmount, state.globalColor, true);
+						DrawSprite(state.sprites, state.textures, state.spriteAmount, state.globalColor, true);
+						DrawButton(state.buttons, state.textures, state.buttonAmount, state.font, state.globalColor, true);
+					EndShaderMode();
+					
+					DrawMessage(state.messages, state.messageAmount, state.font, state.globalColor);
 				}
 			EndMode2D();
 		EndTextureMode();
@@ -536,6 +539,7 @@ void SetState(StateData *state, GameState newState) {
 			state->exitWindowRequested = false;
 			state->exitWindow = false;
 			//state.runGame = true;
+			state->debug = true;
 
 			state->startKey = KEY_ENTER;
 			state->selectKey = KEY_BACKSPACE;
@@ -620,6 +624,9 @@ void SetState(StateData *state, GameState newState) {
 			state->textures[6].init = true;
 			state->textures[7].tex = LoadTexture("./resources/gfx/entities.png");
 			state->textures[7].init = true;
+			
+			state->music = LoadMusicStream("./resources/sfx/title.mp3");
+			state->music.looping = true;
 
 			state->sounds[0].sound = LoadSound("./resources/sfx/pressStart.mp3");
 			state->sounds[0].init = true;
@@ -631,15 +638,22 @@ void SetState(StateData *state, GameState newState) {
 			state->sounds[3].init = true;
 
 			state->combat = (Combat) { { NULL }, { NULL }, NULL, { 0 }, 0, 0 }; // Data from position, entities and stuff
-			state->combat.player[2] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 1);
-			state->combat.player[2]->player.position = 2;
-			LoadEnemiesOnCombat(state->combatData, state->enemyData, state->spriteData, state->techData, &state->combat, 1);
+			//state->combat.player[2] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 1);
+			//state->combat.player[2]->player.position = 2;
+			//LoadEnemiesOnCombat(state->combatData, state->enemyData, state->spriteData, state->techData, &state->combat, 1);
 
-			if (state->pref.firstTime)
-				SetState(state, STATE_SELECTLANGUAGE);
-			else
-				SetState(state, STATE_TITLE);
+			if (state->debug) SetState(state, STATE_DEBUG);
+			else {
+				if (state->pref.firstTime)
+					SetState(state, STATE_SELECTLANGUAGE);
+				else
+					SetState(state, STATE_TITLE);
+			}
 
+			break;
+		case STATE_DEBUG:
+			LoadAnimation(state, (Vector2) { 120, 120 }, 0, 11);
+			LoadAnimation(state, (Vector2) { 1, 0 }, 0, 1);
 			break;
 		case STATE_TITLE:
 			//LoadSpriteFromFile("./resources/layout/mainTitle.tsv", state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE);
@@ -652,9 +666,6 @@ void SetState(StateData *state, GameState newState) {
 			LoadMessage(state, (Vector2) { 159, 154 }, 18, 0, false, ALIGN_CENTER, 1);
 			LoadMessage(state, (Vector2) { 160, 153 }, 18, 0, false, ALIGN_CENTER, 1);
 			LoadMessage(state, (Vector2) { 160, 154 }, 18, 0, true, ALIGN_CENTER, 1);
-
-			state->music = LoadMusicStream("./resources/sfx/title.mp3");
-			state->music.looping = true;
 
 			PlayMusicStream(state->music);
 			SetMusicVolume(state->music, 1.0f);

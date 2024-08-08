@@ -47,8 +47,8 @@ struct Message {
 struct Sprite {
 	int textureIndex; // Índice de la textura en el array del estado para extraer el sprite
 	Rectangle origin; // Origen del sprite dentro de la textura
-	Rectangle dest; // Rectángulo de destino, que establece posición del pivote y escala del sprite
-	Vector2 position; // Posición del pivote en el mundo
+	Rectangle dest; // Rectángulo de destino, que establece posición y escala del sprite
+	Vector2 position; // Posición del pivote en la textura
 	float rotation; // Rotacion aplicada a la textura respecto al pivote
 	bool shader; // ¿Dibujar animable dentro del modo sombreador?
 };
@@ -67,6 +67,7 @@ struct Animable {
 	Sprite *sprite; // Sprite que será modificado en el tiempo. Para tener cambios bruscos, se requiere un nuevo sprite (ID)
 	Rectangle deltaOrigin;
 	Rectangle deltaDest;
+	Vector2 offset;
 	Vector2 deltaPos;
 	float deltaRotation;
 };

@@ -32,6 +32,7 @@ struct PlayerPref {
 	bool firstTime;
 	char namePref[64];
 	Language language;
+	float generalVolume;
 	float musicVolume;
 	float sfxVolume;
 	int textSpeed;
@@ -653,7 +654,7 @@ void SetState(StateData *state, GameState newState) {
 			break;
 		case STATE_DEBUG:
 			LoadAnimation(state, (Vector2) { 120, 120 }, 0, 11);
-			LoadAnimation(state, (Vector2) { 1, 0 }, 0, 1);
+			//LoadAnimation(state, (Vector2) { 1, 0 }, 0, 1);
 			break;
 		case STATE_TITLE:
 			//LoadSpriteFromFile("./resources/layout/mainTitle.tsv", state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE);
@@ -704,17 +705,18 @@ void SetState(StateData *state, GameState newState) {
 }
 void SavePrefs(PlayerPref prefs) {
 	char buffer[512]; // Big buffer to save all data from the user and ensure it gets saved properly
-	sprintf(buffer, "fsp=%d\nname=%s\nlang=%d\nmus=%.2f\nsfx=%.2f\ntext=%d",
+	sprintf(buffer, "fsp=%d\nname=%s\nlang=%d\nvol=%.2f\nmus=%.2f\nsfx=%.2f\ntext=%d",
 			(int) prefs.firstTime,
 			prefs.namePref,
 			(int) prefs.language,
+			prefs.generalVolume,
 			prefs.musicVolume,
 			prefs.sfxVolume,
 			prefs.textSpeed);
 	SaveFileText("PlayerPrefs.data", buffer);
 }
 PlayerPref LoadPrefs() {
-	PlayerPref prefs = { true, "AAA", 0, 0.0f, 0.0f, 5 }; // Default preferences
+	PlayerPref prefs = { true, "AAA", 0, 0.0f, 0.0f, 0.0f, 5 }; // Default preferences
 	if (!FileExists("PlayerPrefs.data")) {
 		printf("INFO: PREFS: Prefs file does not exist, creating one.\n");
 		SavePrefs(prefs);
@@ -728,10 +730,11 @@ PlayerPref LoadPrefs() {
 	}
 	int ftp;
 	int lang;
-	sscanf(buffer, "fsp=%d\nname=%s\nlang=%d\nmus=%f\nsfx=%f\ntext=%d",
+	sscanf(buffer, "fsp=%d\nname=%s\nlang=%d\nvol=%f\nmus=%f\nsfx=%f\ntext=%d",
 			&ftp,
 			prefs.namePref,
 			&lang,
+			&prefs.generalVolume,
 			&prefs.musicVolume,
 			&prefs.sfxVolume,
 			&prefs.textSpeed);

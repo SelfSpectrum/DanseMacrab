@@ -85,23 +85,24 @@ Animable *ParseAnimable(FILE *spriteData, char *line) {
 		printf("ERROR: ANIMABLE: Animable load failed.\n");
 		return NULL;
 	}
+	int id;
 	char *token; // Para ir partiendo el string
 	char *saveptr; // String cortado restante tras cada partición
-	Vector2 position = { 0 };
 	float rotation = 0;
 
 	token = strtok_r(line, "	", &saveptr);
 	anim->frame = atoi(token);
 
 	token = strtok_r(NULL, "	", &saveptr);
-	position.x = atof(token);
+	anim->offset.x = atof(token);
 	token = strtok_r(NULL, "	", &saveptr);
-	position.y = atof(token);
+	anim->offset.y = atof(token);
+	printf("Offset - X: %f\tY: %f\n", anim->offset.x, anim->offset.y);
 	token = strtok_r(NULL, "	", &saveptr);
 	rotation = atof(token);
 
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->sprite = LoadSingleSprite(spriteData, position, rotation, atoi(token));
+	id = atoi(token);
 
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaOrigin.width = atof(token);
@@ -117,16 +118,20 @@ Animable *ParseAnimable(FILE *spriteData, char *line) {
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaDest.height = atof(token);
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaDest.x = atof(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaDest.y = atof(token);
-
-	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaPos.x = atof(token);
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaPos.y = atof(token);
+
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->deltaDest.x = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->deltaDest.y = atof(token);
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaRotation = atof(token);
+
+	anim->sprite = LoadSingleSprite(spriteData, (Vector2) { 0 }, rotation, id);
+
+	//printf("Dest - X: %f\tY: %f\n", anim->sprite->dest.x, anim->sprite->dest.y);
 
 	return anim;
 }
@@ -166,26 +171,22 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 	char line[256];
 	Animable *aux;
 
-	anims[index]->sprite->origin = (Rectangle)
-	{ anims[index]->sprite->origin.x + anims[index]->deltaOrigin.x,
-	  anims[index]->sprite->origin.y + anims[index]->deltaOrigin.y,
-	  anims[index]->sprite->origin.width + anims[index]->deltaOrigin.width,
-	  anims[index]->sprite->origin.height + anims[index]->deltaOrigin.height };
+	anims[index]->sprite->origin.x += anims[index]->deltaOrigin.x;
+	anims[index]->sprite->origin.y += anims[index]->deltaOrigin.y;
+	anims[index]->sprite->origin.width += anims[index]->deltaOrigin.width;
+	anims[index]->sprite->origin.height += anims[index]->deltaOrigin.height;
 
-	Rectangle dest = anims[index]->sprite->dest;
+	//Rectangle dest = anims[index]->sprite->dest;
 
-	//anims[index]->sprite->dest = (Rectangle)
-	//{ anims[index]->sprite->dest.x + anims[index]->deltaDest.x,
-	//  anims[index]->sprite->dest.y + anims[index]->deltaDest.y,
-	anims[index]->sprite->dest = (Rectangle)
-	{ anims[index]->sprite->position.x + anims[index]->deltaPos.x,
-	  anims[index]->sprite->position.y + anims[index]->deltaPos.y,
-	  anims[index]->sprite->dest.width + anims[index]->deltaDest.width,
-	  anims[index]->sprite->dest.height + anims[index]->deltaDest.height };
+	anims[index]->sprite->dest.x += anims[index]->deltaDest.x;
+	anims[index]->sprite->dest.y += anims[index]->deltaDest.y;
+	anims[index]->sprite->dest.width += anims[index]->deltaDest.width;
+	anims[index]->sprite->dest.height += anims[index]->deltaDest.height;
 
-	//anims[index]->sprite->position = Vector2Add(anims[index]->sprite->position, anims[index]->deltaPos);
-	anims[index]->sprite->position = Vector2Add(anims[index]->sprite->position, (Vector2) { dest.x, dest.y });
+	anims[index]->sprite->position.x += anims[index]->deltaPos.x;
+	anims[index]->sprite->position.y += anims[index]->deltaPos.y;
 	anims[index]->sprite->rotation += anims[index]->deltaRotation;
+
 	//printf("Origin - W: %f\tH: %f\tX: %f\tY: %f\n", anims[index]->sprite->origin.width, anims[index]->sprite->origin.height, anims[index]->sprite->origin.x, anims[index]->sprite->origin.y);
 	//printf("Dest - W: %f\tH: %f\tX: %f\tY: %f\n", anims[index]->sprite->dest.width, anims[index]->sprite->dest.height, anims[index]->sprite->dest.x, anims[index]->sprite->dest.y);
 	//printf("Position - X: %f\tY: %f\n", anims[index]->sprite->position.x, anims[index]->sprite->position.y);
@@ -204,6 +205,7 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 				anims[index]->deltaOrigin = aux->deltaOrigin;
 				anims[index]->deltaDest = aux->deltaDest;
 				anims[index]->deltaPos = aux->deltaPos;
+				anims[index]->offset = aux->offset;
 				anims[index]->deltaRotation = aux->deltaRotation;
 
 				free(aux);
@@ -235,17 +237,22 @@ void DrawAnimable(Animable *anim, SafeTexture *textures, Color color, Vector2 po
 	if (shader != anim->sprite->shader) return;
 
 	Rectangle dest = anim->sprite->dest;
-	dest.x += position.x;
-	dest.y += position.y;
+	dest.x += position.x + anim->offset.x;
+	dest.y += position.y + anim->offset.y;
 
 	DrawTexturePro( textures[anim->sprite->textureIndex].tex,
 			anim->sprite->origin,
-			// anim->sprite->dest,
+			//anim->sprite->dest,
 			dest,
 			// Vector2Add(anim->sprite->position, position),
 			(Vector2) { anim->sprite->dest.x, anim->sprite->dest.y },
 			anim->sprite->rotation + rotation,
 			color);
+
+	//printf("Origin - W: %f\tH: %f\tX: %f\tY: %f\n", anim->sprite->origin.width, anim->sprite->origin.height, anim->sprite->origin.x, anim->sprite->origin.y);
+	//printf("Dest - W: %f\tH: %f\tX: %f\tY: %f\n", dest.width, dest.height, anim->sprite->position.x, anim->sprite->position.y);
+	//printf("Position - X: %f\tY: %f\n", dest.x, dest.y);
+	//printf("Offset - X: %f\tY: %f\n", anim->offset.x, anim->offset.y);
 }
 void UnloadAnimationRegister(Animation **anims, int *animAmount) {
 	int i;

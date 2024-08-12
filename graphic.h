@@ -6,7 +6,6 @@
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
-#include <iconv.h>
 #include <raylib.h>
 #include <raymath.h>
 
@@ -48,8 +47,8 @@ struct Message {
 struct Sprite {
 	int textureIndex; // Índice de la textura en el array del estado para extraer el sprite
 	Rectangle origin; // Origen del sprite dentro de la textura
-	Rectangle dest; // Rectángulo de destino, que establece posición del pivote y escala del sprite
-	Vector2 position; // Posición del pivote en el mundo
+	Rectangle dest; // Rectángulo de destino, que establece posición y escala del sprite
+	Vector2 position; // Posición del pivote en la textura
 	float rotation; // Rotacion aplicada a la textura respecto al pivote
 	bool shader; // ¿Dibujar animable dentro del modo sombreador?
 };
@@ -68,6 +67,7 @@ struct Animable {
 	Sprite *sprite; // Sprite que será modificado en el tiempo. Para tener cambios bruscos, se requiere un nuevo sprite (ID)
 	Rectangle deltaOrigin;
 	Rectangle deltaDest;
+	Vector2 offset;
 	Vector2 deltaPos;
 	float deltaRotation;
 };
@@ -89,8 +89,8 @@ Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet);
 Animable *ParseAnimable(FILE *spriteData, char *line);
 void UpdateAnimation(FILE *animsData, FILE *spriteData, Animation **anims, int *animAmount);
 void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, int index, int currentFrame);
-void DrawAnimation(Animation **anims, SafeTexture *textures, int animAmount, Shader shader, Color color);
-void DrawAnimable(Animable *anims, SafeTexture *textures, Shader shader, Color color, Vector2 Position, float rotation);
+void DrawAnimation(Animation **anims, SafeTexture *textures, int animAmount, Color color, bool shader);
+void DrawAnimable(Animable *anims, SafeTexture *textures, Color color, Vector2 Position, float rotation, bool shader);
 void UnloadAnimationRegister(Animation **anims, int *animAmount);
 void UnloadSingleAnimationFromRegister(Animation **anims, int *animAmount, int index);
 
@@ -99,8 +99,8 @@ void LoadSpriteFromFile(const char *spriteSheet, FILE *spriteData, Sprite **spri
 void LoadSpriteIntoRegister(FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE, Vector2 position, float rotation, int id);
 Sprite *LoadSingleSprite(FILE *spriteData, Vector2 position, float rotation, int id);
 Sprite *ParseSprite(char *line);
-void DrawSprite(Sprite **sprites, SafeTexture *textures, int spriteAmount, Shader shader, Color color);
-void DrawSingleSprite(Sprite *sprite, SafeTexture *textures, Shader shader, Color color);
+void DrawSprite(Sprite **sprites, SafeTexture *textures, int spriteAmount, Color color, bool shader);
+void DrawSingleSprite(Sprite *sprite, SafeTexture *textures, Color color, bool shader);
 void UnloadSpriteRegister(Sprite **sprites, int *spriteAmount);
 void UnloadSingleSpriteFromRegister(Sprite **sprites, int *spriteAmount, int index);
 
@@ -118,7 +118,7 @@ void LoadButtonIntoRegister(FILE *spriteData,
 			    int idOn,
 			    int idMessage);
 Button *LoadSingleButton(FILE *spriteData, FILE *translationData, Font font, Vector2 position, float rotation, int idOff, int idOn, int idMessage);
-void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Shader shader, Font font, Color color);
+void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Font font, Color color, bool shader);
 void UnloadButtonRegister(Button **buttons, int *buttonAmount);
 
 // Funciones para traducciones y texto

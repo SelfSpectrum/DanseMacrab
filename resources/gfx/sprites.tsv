@@ -1,12 +1,12 @@
 ID	Nombre	ID Texture	Orígen X	Orígen Y	Orígen Largo	Orígen Alto	Destino X	Destino Y	Destino Largo	Destino Alto	Shader
-1	Giant Crab	0	0	0	323	202	0	0	323	202	1
+1	Giant Crab	0	0	0	323	202	0	202	323	202	1
 2	Title Rin	0	0	304	208	148	0	0	208	148	1
 3	Kanji	0	0	224	64	64	0	0	64	64	1
 4	Kanji	0	64	224	64	64	0	0	64	64	1
 5	Kanji	0	128	224	64	64	0	0	64	64	1
 6	Kanji	0	196	224	64	64	0	0	64	64	1
 7	Title Name	0	0	288	192	16	0	0	192	16	1
-8											
+8	Giant Crab – Stretch	0	0	0	323	202	0	232	323	232	1
 9											
 10	LongButtonOff	4	0	0	48	16	0	0	64	16	0
 11	LongButtonOn	4	48	0	48	16	0	0	64	16	0
@@ -1522,7 +1522,7 @@ ID	Nombre	ID Texture	Orígen X	Orígen Y	Orígen Largo	Orígen Alto	Destino X	De
 1521	 - On	5	480	464	16	16	0	0	16	16	0
 1522	 - On	5	480	480	16	16	0	0	16	16	0
 1523	 - On	5	480	496	16	16	0	0	16	16	0
-1524	Katana slash 1	6	0	0	32	32	16	30	32	32	0
+1524	Katana slash 1	6	0	0	32	32	18	28	32	32	0
 1525	Katana slash 2	6	0	32	32	32	3	29	32	32	0
 1526	Katana slash 3	6	32	32	32	32	2	30	32	32	0
 1527	Katana slash 4	6	32	0	32	32	2	30	32	32	0

@@ -35,7 +35,9 @@ Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 	char dir[128];
 	char *token;
 	char *animables;
+	char *parents;
 	char *saveptr;
+	char *saveptr2;
 	int animId;
 	rewind(animsData);
 	if (fgets(line, sizeof(line), animsData) == NULL) return NULL;
@@ -49,11 +51,22 @@ Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 			token = strtok_r(NULL, "	", &saveptr);
 			anim->repeat = (bool) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			animables = strtok_r(token, ",", &saveptr);
+			animables = strtok_r(token, ",", &saveptr2);
+
 			for (anim->animAmount = 0; (anim->animAmount < 8) && (animables != NULL); anim->animAmount++) {
 				sprintf(dir, "./resources/anims/%s.tsv", strtok(animables, "\n"));
 				anim->anims[anim->animAmount] = LoadSingleAnimable(spriteData, dir);
-				animables = strtok_r(NULL, ",", &saveptr);
+				animables = strtok_r(NULL, ",", &saveptr2);
+			}
+			
+			int i;
+			parents = strtok_r(token, ",", &saveptr);
+			for (i = 0; (i < anim->animAmount) && (parents != NULL); i++) {
+				animId = atoi(parents);
+				printf("\n");
+				if (animId <= 0) anim->anims[i]->parent = NULL;
+				else anim->anims[i]->parent = anim->anims[animId - 1]->parent;
+				parents = strtok_r(NULL, ",", &saveptr);
 			}
 			break;
 		}
@@ -64,7 +77,7 @@ Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet) {
 	// Línea del archivo que contiene toda la información del struct
 	if (!FileExists(animSheet)) return NULL;
 
-	//printf("INFO: ANIMATION: Reading from %s.\n", animSheet);
+	printf("INFO: ANIMATION: Reading from %s.\n", animSheet);
 	FILE *file = fopen(animSheet, "r");
 	char line[256];
 	if (fgets(line, sizeof(line), file) != NULL) {
@@ -97,7 +110,7 @@ Animable *ParseAnimable(FILE *spriteData, char *line) {
 	anim->offset.x = atof(token);
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->offset.y = atof(token);
-	printf("Offset - X: %f\tY: %f\n", anim->offset.x, anim->offset.y);
+	//printf("Offset - X: %f\tY: %f\n", anim->offset.x, anim->offset.y);
 	token = strtok_r(NULL, "	", &saveptr);
 	rotation = atof(token);
 
@@ -105,29 +118,29 @@ Animable *ParseAnimable(FILE *spriteData, char *line) {
 	id = atoi(token);
 
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaOrigin.width = atof(token);
+	anim->deltaOrigin.width = atof(token) / anim->frame;
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaOrigin.height = atof(token);
+	anim->deltaOrigin.height = atof(token) / anim->frame;
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaOrigin.x = atof(token);
+	anim->deltaOrigin.x = atof(token) / anim->frame;
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaOrigin.y = atof(token);
+	anim->deltaOrigin.y = atof(token) / anim->frame;
 
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaDest.width = atof(token);
+	anim->deltaDest.width = atof(token) / anim->frame;
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaDest.height = atof(token);
+	anim->deltaDest.height = atof(token) / anim->frame;
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaPos.x = atof(token);
+	anim->deltaPos.x = atof(token) / anim->frame;
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaPos.y = atof(token);
+	anim->deltaPos.y = atof(token) / anim->frame;
 
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaDest.x = atof(token);
+	anim->deltaDest.x = atof(token) / anim->frame;
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaDest.y = atof(token);
+	anim->deltaDest.y = atof(token) / anim->frame;
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaRotation = atof(token);
+	anim->deltaRotation = atof(token) / anim->frame;
 
 	anim->sprite = LoadSingleSprite(spriteData, (Vector2) { 0 }, rotation, id);
 
@@ -237,8 +250,22 @@ void DrawAnimable(Animable *anim, SafeTexture *textures, Color color, Vector2 po
 	if (shader != anim->sprite->shader) return;
 
 	Rectangle dest = anim->sprite->dest;
+	float rot = anim->sprite->rotation;
+
+	dest.x = 0;
+	dest.y = 0;
+
 	dest.x += position.x + anim->offset.x;
 	dest.y += position.y + anim->offset.y;
+	if (anim->parent != NULL) {
+		dest.x += anim->parent->offset.x;
+		dest.y += anim->parent->offset.y;
+		rot += anim->parent->sprite->rotation;
+	}
+	//anim->sprite->dest.x += position.x + anim->offset.x;
+	//anim->sprite->dest.y += position.y + anim->offset.y;
+	//printf("Dest - W: %f\tH: %f\tX: %f\tY: %f\n", anim->sprite->dest.width, anim->sprite->dest.height, anim->sprite->dest.x, anim->sprite->dest.y);
+	//printf("Dest - W: %f\tH: %f\tX: %f\tY: %f\n", dest.width, dest.height, dest.x, dest.y);
 
 	DrawTexturePro( textures[anim->sprite->textureIndex].tex,
 			anim->sprite->origin,
@@ -246,7 +273,7 @@ void DrawAnimable(Animable *anim, SafeTexture *textures, Color color, Vector2 po
 			dest,
 			// Vector2Add(anim->sprite->position, position),
 			(Vector2) { anim->sprite->dest.x, anim->sprite->dest.y },
-			anim->sprite->rotation + rotation,
+			rot + rotation,
 			color);
 
 	//printf("Origin - W: %f\tH: %f\tX: %f\tY: %f\n", anim->sprite->origin.width, anim->sprite->origin.height, anim->sprite->origin.x, anim->sprite->origin.y);
@@ -274,6 +301,7 @@ void UnloadSingleAnimationFromRegister(Animation **anims, int *animAmount, int i
 				fclose(anims[index]->anims[i]->data);
 				anims[index]->anims[i]->data = NULL;
 			}
+			anims[index]->anims[i]->parent = NULL;
 			free(anims[index]->anims[i]);
 			anims[index]->anims[i] = NULL;
 

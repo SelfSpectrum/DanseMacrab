@@ -70,6 +70,7 @@ struct Animable {
 	Vector2 offset;
 	Vector2 deltaPos;
 	float deltaRotation;
+	Animable *parent;
 };
 struct Animation {
 	int id;

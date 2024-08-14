@@ -653,8 +653,9 @@ void SetState(StateData *state, GameState newState) {
 
 			break;
 		case STATE_DEBUG:
-			LoadAnimation(state, (Vector2) { 120, 120 }, 0, 11);
-			//LoadAnimation(state, (Vector2) { 1, 0 }, 0, 1);
+			//LoadAnimation(state, (Vector2) { 120, 120 }, 0, 11);
+			LoadAnimation(state, (Vector2) { 120, 120 }, 0, 27);
+			//LoadAnimation(state, (Vector2) { 0, 0 }, 0, 1);
 			break;
 		case STATE_TITLE:
 			//LoadSpriteFromFile("./resources/layout/mainTitle.tsv", state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE);

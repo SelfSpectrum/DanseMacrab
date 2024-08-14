@@ -1,5 +1,5 @@
 ID	Nombre	Repetir	Animables
-1	Cangrejo título	1	crab
+1	Cangrejo título	1	crab	0
 2			
 3			
 4			
@@ -9,7 +9,7 @@ ID	Nombre	Repetir	Animables
 8			
 9			
 10			
-11	Ataque cátana	1	katanaSwing
+11	Ataque cátana	0	katanaSwing	0
 12			
 13			
 14			
@@ -19,3 +19,16 @@ ID	Nombre	Repetir	Animables
 18			
 19			
 20			
+21			
+22			
+23			
+24			
+25			
+26			
+27	Ataque pinza	1	crabPinch0,crabPinch1,crabPinch2,crabPinch3	
+28			
+29			
+30			
+31			
+32			
+33			

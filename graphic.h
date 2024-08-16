@@ -87,7 +87,7 @@ struct Animation {
 void LoadAnimationIntoRegister(FILE *animsData, FILE *spriteData, Animation **anims, int *animAmount, int ANIM_SIZE, Vector2 position, float rotation, int id);
 Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id);
 Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet);
-Animable *ParseAnimable(FILE *spriteData, char *line);
+Animable *ParseAnimable(FILE *spriteData, char *line, int deltaFrame);
 void UpdateAnimation(FILE *animsData, FILE *spriteData, Animation **anims, int *animAmount);
 void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, int index, int currentFrame);
 void DrawAnimation(Animation **anims, SafeTexture *textures, int animAmount, Color color, bool shader);

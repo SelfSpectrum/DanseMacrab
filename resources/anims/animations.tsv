@@ -25,7 +25,7 @@ ID	Nombre	Repetir	Animables	Parent
 24				
 25				
 26				
-27	Ataque pinza	1	crabPinch0,crabPinch1,crabPinch2,crabPinch3	2,0,0,2
+27	Ataque pinza	1	crabPinch1,crabPinch0,crabPinch2,crabPinch3	0,1,0,1
 28				
 29				
 30				

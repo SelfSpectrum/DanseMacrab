@@ -82,7 +82,7 @@ Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet) {
 	FILE *file = fopen(animSheet, "r");
 	char line[256];
 	if (fgets(line, sizeof(line), file) != NULL) {
-		Animable *anim = ParseAnimable(spriteData, line);
+		Animable *anim = ParseAnimable(spriteData, line, 0);
 		anim->data = file;
 
 		//printf("INFO: ANIMABLE: Animable loaded succesfully\n");
@@ -92,7 +92,7 @@ Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet) {
 	else printf("INFO: ANIMABLE: Error opening the animation file %s!\n", animSheet);
 	return NULL;
 }
-Animable *ParseAnimable(FILE *spriteData, char *line) {
+Animable *ParseAnimable(FILE *spriteData, char *line, int deltaFrame) {
 	// Alocación dinámica, ya que muchos de los animables pueden y deben ser creados y destruidos en sucesiones rápidas, no olvidar liberar la memoria luego
 	Animable *anim = (Animable *) malloc(sizeof(Animable));	
 	if (anim == NULL) {
@@ -119,29 +119,29 @@ Animable *ParseAnimable(FILE *spriteData, char *line) {
 	id = atoi(token);
 
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaOrigin.width = atof(token) / anim->frame;
+	anim->deltaOrigin.width = atof(token) / (anim->frame - deltaFrame);
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaOrigin.height = atof(token) / anim->frame;
+	anim->deltaOrigin.height = atof(token) / (anim->frame - deltaFrame);
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaOrigin.x = atof(token) / anim->frame;
+	anim->deltaOrigin.x = atof(token) / (anim->frame - deltaFrame);
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaOrigin.y = atof(token) / anim->frame;
+	anim->deltaOrigin.y = atof(token) / (anim->frame - deltaFrame);
 
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaDest.width = atof(token) / anim->frame;
+	anim->deltaDest.width = atof(token) / (anim->frame - deltaFrame);
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaDest.height = atof(token) / anim->frame;
+	anim->deltaDest.height = atof(token) / (anim->frame - deltaFrame);
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaPos.x = atof(token) / anim->frame;
+	anim->deltaPos.x = atof(token) / (anim->frame - deltaFrame);
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaPos.y = atof(token) / anim->frame;
+	anim->deltaPos.y = atof(token) / (anim->frame - deltaFrame);
 
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaDest.x = atof(token) / anim->frame;
+	anim->deltaDest.x = atof(token) / (anim->frame - deltaFrame);
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaDest.y = atof(token) / anim->frame;
+	anim->deltaDest.y = atof(token) / (anim->frame - deltaFrame);
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaRotation = atof(token) / anim->frame;
+	anim->deltaRotation = atof(token) / (anim->frame - deltaFrame);
 
 	anim->sprite = LoadSingleSprite(spriteData, (Vector2) { 0 }, rotation, id);
 
@@ -235,7 +235,7 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 			if (fgets(line, sizeof(line), anims[index]->data) != NULL) {
 				free(anims[index]->sprite);
 				anims[index]->sprite = NULL;
-				aux = ParseAnimable(spriteData, line);
+				aux = ParseAnimable(spriteData, line, anims[index]->frame);
 
 				anims[index]->frame = aux->frame;
 				anims[index]->sprite = aux->sprite;

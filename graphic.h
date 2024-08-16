@@ -70,7 +70,7 @@ struct Animable {
 	Vector2 offset;
 	Vector2 deltaPos;
 	float deltaRotation;
-	Animable *parent;
+	int parentId;
 };
 struct Animation {
 	int id;
@@ -91,7 +91,7 @@ Animable *ParseAnimable(FILE *spriteData, char *line);
 void UpdateAnimation(FILE *animsData, FILE *spriteData, Animation **anims, int *animAmount);
 void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, int index, int currentFrame);
 void DrawAnimation(Animation **anims, SafeTexture *textures, int animAmount, Color color, bool shader);
-void DrawAnimable(Animable *anims, SafeTexture *textures, Color color, Vector2 Position, float rotation, bool shader);
+void DrawAnimable(Animable *anims, Animable *parent, SafeTexture *textures, Color color, Vector2 Position, float rotation, bool shader);
 void UnloadAnimationRegister(Animation **anims, int *animAmount);
 void UnloadSingleAnimationFromRegister(Animation **anims, int *animAmount, int index);
 

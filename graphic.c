@@ -60,12 +60,12 @@ Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 			}
 			
 			int i;
+			token = strtok_r(NULL, "	", &saveptr);
 			parents = strtok_r(token, ",", &saveptr);
+			printf("Parents left %s\n", parents);
 			for (i = 0; (i < anim->animAmount) && (parents != NULL); i++) {
-				animId = atoi(parents);
-				printf("\n");
-				if (animId <= 0) anim->anims[i]->parent = NULL;
-				else anim->anims[i]->parent = anim->anims[animId - 1]->parent;
+				anim->anims[i]->parentId = atoi(parents);
+				//printf("Id parent %d\n", anim->anims[i]->parentId);
 				parents = strtok_r(NULL, ",", &saveptr);
 			}
 			break;
@@ -77,7 +77,7 @@ Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet) {
 	// Línea del archivo que contiene toda la información del struct
 	if (!FileExists(animSheet)) return NULL;
 
-	printf("INFO: ANIMATION: Reading from %s.\n", animSheet);
+	//printf("INFO: ANIMATION: Reading from %s.\n", animSheet);
 	FILE *file = fopen(animSheet, "r");
 	char line[256];
 	if (fgets(line, sizeof(line), file) != NULL) {
@@ -182,6 +182,7 @@ void UpdateAnimation(FILE *animsData, FILE *spriteData, Animation **anims, int *
 void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, int index, int currentFrame) {
 	if (anims[index] == NULL) return;
 	char line[256];
+
 	Animable *aux;
 
 	anims[index]->sprite->origin.x += anims[index]->deltaOrigin.x;
@@ -226,6 +227,7 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 			}
 		}
 		else {
+
 			free(anims[index]->sprite);
 			anims[index]->sprite = NULL;
 			fclose(anims[index]->data);
@@ -241,11 +243,14 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 void DrawAnimation(Animation **anims, SafeTexture *textures, int animAmount, Color color, bool shader) {
 	int i;
 	int j;
-	for (i = 0; i < animAmount; i++)
-		for (j = 0; j < anims[i]->animAmount; j++)
-			DrawAnimable(anims[i]->anims[j], textures, color, anims[i]->position, anims[i]->rotation, shader);
+	for (i = 0; i < animAmount; i++) {
+		for (j = 0; j < anims[i]->animAmount; j++) {
+			if (anims[i]->anims[j]->parentId == 0) DrawAnimable(anims[i]->anims[j], NULL, textures, color, anims[i]->position, anims[i]->rotation, shader);
+			else DrawAnimable(anims[i]->anims[j], anims[i]->anims[anims[i]->anims[j]->parentId - 1], textures, color, anims[i]->position, anims[i]->rotation, shader);
+		}
+	}
 }
-void DrawAnimable(Animable *anim, SafeTexture *textures, Color color, Vector2 position, float rotation, bool shader) {
+void DrawAnimable(Animable *anim, Animable *parent, SafeTexture *textures, Color color, Vector2 position, float rotation, bool shader) {
 	if (anim == NULL) return;
 	if (shader != anim->sprite->shader) return;
 
@@ -255,12 +260,12 @@ void DrawAnimable(Animable *anim, SafeTexture *textures, Color color, Vector2 po
 	dest.x = 0;
 	dest.y = 0;
 
-	dest.x += position.x + anim->offset.x;
-	dest.y += position.y + anim->offset.y;
-	if (anim->parent != NULL) {
-		dest.x += anim->parent->offset.x;
-		dest.y += anim->parent->offset.y;
-		rot += anim->parent->sprite->rotation;
+	dest.x += position.x + anim->offset.x + anim->sprite->position.x;
+	dest.y += position.y + anim->offset.y + anim->sprite->position.y;
+	if (parent != NULL) {
+		dest.x += parent->offset.x + parent->sprite->position.x;
+		dest.y += parent->offset.y + parent->sprite->position.y;
+		rot += parent->sprite->rotation;
 	}
 	//anim->sprite->dest.x += position.x + anim->offset.x;
 	//anim->sprite->dest.y += position.y + anim->offset.y;
@@ -301,7 +306,6 @@ void UnloadSingleAnimationFromRegister(Animation **anims, int *animAmount, int i
 				fclose(anims[index]->anims[i]->data);
 				anims[index]->anims[i]->data = NULL;
 			}
-			anims[index]->anims[i]->parent = NULL;
 			free(anims[index]->anims[i]);
 			anims[index]->anims[i] = NULL;
 

@@ -541,6 +541,7 @@ void SetState(StateData *state, GameState newState) {
 			state->exitWindow = false;
 			//state.runGame = true;
 			state->debug = true;
+			//state->debug = false;
 
 			state->startKey = KEY_ENTER;
 			state->selectKey = KEY_BACKSPACE;

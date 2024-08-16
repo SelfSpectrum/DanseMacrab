@@ -47,7 +47,7 @@ Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 		if (animId == id) {
 			anim->id = animId;
 			token = strtok_r(NULL, "	", &saveptr);
-			printf("INFO: ANIMATION: Loading %s.\n", token);
+			//printf("INFO: ANIMATION: Loading %s.\n", token);
 			token = strtok_r(NULL, "	", &saveptr);
 			anim->repeat = (bool) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
@@ -62,7 +62,8 @@ Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 			int i;
 			token = strtok_r(NULL, "	", &saveptr);
 			parents = strtok_r(token, ",", &saveptr);
-			printf("Parents left %s\n", parents);
+			//printf("Parents left %s\n", parents);
+
 			for (i = 0; (i < anim->animAmount) && (parents != NULL); i++) {
 				anim->anims[i]->parentId = atoi(parents);
 				//printf("Id parent %d\n", anim->anims[i]->parentId);
@@ -84,7 +85,7 @@ Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet) {
 		Animable *anim = ParseAnimable(spriteData, line);
 		anim->data = file;
 
-		printf("INFO: ANIMABLE: Animable loaded succesfully\n");
+		//printf("INFO: ANIMABLE: Animable loaded succesfully\n");
 
 		return anim;
 	}
@@ -201,6 +202,30 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 	anims[index]->sprite->position.y += anims[index]->deltaPos.y;
 	anims[index]->sprite->rotation += anims[index]->deltaRotation;
 
+	if (anims[index]->parentId != 0) {
+		if (anims[anims[index]->parentId - 1] != NULL) {
+			Animable *parent = anims[anims[index]->parentId - 1];
+
+			anims[index]->sprite->origin.x += parent->deltaOrigin.x;
+			anims[index]->sprite->origin.y += parent->deltaOrigin.y;
+			anims[index]->sprite->origin.width += parent->deltaOrigin.width;
+			anims[index]->sprite->origin.height += parent->deltaOrigin.height;
+
+			//Rectangle dest = anims[index]->sprite->dest;
+
+			anims[index]->sprite->dest.x += parent->deltaDest.x;
+			anims[index]->sprite->dest.y += parent->deltaDest.y;
+			anims[index]->sprite->dest.width += parent->deltaDest.width;
+			anims[index]->sprite->dest.height += parent->deltaDest.height;
+
+			anims[index]->sprite->position.x += parent->deltaPos.x;
+			anims[index]->sprite->position.y += parent->deltaPos.y;
+			anims[index]->sprite->rotation += parent->deltaRotation;
+
+			parent = NULL;
+		}
+	}
+
 	//printf("Origin - W: %f\tH: %f\tX: %f\tY: %f\n", anims[index]->sprite->origin.width, anims[index]->sprite->origin.height, anims[index]->sprite->origin.x, anims[index]->sprite->origin.y);
 	//printf("Dest - W: %f\tH: %f\tX: %f\tY: %f\n", anims[index]->sprite->dest.width, anims[index]->sprite->dest.height, anims[index]->sprite->dest.x, anims[index]->sprite->dest.y);
 	//printf("Position - X: %f\tY: %f\n", anims[index]->sprite->position.x, anims[index]->sprite->position.y);
@@ -255,8 +280,7 @@ void DrawAnimable(Animable *anim, Animable *parent, SafeTexture *textures, Color
 	if (shader != anim->sprite->shader) return;
 
 	Rectangle dest = anim->sprite->dest;
-	float rot = anim->sprite->rotation;
-
+	
 	dest.x = 0;
 	dest.y = 0;
 
@@ -265,7 +289,6 @@ void DrawAnimable(Animable *anim, Animable *parent, SafeTexture *textures, Color
 	if (parent != NULL) {
 		dest.x += parent->offset.x + parent->sprite->position.x;
 		dest.y += parent->offset.y + parent->sprite->position.y;
-		rot += parent->sprite->rotation;
 	}
 	//anim->sprite->dest.x += position.x + anim->offset.x;
 	//anim->sprite->dest.y += position.y + anim->offset.y;
@@ -278,7 +301,7 @@ void DrawAnimable(Animable *anim, Animable *parent, SafeTexture *textures, Color
 			dest,
 			// Vector2Add(anim->sprite->position, position),
 			(Vector2) { anim->sprite->dest.x, anim->sprite->dest.y },
-			rot + rotation,
+			anim->sprite->rotation + rotation,
 			color);
 
 	//printf("Origin - W: %f\tH: %f\tX: %f\tY: %f\n", anim->sprite->origin.width, anim->sprite->origin.height, anim->sprite->origin.x, anim->sprite->origin.y);
@@ -375,7 +398,7 @@ Sprite *LoadSingleSprite(FILE *spriteData, Vector2 position, float rotation, int
 		spriteId = atoi(token);
 		if (spriteId == id) {
 			token = strtok_r(NULL, "	", &saveptr); //To delete the sprite name
-			printf("INFO: SPRITE: Parsing %s\n", token);
+			//printf("INFO: SPRITE: Parsing %s\n", token);
 			sprite = ParseSprite(saveptr);
 			if (sprite != NULL) {
 				sprite->position = position;

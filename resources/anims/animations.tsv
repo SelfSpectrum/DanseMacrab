@@ -10,25 +10,42 @@ ID	Nombre	Repetir	Animables	Parent
 9				
 10				
 11	Ataque cátana	0	katanaSwing	0
-12				
-13				
-14				
-15				
+12	Ataque martillo	0	hammerSwing	0
+13	Ataque pinza	0	crabPinch1,crabPinch0,crabPinch2,crabPinch3	0,1,0,1
+14	Corte rápido	0	quickSlash	0
+15	Boncazo brígido	0	heavyBonk0,heavyBonk1	0,0
 16				
 17				
 18				
 19				
 20				
 21				
-22				
+22	Carámbanos	0	icicles0,icicles1,icicles2,icicles3	0,0,0,0
 23				
 24				
 25				
 26				
-27	Ataque pinza	1	crabPinch1,crabPinch0,crabPinch2,crabPinch3	0,1,0,1
-28				
-29				
-30				
-31				
+27	Nube Venenosa	0	poisonCloud0,poisonCloud1,poisonCloud2,poisonCloud3	0,0,0,0
+28	Represalia	0	retaliate0,retaliate1,retaliate2,retaliate3,retaliate4	0,0,0,0,0
+29	Defensa Sangrienta	0	bloodyDefense0,bloodyDefense1,bloodyDefense2	0,0,0
+30	Afilar	0	sharpen0,sharpen1,sharpen2,sharpen3,sharpen4	0,0,0,0,0
+31	Guillotina	0	guillotine0,guillotine1,guillotine2,guillotine3	0,0,0,0
 32				
 33				
+34				
+35	Romper Huevo	0		
+36	Sacar Espinas	0		
+37	Cangrejo Lágrimas	0		
+38	Poner Huevo	0		
+39	Comer	0		
+40				
+41				
+42				
+43				
+44				
+45				
+46				
+47				
+48				
+49				
+50				

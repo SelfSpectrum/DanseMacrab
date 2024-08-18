@@ -655,7 +655,7 @@ void SetState(StateData *state, GameState newState) {
 			break;
 		case STATE_DEBUG:
 			//LoadAnimation(state, (Vector2) { 120, 120 }, 0, 11);
-			LoadAnimation(state, (Vector2) { 120, 60 }, 0, 27);
+			LoadAnimation(state, (Vector2) { 120, 60 }, 0, 13);
 			//LoadAnimation(state, (Vector2) { 0, 0 }, 0, 1);
 			break;
 		case STATE_TITLE:

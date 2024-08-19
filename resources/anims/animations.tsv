@@ -9,10 +9,10 @@ ID	Nombre	Repetir	Animables	Parent
 8				
 9				
 10				
-11	Ataque cátana	0	katanaSwing	0
+11	Ataque cátana	1	katanaSwing	0
 12	Ataque martillo	0	hammerSwing	0
-13	Ataque pinza	0	crabPinch1,crabPinch0,crabPinch2,crabPinch3	0,1,0,1
-14	Corte rápido	0	quickSlash	0
+13	Ataque pinza	1	crabPinch1,crabPinch0,crabPinch2,crabPinch3	0,1,0,1
+14	Corte rápido	1	quickSlash	0
 15	Boncazo brígido	0	heavyBonk0,heavyBonk1	0,0
 16				
 17				
@@ -41,11 +41,11 @@ ID	Nombre	Repetir	Animables	Parent
 40				
 41				
 42				
-43				
-44				
-45				
-46				
-47				
-48				
-49				
-50				
+43	Astilla mental	0		
+44	Explosión	0		
+45	Locura	0		
+46	Inmolación	0		
+47	Perdición	0		
+48	Rayo	0		
+49	Descarga	0		
+50	Congelar	0		

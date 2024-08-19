@@ -41,15 +41,15 @@ struct StateData {
 	// Estado
 	GameState state;
 	bool exitWindowRequested; // Bandera para solicitar que se cierre la ventana
-	bool exitWindow; // Flag to set window to exit
-	//bool runGame; // To know if the game should run
+	bool exitWindow; // Bandera para establecer que se ha de cerrar la ventana
+	//bool runGame; // Útil para saber si el juego debería ejecutarse, ideal para errores enmedio de la ejecución
 	bool debug;
 	int randomValue;
 	PlayerPref pref;
 	// Visuals
-	Color globalColor; // Used to render the white lines in all textures as colors
+	Color globalColor; // Utilizado para renderizar colores sobre todas las texturas
 	Font font;
-	SafeTexture textures[TEX_SIZE]; // Here I hold all the texture used in the game
+	SafeTexture textures[TEX_SIZE]; // Todas las texturas que se utilizan durante el tiempo de ejecución se mantienen aquí
 	Animation *anims[ANIM_SIZE];
 	Sprite *sprites[SPRITE_SIZE];
 	Message *messages[MSG_SIZE];
@@ -73,9 +73,9 @@ struct StateData {
 	int extraBKey;
 	// Sounds
 	Music music;
-	SafeSound sounds[SOUND_SIZE]; // Here I hold all the sounds used in the game
-	SafeSound sfxAlias[SFXALIAS_SIZE]; // Used to reproduce several sounds at once
-	int sfxPosition; // Position to locate one "free" sfxAlias
+	SafeSound sounds[SOUND_SIZE]; // Todas los sonidos que se utilizan durante el tiempo de ejecución se mantienen aquí
+	SafeSound sfxAlias[SFXALIAS_SIZE]; // Un array de sonidos para copiar referencias de "sounds", así se pueden tener efectos de sonido en paralelo
+	int sfxPosition; // Posición para localizar un sfxAlias "libre"
 	// Combat
 	Combat combat;
 	// Files
@@ -92,7 +92,7 @@ struct StateData {
 	FILE *combatData;
 };
 
-// INFO: Input functions
+// INFO: Funciones para las entradas de datos (botones físicos y tal)
 void Accept(StateData *state);
 void Cancel(StateData *state);
 void ExtraA(StateData *state);
@@ -102,10 +102,10 @@ void Select(StateData *state);
 void Menu(StateData *state);
 void ChangeSelection(StateData *state);
 void SetState(StateData *state, GameState newState);
-// INFO: Player Preferences functions
+// INFO: Funciones para trabajar con las preferencias del jugador
 void SavePrefs(PlayerPref prefs);
 PlayerPref LoadPrefs();
-// INFO: SFX functions
+// INFO: Funciones para trabajar con audio y efectos de sonido
 void PlaySecSound(StateData *state, int id);
 //void LowPassFilter(void *buffer, unsigned int frames); // TODO
 //void Crossfade(); // TODO
@@ -113,6 +113,7 @@ void PlaySecSound(StateData *state, int id);
 void SetHorizontalKeys(StateData *state);
 void SetVerticalKeys(StateData *state);
 void SetOnlyVerticalKeys(StateData *state);
+void LoadFiles(StateData *state);
 void LoadSprite(StateData *state, Vector2 position, float rotation, int id);
 void LoadAnimation(StateData *state, Vector2 position, float rotation, int id);
 void LoadButton(StateData *state, Vector2 position, float rotation, int idOff, int idOn, int idMessage);
@@ -120,7 +121,7 @@ void LoadMessage(StateData *state, Vector2 position, float fontSize, float spaci
 
 int main() {
 	//-------------------------------------------------------------
-	// Camera & Pixel Perfect
+	// Cámara y efecto de Píxeles Perfectos
 	//-------------------------------------------------------------
 	
 	const int virtualScreenWidth = 320;
@@ -281,29 +282,26 @@ int main() {
 	}
 
 	for (i = 0; i < TEX_SIZE; i++) {
-		//printf("Tex %d\n", i);
 		if (state.textures[i].init) {
 			UnloadTexture(state.textures[i].tex);
 			state.textures[i].init = false;
 		}
 	}
 	for (i = 0; i < SFXALIAS_SIZE; i++) {
-		//printf("Sfx %d\n", i);
 		if (state.sfxAlias[i].init) {
 			UnloadSoundAlias(state.sfxAlias[i].sound);
 			state.sfxAlias[i].init = false;
 		}
 	}
 	for (i = 0; i < SOUND_SIZE; i++) {
-		//printf("Snd %d\n", i);
 		if (state.sounds[i].init) {
 			UnloadSound(state.sounds[i].sound);
 			state.sounds[i].init = false;
 		}
 	}
 
-	CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
-	CloseWindow();              // Close window and OpenGL context
+	CloseAudioDevice(); // Close audio device (music streaming is automatically stopped)
+	CloseWindow(); // Close window and OpenGL context
 
 	return 0;
 }
@@ -431,6 +429,12 @@ void Start(StateData *state) {
 }
 void Select(StateData *state) {
 	switch (state->state) {
+		case STATE_DEBUG:
+			LoadFiles(state);
+			break;
+		case STATE_TITLE:
+			Accept(state);
+			break;
 		default:
 			break;
 	}
@@ -568,37 +572,21 @@ void SetState(StateData *state, GameState newState) {
 			for (i = 0; i < ANIM_SIZE; i++) state->anims[i] = NULL;
 			for (i = 0; i < SPRITE_SIZE; i++) state->sprites[i]  = NULL;
 			for (i = 0; i < MSG_SIZE; i++) state->messages[i] = NULL;
+			
+			// Carga de todos los archivos/base de datos
+			state->animsData = NULL;
+			state->spriteData = NULL;
+			state->charmData = NULL;
+			state->armorData = NULL;
+			state->weaponData = NULL;
+			state->techData = NULL;
+			state->characterData = NULL;
+			state->enemyData = NULL;
+			state->dialogData = NULL;
+			state->translationData = NULL;
+			state->combatData = NULL;
 
-			if (FileExists("./resources/anims/animations.tsv"))
-				state->animsData = fopen("./resources/anims/animations.tsv", "r");
-			else state->animsData = NULL;
-			if (FileExists("./resources/gfx/sprites.tsv"))
-				state->spriteData = fopen("./resources/gfx/sprites.tsv", "r");
-			else state->spriteData = NULL;
-			if (FileExists("./resources/combat/charms.tsv"))
-				state->charmData = fopen("./resources/combat/charms.tsv", "r");
-			else state->charmData = NULL;
-			if (FileExists("./resources/combat/armors.tsv"))
-				state->armorData = fopen("./resources/combat/armors.tsv", "r");
-			else state->armorData = NULL;
-			if (FileExists("./resources/combat/weapons.tsv"))
-				state->weaponData = fopen("./resources/combat/weapons.tsv", "r");
-			else state->weaponData = NULL;
-			if (FileExists("./resources/combat/techniques.tsv"))
-				state->techData = fopen("./resources/combat/techniques.tsv", "r");
-			else state->techData = NULL;
-			if (FileExists("./resources/combat/characters.tsv"))
-				state->characterData = fopen("./resources/combat/characters.tsv", "r");
-			else state->characterData = NULL;
-			if (FileExists("./resources/combat/enemies.tsv"))
-				state->enemyData = fopen("./resources/combat/enemies.tsv", "r");
-			else state->enemyData = NULL;
-			if (FileExists("./resources/text/dialogs.tsv"))
-				state->dialogData = fopen("./resources/text/dialogs.tsv", "r");
-			else state->dialogData = NULL;
-			if (FileExists("./resources/combat/dispairHill.tsv"))
-				state->combatData = fopen("./resources/combat/dispairHill.tsv", "r");
-			else state->combatData = NULL;
+			LoadFiles(state);
 
 			state->translationData = NULL;
 			int codepoints[210] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 1041, 1042, 1043, 1044, 1045, 1046, 1047, 1048, 1049, 160, 1050, 1051, 1052, 176, 1053, 1054, 1055, 191, 1025, 193, 1056, 1057, 201, 1058, 205, 209, 1059, 211, 1060, 215, 218, 1061, 1062, 225, 1063, 233, 1064, 237, 1065, 241, 243, 1066, 247, 1067, 250, 1068, 1069, 1070, 1071, 1072, 1040, 1073, 1074, 1075, 1076, 1077, 1078, 1079, 1080, 1081, 1082, 1083, 1084, 1085, 1086, 1087, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1099, 1100, 1101, 1102, 1103, 1105};
@@ -654,16 +642,14 @@ void SetState(StateData *state, GameState newState) {
 
 			break;
 		case STATE_DEBUG:
-			//LoadAnimation(state, (Vector2) { 120, 120 }, 0, 11);
+			LoadAnimation(state, (Vector2) { 120, 120 }, 0, 11);
 			LoadAnimation(state, (Vector2) { 120, 60 }, 0, 13);
-			//LoadAnimation(state, (Vector2) { 0, 0 }, 0, 1);
+			LoadAnimation(state, (Vector2) { 60, 60 }, 0, 14);
 			break;
 		case STATE_TITLE:
-			//LoadSpriteFromFile("./resources/layout/mainTitle.tsv", state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE);
 			LoadSprite(state, (Vector2) { -80, -38 }, 0, 2);
 			LoadSprite(state, (Vector2) { -60, -140 }, 0, 7);
-			//LoadAnimable(state->animsData, state->anims, (Vector2) { 0 }, &state->animAmount, ANIM_SIZE, 1);
-			LoadAnimation(state, (Vector2) { 1, 0 }, 0, 1);
+			LoadAnimation(state, (Vector2) { 0 }, 0, 1);
 			LoadMessage(state, (Vector2) { 161, 154 }, 18, 0, false, ALIGN_CENTER, 1);
 			LoadMessage(state, (Vector2) { 160, 155 }, 18, 0, false, ALIGN_CENTER, 1);
 			LoadMessage(state, (Vector2) { 159, 154 }, 18, 0, false, ALIGN_CENTER, 1);
@@ -706,7 +692,7 @@ void SetState(StateData *state, GameState newState) {
 	}
 }
 void SavePrefs(PlayerPref prefs) {
-	char buffer[512]; // Big buffer to save all data from the user and ensure it gets saved properly
+	char buffer[512]; // Un buffer gigante para guardar todos los datos que el usuario posee y asegurar que se guardan apropiadamente
 	sprintf(buffer, "fsp=%d\nname=%s\nlang=%d\nvol=%.2f\nmus=%.2f\nsfx=%.2f\ntext=%d",
 			(int) prefs.firstTime,
 			prefs.namePref,
@@ -718,7 +704,7 @@ void SavePrefs(PlayerPref prefs) {
 	SaveFileText("PlayerPrefs.data", buffer);
 }
 PlayerPref LoadPrefs() {
-	PlayerPref prefs = { true, "AAA", 0, 0.0f, 0.0f, 0.0f, 5 }; // Default preferences
+	PlayerPref prefs = { true, "AAA", 0, 0.0f, 0.0f, 0.0f, 5 }; // Preferencias por defecto
 	if (!FileExists("PlayerPrefs.data")) {
 		printf("INFO: PREFS: Prefs file does not exist, creating one.\n");
 		SavePrefs(prefs);
@@ -726,7 +712,7 @@ PlayerPref LoadPrefs() {
 	}
 	char *buffer = LoadFileText("PlayerPrefs.data");
 	if (buffer == NULL) {
-		//TODO: Remember to drop an error when this happen and to abort, informing it and to choose to reload or override
+		//TODO: Recuerda crear un error cuando esto ocurra, para abortar la carga de datos, informando si se quiere recargar o sobreescribir
 		printf("INFO: PREFS: Prefs file loading error, returning default.\n");
 		return prefs;
 	}
@@ -757,11 +743,103 @@ void SetVerticalKeys(StateData *state) {
 	state->upKey = KEY_LEFT;
 	state->downKey = KEY_RIGHT;
 }
+// INFO: Útil cuando se necesita recorrer columnas de botones
 void SetOnlyVerticalKeys(StateData *state) {
 	state->leftKey = KEY_UP;
 	state->rightKey = KEY_DOWN;
 	state->upKey = KEY_NULL;
 	state->downKey = KEY_NULL;
+}
+void LoadFiles(StateData *state) {
+	// Estableciendo el archivo para cargar animaciones
+	if (state->animsData != NULL) {
+		fclose(state->animsData);
+		state->animsData = NULL;
+	}
+	if (FileExists("./resources/anims/animations.tsv"))
+		state->animsData = fopen("./resources/anims/animations.tsv", "r");
+	else state->animsData = NULL;
+
+	// Estableciendo el archivo para cargar sprites
+	if (state->spriteData != NULL) {
+		fclose(state->spriteData);
+		state->spriteData = NULL;
+	}
+	if (FileExists("./resources/gfx/sprites.tsv"))
+		state->spriteData = fopen("./resources/gfx/sprites.tsv", "r");
+	else state->spriteData = NULL;
+
+	// Estableciendo el archivo para cargar amuletos
+	if (state->charmData != NULL) {
+		fclose(state->charmData);
+		state->charmData = NULL;
+	}
+	if (FileExists("./resources/combat/charms.tsv"))
+		state->charmData = fopen("./resources/combat/charms.tsv", "r");
+	else state->charmData = NULL;
+
+	// Estableciendo el archivo para cargar armaduras
+	if (state->armorData != NULL) {
+		fclose(state->armorData);
+		state->armorData = NULL;
+	}
+	if (FileExists("./resources/combat/armors.tsv"))
+		state->armorData = fopen("./resources/combat/armors.tsv", "r");
+	else state->armorData = NULL;
+
+	// Establenciendo el archivo para cargar armas
+	if (state->weaponData != NULL) {
+		fclose(state->weaponData);
+		state->weaponData = NULL;
+	}
+	if (FileExists("./resources/combat/weapons.tsv"))
+		state->weaponData = fopen("./resources/combat/weapons.tsv", "r");
+	else state->weaponData = NULL;
+
+	// Estableciendo el archivo para cargar técnicas
+	if (state->techData != NULL) {
+		fclose(state->techData);
+		state->techData = NULL;
+	}
+	if (FileExists("./resources/combat/techniques.tsv"))
+		state->techData = fopen("./resources/combat/techniques.tsv", "r");
+	else state->techData = NULL;
+
+	// Estableciendo el archivo para cargar la información de los personajes jugables 
+	if (state->characterData) {
+		fclose(state->characterData);
+		state->characterData = NULL;
+	}
+	if (FileExists("./resources/combat/characters.tsv"))
+		state->characterData = fopen("./resources/combat/characters.tsv", "r");
+	else state->characterData = NULL;
+
+	// Estableciendo el archivo para cargar la información de los enemigos
+	if (state->enemyData != NULL) {
+		fclose(state->enemyData);
+		state->enemyData = NULL;
+	}
+	if (FileExists("./resources/combat/enemies.tsv"))
+		state->enemyData = fopen("./resources/combat/enemies.tsv", "r");
+	else state->enemyData = NULL;
+
+	// Estableciendo el archivo para cargar dialogos
+	if (state->dialogData != NULL) {
+		fclose(state->dialogData);
+		state->dialogData = NULL;
+	}
+	if (FileExists("./resources/text/dialogs.tsv"))
+		state->dialogData = fopen("./resources/text/dialogs.tsv", "r");
+	else state->dialogData = NULL;
+
+	// Estableciendo un archivo base para cargar combates (placeholder)
+	if (state->combatData != NULL) {
+		fclose(state->combatData);
+		state->combatData = NULL;
+	}
+	if (FileExists("./resources/combat/dispairHill.tsv"))
+		state->combatData = fopen("./resources/combat/dispairHill.tsv", "r");
+	else state->combatData = NULL;
 }
 void LoadSprite(StateData *state, Vector2 position, float rotation, int id) {
 	LoadSpriteIntoRegister(state->spriteData, state->sprites, &state->spriteAmount, SPRITE_SIZE, position, rotation, id);

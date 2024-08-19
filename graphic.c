@@ -311,8 +311,12 @@ void DrawAnimable(Animable *anim, Animable *parent, SafeTexture *textures, Color
 }
 void UnloadAnimationRegister(Animation **anims, int *animAmount) {
 	int i;
+	//int j;
 	int amount = *animAmount;
-	for (i = 0; i < amount; i++) UnloadSingleAnimationFromRegister(anims, animAmount, 0);
+	for (i = 0; i < amount; i++) {
+		//for (j = 0; j < 8; j++) printf("%p\n", anims[j]);
+		UnloadSingleAnimationFromRegister(anims, animAmount, 0);
+	}
 	printf("INFO: ANIMATION: Animable array data unloaded.\n");
 }
 void UnloadSingleAnimationFromRegister(Animation **anims, int *animAmount, int index) {
@@ -341,7 +345,10 @@ void UnloadSingleAnimationFromRegister(Animation **anims, int *animAmount, int i
 	(*animAmount)--;
 
 	for (i = 0; i < (*animAmount); i++)
-		if (anims[i] == NULL) anims[i] = anims[i + 1];
+		if (anims[i] == NULL) {
+			anims[i] = anims[i + 1];
+			anims[i + 1] = NULL;
+		}
 }
 void LoadSpriteFromFile(const char *spriteSheet, FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE) {
 	if (!FileExists(spriteSheet)) {
@@ -467,7 +474,10 @@ void UnloadSingleSpriteFromRegister(Sprite **sprites, int *spriteAmount, int ind
 	(*spriteAmount)--;
 	int i;
 	for (i = 0; i < (*spriteAmount); i++)
-		if (sprites[i] == NULL) sprites[i] = sprites[i + 1];
+		if (sprites[i] == NULL) {
+			sprites[i] = sprites[i + 1];
+			sprites[i + 1] = NULL;
+		}
 }
 void LoadButtonFromFile(const char *buttonSheet, FILE *spriteData, FILE *translationData, Font font, Button **buttons, int *buttonAmount, int BUTTON_SIZE) {
 	if (spriteData == NULL) {

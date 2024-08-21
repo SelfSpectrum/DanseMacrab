@@ -1535,9 +1535,9 @@ ID	Nombre	ID Texture	Orígen X	Orígen Y	Orígen Largo	Orígen Alto	Destino X	De
 1534	Crab pinch 3	6	160	32	32	32	8	8	32	32	0
 1535	Crab pinch 4	6	160	0	32	32	14	5	32	32	0
 1536	Quick slash 1	6	192	0	32	32	2	30	32	32	0
-1537	Quick slash 2	6	192	32	32	32	0	0	32	32	0
+1537	Quick slash 2	6	192	32	32	32	8	30	32	32	0
 1538	Quick slash 3	6	224	32	32	32	0	0	32	32	0
-1539	Quick slash 4	6	224	0	32	32	0	0	32	32	0
+1539	Quick slash 4	6	224	0	32	32	30	3	32	32	0
 1540	Stomp 1	6	256	0	32	32	0	0	32	32	0
 1541	Stomp 2	6	256	32	32	32	0	0	32	32	0
 1542	Stomp 3	6	288	32	32	32	0	0	32	32	0

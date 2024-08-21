@@ -290,10 +290,6 @@ void DrawAnimable(Animable *anim, Animable *parent, SafeTexture *textures, Color
 		dest.x += parent->offset.x + parent->sprite->position.x;
 		dest.y += parent->offset.y + parent->sprite->position.y;
 	}
-	//anim->sprite->dest.x += position.x + anim->offset.x;
-	//anim->sprite->dest.y += position.y + anim->offset.y;
-	//printf("Dest - W: %f\tH: %f\tX: %f\tY: %f\n", anim->sprite->dest.width, anim->sprite->dest.height, anim->sprite->dest.x, anim->sprite->dest.y);
-	//printf("Dest - W: %f\tH: %f\tX: %f\tY: %f\n", dest.width, dest.height, dest.x, dest.y);
 
 	DrawTexturePro( textures[anim->sprite->textureIndex].tex,
 			anim->sprite->origin,

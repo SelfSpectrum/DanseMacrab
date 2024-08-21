@@ -12,7 +12,7 @@ ID	Nombre	Repetir	Animables	Parent
 11	Ataque cátana	1	katanaSwing	0
 12	Ataque martillo	0	hammerSwing	0
 13	Ataque pinza	1	crabPinch1,crabPinch0,crabPinch2,crabPinch3	0,1,0,1
-14	Corte rápido	1	quickSlash	0
+14	Corte rápido	1	quickSlash0,quickSlash1	0,0
 15	Boncazo brígido	0	heavyBonk0,heavyBonk1	0,0
 16				
 17				

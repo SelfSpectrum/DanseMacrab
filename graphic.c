@@ -526,7 +526,7 @@ Button *LoadSingleButton(FILE *spriteData, FILE *translationData, Font font, Vec
 		button->message = LoadSingleMessage(translationData,
 						    font,
 						    idMessage,
-						    (Vector2) { -position.x + 24, -position.y },
+						    (Vector2) { -position.x, -position.y },
 						    18, 0, true, ALIGN_CENTER);
 		//printf("Button's Pos (%f, %f)\n", button->position.x, button->position.y);
 		button->selected = false;
@@ -544,6 +544,8 @@ void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Font 
 						buttons[i]->position,
 						buttons[i]->rotation,
 						color);
+			//DrawButtonMessage(buttons[i], (Vector2) { buttons[i]->spriteOn->dest.width / 2, buttons[i]->spriteOn->dest.height / 2 }, font, color);
+			DrawButtonMessage(buttons[i], (Vector2) { buttons[i]->spriteOn->dest.width / 2, -1 }, font, color);
 		}
 		else {
 			if (shader != buttons[i]->spriteOff->shader) continue;
@@ -553,8 +555,9 @@ void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Font 
 						buttons[i]->position,
 						buttons[i]->rotation,
 					color);
+			//DrawButtonMessage(buttons[i], (Vector2) { buttons[i]->spriteOff->dest.width / 2, buttons[i]->spriteOff->dest.height / 2 }, font, color);
+			DrawButtonMessage(buttons[i], (Vector2) { buttons[i]->spriteOff->dest.width / 2, -1 }, font, color);
 		}
-		DrawButtonMessage(buttons[i], font, color);
 	}
 }
 void UnloadButtonRegister(Button **buttons, int *buttonAmount) {
@@ -646,9 +649,15 @@ void DrawSingleMessage(Message *message, Font font, Color color) {
 		    message->spacing,
 		    message->useColor ? color : BLACK);
 }
-void DrawButtonMessage(Button *button, Font font, Color color) {
+void DrawButtonMessage(Button *button, Vector2 position, Font font, Color color) {
 	if (button->message == NULL) return;
-	DrawSingleMessage(button->message, font, button->selected ? BLACK : color);
+	DrawTextCodepoints(font,
+		    button->message->codepoints,
+		    button->message->codepointAmount,
+		    Vector2Add(button->message->position, position),
+		    button->message->fontSize,
+		    button->message->spacing,
+		    button->message->useColor != button->selected ? color : BLACK);
 
 }
 void UnloadMessageRegister(Message **messages, int *messageAmount) {

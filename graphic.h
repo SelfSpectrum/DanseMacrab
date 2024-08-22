@@ -137,7 +137,7 @@ void LoadMessageIntoRegister(FILE *translationData,
 Message *LoadSingleMessage(FILE *translationData, Font font, int id, Vector2 position, float fontSize, float spacing, bool useColor, Align align);
 void DrawMessage(Message **messages, int messageAmount, Font font, Color color);
 void DrawSingleMessage(Message *message, Font font, Color color);
-void DrawButtonMessage(Button *button, Font font, Color color);
+void DrawButtonMessage(Button *button, Vector2 position, Font font, Color color);
 void UnloadMessageRegister(Message **messages, int *menssageAmount);
 void UnloadSingleMessage(Message **message);
 void ChangeTranslation(FILE **translationData, Font font,  Message **messages, int messageAmount, Button **buttons, int buttonAmount, Language language);

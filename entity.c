@@ -279,7 +279,8 @@ void UnloadEntity(EntityType type, Combat *combat, int position) {
 			return;
 	}
 }
-void DrawCombat(Combat combat, SafeTexture *textures, Color color, bool shader) {
+void DrawCombat(Combat combat, SafeTexture *textures, Color color, bool shader, bool draw) {
+	if (draw == false) return;
 	int i;
 	Sprite *sprite;
 	for (i = 0; i < 5; i++) {
@@ -299,7 +300,7 @@ void DrawCombat(Combat combat, SafeTexture *textures, Color color, bool shader) 
 			DrawTexturePro(textures[sprite->textureIndex].tex,
 				       sprite->origin,
 				       sprite->dest,
-				       (Vector2) { -48 * combat.player[i]->player.position - 48, -82 },
+				       (Vector2) { -48 * combat.player[i]->player.position - 48, -83 },
 				       sprite->rotation,
 				       color);
 		}

@@ -86,7 +86,8 @@ enum TechniqueType {
 	TECH_DRACONIC = 5,
 	TECH_GOREART = 6,
 	TECH_DEMONHAND = 7,
-	TECH_SUMMON = 8
+	TECH_SUMMON = 8,
+	TECH_SORCERY = 9
 };
 enum AttributeType {	// ATTR % 6 for index
 	ATTR_PHYSIQUE = 0,
@@ -440,7 +441,7 @@ void DamageEntity(Combat *combat, Entity attacker, Technique tech);
 void KillEntity(Combat *combat, Entity *entity); //TODO
 void UnloadCombat(Combat *combat);
 void UnloadEntity(EntityType type, Combat *combat, int position);
-void DrawCombat(Combat combat, SafeTexture *textures, Color color, bool shader);
+void DrawCombat(Combat combat, SafeTexture *textures, Color color, bool shader, bool draw);
 // Techniques
 Technique LoadTech(FILE *techData, int id);
 void PlayerLoadTech(FILE *techData, Entity *player); //TODO

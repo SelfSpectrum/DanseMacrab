@@ -40,6 +40,7 @@ struct PlayerPref {
 struct StateData {
 	// Estado
 	GameState state;
+	bool onCombat;
 	bool exitWindowRequested; // Bandera para solicitar que se cierre la ventana
 	bool exitWindow; // Bandera para establecer que se ha de cerrar la ventana
 	//bool runGame; // Útil para saber si el juego debería ejecutarse, ideal para errores enmedio de la ejecución
@@ -195,13 +196,13 @@ int main() {
 					DrawText("Are you sure you want to exit program?", 50, 90, 8, state.globalColor);
 				}
 				else {
-					DrawCombat(state.combat, state.textures, state.globalColor, false);
+					DrawCombat(state.combat, state.textures, state.globalColor, false, state.onCombat);
 					DrawAnimation(state.anims, state.textures, state.animAmount, state.globalColor, false);
 					DrawSprite(state.sprites, state.textures, state.spriteAmount, state.globalColor, false);
 					DrawButton(state.buttons, state.textures, state.buttonAmount, state.font, state.globalColor, false);
 
 					BeginShaderMode(shader);
-						DrawCombat(state.combat, state.textures, state.globalColor, true);
+						DrawCombat(state.combat, state.textures, state.globalColor, true, state.onCombat);
 						DrawAnimation(state.anims, state.textures, state.animAmount, state.globalColor, true);
 						DrawSprite(state.sprites, state.textures, state.spriteAmount, state.globalColor, true);
 						DrawButton(state.buttons, state.textures, state.buttonAmount, state.font, state.globalColor, true);
@@ -541,11 +542,12 @@ void SetState(StateData *state, GameState newState) {
 		case STATE_INIT:
 			state->pref = LoadPrefs();
 
+			state->onCombat = false;
 			state->exitWindowRequested = false;
 			state->exitWindow = false;
 			//state.runGame = true;
-			state->debug = true;
-			//state->debug = false;
+			//state->debug = true;
+			state->debug = false;
 
 			state->startKey = KEY_ENTER;
 			state->selectKey = KEY_BACKSPACE;
@@ -628,9 +630,13 @@ void SetState(StateData *state, GameState newState) {
 			state->sounds[3].init = true;
 
 			state->combat = (Combat) { { NULL }, { NULL }, NULL, { 0 }, 0, 0 }; // Data from position, entities and stuff
-			//state->combat.player[2] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 1);
-			//state->combat.player[2]->player.position = 2;
-			//LoadEnemiesOnCombat(state->combatData, state->enemyData, state->spriteData, state->techData, &state->combat, 1);
+			state->combat.player[1] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 2);
+			state->combat.player[1]->player.position = 1;
+			state->combat.player[2] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 1);
+			state->combat.player[2]->player.position = 2;
+			state->combat.player[3] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 3);
+			state->combat.player[3]->player.position = 3;
+			LoadEnemiesOnCombat(state->combatData, state->enemyData, state->spriteData, state->techData, &state->combat, 1);
 
 			if (state->debug) SetState(state, STATE_DEBUG);
 			else {
@@ -664,9 +670,9 @@ void SetState(StateData *state, GameState newState) {
 			SetOnlyVerticalKeys(state);
 
 			LoadMessage(state, (Vector2) { 160, 20 }, 18, 0, true, ALIGN_CENTER, 100);
-			LoadButton(state, (Vector2) { -138, -100 }, 0, 10, 11, 102);
-			LoadButton(state, (Vector2) { -138, -116 }, 0, 10, 11, 101);
-			LoadButton(state, (Vector2) { -138, -132 }, 0, 10, 11, 103);
+			LoadButton(state, (Vector2) { -128, -100 }, 0, 10, 11, 102);
+			LoadButton(state, (Vector2) { -128, -116 }, 0, 10, 11, 101);
+			LoadButton(state, (Vector2) { -128, -132 }, 0, 10, 11, 103);
 			ChangeSelection(state);
 
 			break;
@@ -675,6 +681,7 @@ void SetState(StateData *state, GameState newState) {
 			break;
 		case STATE_FIGHT:
 			SetHorizontalKeys(state);
+			state->onCombat = true;
 			LoadSprite(state, (Vector2) { 0, -131 }, 0, 102);
 			//LoadSprite(state, (Vector2) { 0, -86 }, 100);
 			//LoadButton("./resources/layout/fightButtons.tsv", state->spriteData, state->translationData, state->font, state->buttons, &state->buttonAmount, BUTTON_SIZE);

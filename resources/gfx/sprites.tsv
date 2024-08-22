@@ -98,25 +98,25 @@ ID	Nombre	ID Texture	Orígen X	Orígen Y	Orígen Largo	Orígen Alto	Destino X	De
 97											
 98											
 99											
-100	Rin – Back	2	112	0	48	48	0	0	48	48	1
-101	Rin – Front	2	160	0	48	48	0	0	48	48	1
+100	Rin – Back	2	113	1	47	47	0	0	47	47	1
+101	Rin – Front	2	161	1	47	47	0	0	47	47	1
 102	Rin – FightMug	2	0	0	112	48	0	0	112	48	1
 103	Rin – Death	2									
 104	Rin – MidHarm	2									
 105	Rin – LotHarm	2									
 106	Rin – Damage	2									
 107	Rin – DeathMug	2									
-108	Alina – Back	2	112	48	48	48	0	0	48	48	1
-109	Alina – Front	2	160	48	48	48	0	0	48	48	1
+108	Alina – Back	2	113	49	47	47	0	0	47	47	1
+109	Alina – Front	2	161	49	47	47	0	0	47	47	1
 110	Alina – FightMug	2	0	48	112	48	0	0	112	48	1
 111	Alina – Death	2									
 112	Alina – MidHarm	2									
 113	Alina – LotHarm	2									
 114	Alina – Damage	2									
 115	Alina – DeathMug	2									
-116	Irina – Back	2									
-117	Irina – Front	2									
-118	Irina – FightMug	2									
+116	Irina – Back	2	113	97	47	47	0	0	47	47	1
+117	Irina – Front	2	161	97	47	47	0	0	47	47	1
+118	Irina – FightMug	2	0	96	112	48	0	0	112	48	1
 119	Irina – Death	2									
 120	Irina – MidHarm	2									
 121	Irina – LotHarm	2									

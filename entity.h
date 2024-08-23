@@ -417,15 +417,9 @@ struct Enemy {
 	int multiattack;
 	Sprite *sprite;
 };
-union Entity {
-	Enemy enemy;
-	Player player;
-};
 struct Combat {
-	Entity *enemy[5];
-	Entity *player[5];
-	Entity *timeline[10];
-	int timelineAmount;
+	void *enemy[5];
+	void *player[5];
 	Equip inventory[20];
 	int inventoryAmount;
 	int turn;
@@ -435,29 +429,29 @@ struct Combat {
 
 void LoadEnemiesFile(FILE **file, const char *enemySheet);
 void LoadEnemiesOnCombat(FILE *file, FILE *enemyData, FILE *spriteData, FILE *techData, Combat *combat, int id);
-Entity *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id);
-Entity *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id, int position);
-void MoveEntity(Entity *entity, int position);
-void DamageEntity(Combat *combat, Entity attacker, Technique tech);
-void KillEntity(Combat *combat, Entity *entity); //TODO
+void *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id);
+void *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id, int position);
+void RollInitiative(Combat *combat, int *randomValue);
+void MoveEntity(Combat *combat, int position);
+void DamageEntity(Combat *combat, void attacker, Technique *tech);
+void KillEntity(Combat *combat, void *entity); //TODO
 void UnloadCombat(Combat *combat);
 void UnloadEntity(EntityType type, Combat *combat, int position);
-void DrawCombat(Combat combat, SafeTexture *textures, Color color, bool shader, bool draw);
+void DrawCombat(Combat *combat, SafeTexture *textures, Color color, bool shader, bool draw);
 // Techniques
 Technique LoadTech(FILE *techData, int id);
-void PlayerLoadTech(FILE *techData, Entity *player); //TODO
+void PlayerLoadTech(FILE *techData, void *player); //TODO
 // Equipment
 Equip LoadWeapon(FILE *weaponData, int id);
 Equip LoadArmor(FILE *armorData, int id);
 Equip LoadCharm(FILE *charmData, int id);
-void SetProficiency(Entity *player, AttributeType attr);
-void SetFeature(FILE *weaponData, FILE *charmData, FILE *tech, Entity *player, Feature feature);
+void SetProficiency(void *player, AttributeType attr);
+void SetFeature(FILE *weaponData, FILE *charmData, FILE *tech, void *player, Feature feature);
 // Dice related
 int DiceMean(DiceType dice);
 int DiceRoll(DiceType dice, int *randomValue);
 void SetSeed(int seed, int *randomValue);
 void SetTimeSeed(int *randomValue);
 void Random(int *randomValue);
-void RollInitiative(Combat *combat, int *randomValue);
 
 #endif		// ENTITY_H

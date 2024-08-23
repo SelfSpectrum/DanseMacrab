@@ -34,15 +34,16 @@ void LoadEnemiesOnCombat(FILE *file, FILE *enemyData, FILE *spriteData, FILE *te
 		}
 	}
 }
-Entity *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id) {
+void *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id) {
 	if (id == 0) return NULL;
-	Entity *enemy = (Entity *) malloc(sizeof(Entity));
-	enemy->enemy.type = ENTITY_ENEMY;
-	enemy->enemy.phyBonus = 0;
-	enemy->enemy.refBonus = 0;
-	enemy->enemy.lorBonus = 0;
-	enemy->enemy.chaBonus = 0;
-	enemy->enemy.techAmount = 0;
+	void *enemyData = malloc(sizeof(Entity));
+	Enemy *enemy = (Enemy *) enemyData;
+	enemy->type = ENTITY_ENEMY;
+	enemy->phyBonus = 0;
+	enemy->refBonus = 0;
+	enemy->lorBonus = 0;
+	enemy->chaBonus = 0;
+	enemy->techAmount = 0;
 	char line[512];
 	char *saveptr;
 	char *token;
@@ -54,75 +55,77 @@ Entity *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id) {
 		token = strtok_r(line, "	", &saveptr);
 		enemyId = atoi(token);
 		if (enemyId == id) {
-			enemy->enemy.id = enemyId;
+			enemy->id = enemyId;
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.name = atoi(token);
+			enemy->name = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.description = atoi(token);
+			enemy->description = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.sprite = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, atoi(token));
+			enemy->sprite = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, atoi(token));
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.enemy = (EnemyType) atoi(token);
+			enemy->enemy = (EnemyType) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.physique = atoi(token);
+			enemy->physique = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.reflex = atoi(token);
+			enemy->reflex = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.lore = atoi(token);
+			enemy->lore = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.charisma = atoi(token);
+			enemy->charisma = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.size = atoi(token);
+			enemy->size = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.maxHealth = DiceMean((DiceType) enemy->enemy.size) * atoi(token) + enemy->enemy.physique * atoi(token);
-			enemy->enemy.health = enemy->enemy.maxHealth;
+			enemy->maxHealth = DiceMean((DiceType) enemy->enemy.size) * atoi(token) + enemy->enemy.physique * atoi(token);
+			enemy->health = enemy->enemy.maxHealth;
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.maxStress = atoi(token);
-			enemy->enemy.stress = enemy->enemy.maxStress;
+			enemy->maxStress = atoi(token);
+			enemy->stress = enemy->enemy.maxStress;
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.weakness[0] = (DamageType) atoi(token);
+			enemy->weakness[0] = (DamageType) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.weakness[1] = (DamageType) atoi(token);
+			enemy->weakness[1] = (DamageType) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.resistances[0] = (DamageType) atoi(token);
+			enemy->resistances[0] = (DamageType) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.resistances[1] = (DamageType) atoi(token);
+			enemy->resistances[1] = (DamageType) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.inmunities[0] = (StatusType) atoi(token);
+			enemy->inmunities[0] = (StatusType) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.inmunities[1] = (StatusType) atoi(token);
+			enemy->inmunities[1] = (StatusType) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy.multiattack = atoi(token);
+			enemy->multiattack = atoi(token);
 			// Loading techniques
 			token = strtok_r(NULL, "	", &saveptr);
 			tech = strtok_r(token, ",", &saveptr);
 			while (tech != NULL) {
-				enemy->enemy.tech[enemy->enemy.techAmount] = LoadTech(techData, atoi(tech));
+				enemy->tech[enemy->enemy.techAmount] = LoadTech(techData, atoi(tech));
 				tech = strtok_r(NULL, ",", &saveptr);
-				enemy->enemy.techAmount++;
+				enemy->techAmount++;
 			}
-			return enemy;
+			enemy = NULL;
+			return enemyData;
 		}
 	}
 	return NULL;
 }
-Entity *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id, int position) {
+void *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id, int position) {
 	if (id == 0) return NULL;
-	Entity *player = (Entity *) malloc(sizeof(Entity));
+	void *playerData = malloc(sizeof(Entity));
+	Player *player = (Player *) playerData;
 
-	player->player.position = position;
-	player->player.type = ENTITY_PLAYER;
-	player->player.maxStress = 3;
-	player->player.stress = 0;
-	player->player.demonTally = 0;
-	player->player.accumulatedDamage = 0;
-	player->player.phyBonus = 0;
-	player->player.refBonus = 0;
-	player->player.lorBonus = 0;
-	player->player.chaBonus = 0;
-	player->player.featuresAmount = 0;
-	player->player.techAmount = 0;
-	player->player.equipedTechAmount = 0;
+	player->position = position;
+	player->type = ENTITY_PLAYER;
+	player->maxStress = 3;
+	player->stress = 0;
+	player->demonTally = 0;
+	player->accumulatedDamage = 0;
+	player->phyBonus = 0;
+	player->refBonus = 0;
+	player->lorBonus = 0;
+	player->chaBonus = 0;
+	player->featuresAmount = 0;
+	player->techAmount = 0;
+	player->equipedTechAmount = 0;
 	char line[512];
 	char *saveptr;
 	char *token;
@@ -130,68 +133,69 @@ Entity *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE
 	int playerId;
 	int i;
 	for (i = 0; i < 6; i++) {
-		player->player.physique[i] = 0;
-		player->player.reflex[i] = 0;
-		player->player.lore[i] = 0;
-		player->player.charisma[i] = 0;
+		player->physique[i] = 0;
+		player->reflex[i] = 0;
+		player->lore[i] = 0;
+		player->charisma[i] = 0;
 	}
-	for (i = 0; i < 8; i++) player->player.enemyBonus[i] = 0;
+	for (i = 0; i < 8; i++) player->enemyBonus[i] = 0;
 	rewind(characterData);
 	fgets(line, sizeof(line), characterData);
 	while (fgets(line, sizeof(line), characterData)) {
 		token = strtok_r(line, "	", &saveptr);
 		playerId = atoi(token);
 		if (playerId == id) {
-			player->player.id = playerId;
+			player->id = playerId;
 			token = strtok_r(NULL, "	", &saveptr);
-			player->player.name = atoi(token);
+			player->name = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			player->player.surname = atoi(token);
+			player->surname = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			player->player.giftCurse = atoi(token);
+			player->giftCurse = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			player->player.nomGuerre = atoi(token);
+			player->nomGuerre = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			player->player.description = atoi(token);
+			player->description = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			player->player.sprite = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, atoi(token));
+			player->sprite = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, atoi(token));
 			token = strtok_r(NULL, "	", &saveptr);
-			player->player.physique[0] = atoi(token);
+			player->physique[0] = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			player->player.reflex[0] = atoi(token);
+			player->reflex[0] = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			player->player.lore[0] = atoi(token);
+			player->lore[0] = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			player->player.charisma[0] = atoi(token);
+			player->charisma[0] = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			SetProficiency(player, (AttributeType) atoi(token));
+			SetProficiency(playerData, (AttributeType) atoi(token));
 			token = strtok_r(NULL, "	", &saveptr);
-			SetProficiency(player, (AttributeType) atoi(token));
+			SetProficiency(playerData, (AttributeType) atoi(token));
 			token = strtok_r(NULL, "	", &saveptr);
-			SetProficiency(player, (AttributeType) atoi(token));
+			SetProficiency(playerData, (AttributeType) atoi(token));
 			token = strtok_r(NULL, "	", &saveptr);
-			player->player.hitDice = (DiceType) atoi(token);
-			player->player.maxHealth = DiceMean(player->player.hitDice) + player->player.physique[0];
-			player->player.health = player->player.maxHealth;
+			player->hitDice = (DiceType) atoi(token);
+			player->maxHealth = DiceMean(player->hitDice) + player->physique[0];
+			player->health = player->maxHealth;
 			token = strtok_r(NULL, "	", &saveptr);
-			player->player.weakness = (DamageType) atoi(token);
+			player->weakness = (DamageType) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			player->player.resistance = (DamageType) atoi(token);
+			player->resistance = (DamageType) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			player->player.inmunity = (StatusType) atoi(token);
+			player->inmunity = (StatusType) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			player->player.weapon = LoadWeapon(weaponData, atoi(token));
+			player->weapon = LoadWeapon(weaponData, atoi(token));
 			token = strtok_r(NULL, "	", &saveptr);
-			player->player.armor = LoadArmor(armorData, atoi(token));
+			player->armor = LoadArmor(armorData, atoi(token));
 			token = strtok_r(NULL, "	", &saveptr);
-			player->player.charm = LoadCharm(charmData, atoi(token));
+			player->charm = LoadCharm(charmData, atoi(token));
 			token = strtok_r(NULL, "	", &saveptr);
 			feature = strtok_r(token, ",", &saveptr);
 			while (feature != NULL) {
-				SetFeature(weaponData, charmData, techData, player, (Feature) atoi(feature));
+				SetFeature(weaponData, charmData, techData, playerData, (Feature) atoi(feature));
 				feature = strtok_r(NULL, ",", &saveptr);
 			}
-			return player;
+			player = NULL;
+			return playerData;
 		}
 	}
 	return player;
@@ -242,11 +246,16 @@ void DamageEntity(Combat *combat, Entity attacker, Technique tech) {
 			break;
 	}
 }
-void KillEntity(Combat *combat, Entity *entity) {
-	EntityType type;
-	if (entity->player.type == ENTITY_PLAYER) type = ENTITY_PLAYER;
-	else type = ENTITY_ENEMY;
-	UnloadEntity(type, combat, entity->player.position);
+void KillEntity(Combat *combat, void *entity, EntityType type) {
+	if (type == ENTITY_ENEMY) {
+		Enemy *enemy = (Enemy *) entity;
+		enemy = NULL;
+	}
+	else {
+		Player *player = (Player *) entity;
+		UnloadEntity(type, combat, player->position);
+		player = NULL;
+	}
 }
 void UnloadCombat(Combat *combat) {
 	int i;
@@ -262,49 +271,60 @@ void UnloadEntity(EntityType type, Combat *combat, int position) {
 	switch (type) {
 		case ENTITY_ENEMY:
 			if (combat->enemy[position] == NULL) return;
-			if (combat->enemy[position]->enemy.sprite != NULL) {
-				free(combat->enemy[position]->enemy.sprite);
-				combat->enemy[position]->enemy.sprite = NULL;
-			}
-			free(combat->enemy[position]);
+			Enemy *enemy = (Enemy *) combat->enemy[position];
 			combat->enemy[position] = NULL;
+
+			if (enemy->sprite != NULL) {
+				free(enemy->sprite);
+				enemy->sprite = NULL;
+			}
+			free(enemy);
 			return;
 		case ENTITY_PLAYER:
 			if (combat->player[position] == NULL) return;
-			if (combat->player[position]->player.sprite != NULL) {
-				free(combat->player[position]->player.sprite);
-				combat->player[position]->player.sprite = NULL;
-			}
-			printf("INFO: COMBAT: Milestone.\n");
-			free(combat->player[position]);
+			Player *player = (Player *) combat->player[position];
 			combat->player[position] = NULL;
+
+			if (player->sprite != NULL) {
+				free(player->sprite);
+				player->sprite = NULL;
+			}
+			free(player);
 			return;
 	}
 }
-void DrawCombat(Combat combat, SafeTexture *textures, Color color, bool shader, bool draw) {
+void DrawCombat(Combat *combat, SafeTexture *textures, Color color, bool shader, bool draw) {
 	if (draw == false) return;
 	int i;
+	Enemy *enemy;
+	Player *player;
 	Sprite *sprite;
 	for (i = 0; i < 5; i++) {
-		if (combat.enemy[i] != NULL) {
-			sprite = combat.enemy[i]->enemy.sprite;
+		if (combat->enemy[i] != NULL) {
+			enemy = (Enemy *) combat->enemy[i];
+			sprite = enemy->sprite;
 			if (shader != sprite->shader) continue;
 			DrawTexturePro(textures[sprite->textureIndex].tex,
 				       sprite->origin,
 				       sprite->dest,
-				       (Vector2) { -48 * combat.enemy[i]->enemy.position - 48, -36 },
+				       (Vector2) { -48 * enemy->position - 48, -36 },
 				       sprite->rotation,
 				       color);
+			enemy = NULL;
+			sprite = NULL;
 		}
-		if (combat.player[i] != NULL) {
-			sprite = combat.player[i]->player.sprite;
+		if (combat->player[i] != NULL) {
+			player = (Player *) combat->player[i];
+			sprite = player->sprite;
 			if (shader != sprite->shader) continue;
 			DrawTexturePro(textures[sprite->textureIndex].tex,
 				       sprite->origin,
 				       sprite->dest,
-				       (Vector2) { -48 * combat.player[i]->player.position - 48, -83 },
+				       (Vector2) { -48 * player->position - 48, -83 },
 				       sprite->rotation,
 				       color);
+			player = NULL;
+			sprite = NULL;
 		}
 	}
 	DrawRectangle(0, 130, 360, 1, color);
@@ -531,108 +551,111 @@ Equip LoadCharm(FILE *charmData, int id) {
 	}
 	return charm;
 }
-void SetProficiency(Entity *player, AttributeType attr) {
+void SetProficiency(void *playerData, AttributeType attr) {
+	Player *player = (Player *) playerData;
 	switch (attr) {
 		case ATTR_ATHLETICS:
-			player->player.physique[1] += 2;
+			player->physique[1] += 2;
 			break;
 		case ATTR_CONSTITUTION:
-			player->player.physique[2] += 2;
+			player->physique[2] += 2;
 			break;
 		case ATTR_MEDICINE:
-			player->player.physique[3] += 2;
+			player->physique[3] += 2;
 			break;
 		case ATTR_MELEE:
-			player->player.physique[4] += 2;
+			player->physique[4] += 2;
 			break;
 		case ATTR_VIBES:
-			player->player.physique[5] += 2;
+			player->physique[5] += 2;
 			break;
 		case ATTR_ACCURACY:
-			player->player.reflex[1] += 2;
+			player->reflex[1] += 2;
 			break;
 		case ATTR_ACROBATICS:
-			player->player.reflex[2] += 2;
+			player->reflex[2] += 2;
 			break;
 		case ATTR_MISCHIEF:
-			player->player.reflex[3] += 2;
+			player->reflex[3] += 2;
 			break;
 		case ATTR_PERCEPTION:
-			player->player.reflex[4] += 2;
+			player->reflex[4] += 2;
 			break;
 		case ATTR_TOUCH:
-			player->player.reflex[5] += 2;
+			player->reflex[5] += 2;
 			break;
 		case ATTR_ARCANUM:
-			player->player.lore[1] += 2;
+			player->lore[1] += 2;
 			break;
 		case ATTR_BEASTS:
-			player->player.lore[2] += 2;
+			player->lore[2] += 2;
 			break;
 		case ATTR_DREAMS:
-			player->player.lore[3] += 2;
+			player->lore[3] += 2;
 			break;
 		case ATTR_DUNGEONS:
-			player->player.lore[4] += 2;
+			player->lore[4] += 2;
 			break;
 		case ATTR_NATURE:
-			player->player.lore[5] += 2;
+			player->lore[5] += 2;
 			break;
 		case ATTR_ANIMA:
-			player->player.charisma[1] += 2;
+			player->charisma[1] += 2;
 			break;
 		case ATTR_AUTHORITY:
-			player->player.charisma[2] += 2;
+			player->charisma[2] += 2;
 			break;
 		case ATTR_DRAMA:
-			player->player.charisma[3] += 2;
+			player->charisma[3] += 2;
 			break;
 		case ATTR_KINSHIP:
-			player->player.charisma[4] += 2;
+			player->charisma[4] += 2;
 			break;
 		case ATTR_PASSION:
-			player->player.charisma[5] += 2;
+			player->charisma[5] += 2;
 			break;
 		default:
 			break;
 	}
 }
-void SetFeature(FILE *weaponData, FILE *charmFile, FILE *techData, Entity *player, Feature feature) {
+void SetFeature(FILE *weaponData, FILE *charmFile, FILE *techData, void *playerData, Feature feature) {
+	Player *player = (Player *) playerData;
 	switch (feature) {
 		case FEAT_DEMONHANDS:
-			player->player.tech[player->player.techAmount] = LoadTech(techData, 81);
-			player->player.techAmount++;
-			player->player.tech[player->player.techAmount] = LoadTech(techData, 82);
-			player->player.techAmount++;
-			player->player.tech[player->player.techAmount] = LoadTech(techData, 83);
-			player->player.techAmount++;
-			player->player.tech[player->player.techAmount] = LoadTech(techData, 86);
-			player->player.techAmount++;
-			player->player.tech[player->player.techAmount] = LoadTech(techData, 87);
-			player->player.techAmount++;
+			player->tech[player->techAmount] = LoadTech(techData, 81);
+			player->techAmount++;
+			player->tech[player->techAmount] = LoadTech(techData, 82);
+			player->techAmount++;
+			player->tech[player->techAmount] = LoadTech(techData, 83);
+			player->techAmount++;
+			player->tech[player->techAmount] = LoadTech(techData, 86);
+			player->techAmount++;
+			player->tech[player->techAmount] = LoadTech(techData, 87);
+			player->techAmount++;
 			break;
 		case FEAT_PASSIONFUL:
-			player->player.charisma[5] += 1;
+			player->charisma[5] += 1;
 			break;
 		case FEAT_PASSIONNAIL:
-			player->player.weapon = LoadWeapon(weaponData, 64);
+			player->weapon = LoadWeapon(weaponData, 64);
 			break;
 		case FEAT_DEMONHUNTER:
-			player->player.enemyBonus[(int) ENEMY_DEMON] += 1;
+			player->enemyBonus[(int) ENEMY_DEMON] += 1;
 			break;
 		case FEAT_BORNFORMISCHIEF:
-			SetProficiency(player, ATTR_MISCHIEF);
+			SetProficiency(playerData, ATTR_MISCHIEF);
 			break;
 		case FEAT_UNDEADHUNTER:
-			player->player.enemyBonus[(int) ENEMY_UNDEAD] += 1;
+			player->enemyBonus[(int) ENEMY_UNDEAD] += 1;
 			break;
 		case FEAT_LUXURIOUSGEM:
-			player->player.charm = LoadCharm(charmFile, 1);
+			player->charm = LoadCharm(charmFile, 1);
 		default:
 			break;
 	}
-	player->player.features[player->player.featuresAmount] = feature;
-	player->player.featuresAmount++;
+	player->features[player->featuresAmount] = feature;
+	player->featuresAmount++;
+	player = NULL;
 }
 int DiceRoll(DiceType dice, int *randomValue) {
 	int roll;
@@ -711,18 +734,23 @@ void Random(int *randomValue) {
 	*randomValue = rand();
 }
 void RollInitiative(Combat *combat, int *randomValue) {
-	int init[10] = { 0 };
 	int i = 0;
 	int j = 0;
+	Enemy *enemy;
+	Player *player;
 
 	for (i = 0; i < 5; i++) {
 		if (combat->player[i] == NULL) continue;
-		init[j] = DiceRoll(DICE_D20, randomValue) + combat->player[i]->player.reflex[0];
+		player = (Player *) combat->player[i];
+		DiceRoll(DICE_D20, randomValue) + player->reflex[0];
 		j++;
+		player = NULL;
 	}
 	for (i = 0; i < 5; i++) {
 		if (combat->enemy[i] == NULL) continue;
-		init[j] = DiceRoll(DICE_D20, randomValue) + combat->enemy[i]->enemy.reflex;
+		enemy = (Enemy *) combat->enemy[i];
+		DiceRoll(DICE_D20, randomValue) + enemy->reflex;
 		j++;
+		enemy = NULL;
 	}
 }

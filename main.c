@@ -22,6 +22,7 @@ enum GameState {
 	STATE_SELECTCARDS,
 	STATE_FIGHT,
 	STATE_ATTACKMENU,
+	STATE_FIGHTTIMELINE,
 	STATE_DEBUG
 };
 struct SafeSound {
@@ -197,13 +198,13 @@ int main() {
 					DrawText("Are you sure you want to exit program?", 50, 90, 8, state.globalColor);
 				}
 				else {
-					DrawCombat(state.combat, state.textures, state.globalColor, false, state.onCombat);
+					DrawCombat(&state.combat, state.textures, state.globalColor, false, state.onCombat);
 					DrawAnimation(state.anims, state.textures, state.animAmount, state.globalColor, false);
 					DrawSprite(state.sprites, state.textures, state.spriteAmount, state.globalColor, false);
 					DrawButton(state.buttons, state.textures, state.buttonAmount, state.font, state.globalColor, false);
 
 					BeginShaderMode(shader);
-						DrawCombat(state.combat, state.textures, state.globalColor, true, state.onCombat);
+						DrawCombat(&state.combat, state.textures, state.globalColor, true, state.onCombat);
 						DrawAnimation(state.anims, state.textures, state.animAmount, state.globalColor, true);
 						DrawSprite(state.sprites, state.textures, state.spriteAmount, state.globalColor, true);
 						DrawButton(state.buttons, state.textures, state.buttonAmount, state.font, state.globalColor, true);
@@ -694,6 +695,8 @@ void SetState(StateData *state, GameState newState) {
 		case STATE_ATTACKMENU:
 			SetOnlyHorizontalKeys(state);
 			
+			break;
+		case STATE_FIGHTTIMELINE:
 			break;
 		default:
 			break;

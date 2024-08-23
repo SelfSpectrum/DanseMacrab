@@ -8,21 +8,19 @@ typedef struct Enemy Enemy;
 typedef struct Weapon Weapon;
 typedef struct Armor Armor;
 typedef struct Charm Charm;
-typedef struct Effect Effect;
+//typedef struct Effect Effect;
 typedef struct Technique Technique;
 typedef struct Combat Combat;
 typedef enum DamageType DamageType;
-typedef enum EntityType EntityType;
 typedef enum EnemyType EnemyType;
 typedef enum EquipType EquipType;
 typedef enum DiceType DiceType;
 typedef enum TechniqueType TechniqueType;
-typedef enum EffectType EffectType;
+//typedef enum EffectType EffectType;
 typedef enum AttributeType AttributeType;
 typedef enum EconomyType EconomyType;
 typedef enum StatusType StatusType;
 typedef enum Feature Feature;
-typedef union Entity Entity;
 typedef union Equip Equip;
 
 enum DamageType {
@@ -42,10 +40,6 @@ enum DamageType {
 	DMG_HEALARMOR = 13,
 	DMG_HEALMEDICINE = 14,
 	DMG_TRUE = 15
-};
-enum EntityType {
-	ENTITY_ENEMY = 0,
-	ENTITY_PLAYER = 1
 };
 enum EnemyType {
 	ENEMY_BEAST = 0,

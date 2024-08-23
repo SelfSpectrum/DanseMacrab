@@ -424,7 +424,8 @@ union Entity {
 struct Combat {
 	Entity *enemy[5];
 	Entity *player[5];
-	Entity *selected;
+	Entity *timeline[10];
+	int timelineAmount;
 	Equip inventory[20];
 	int inventoryAmount;
 	int turn;
@@ -435,7 +436,7 @@ struct Combat {
 void LoadEnemiesFile(FILE **file, const char *enemySheet);
 void LoadEnemiesOnCombat(FILE *file, FILE *enemyData, FILE *spriteData, FILE *techData, Combat *combat, int id);
 Entity *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id);
-Entity *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id);
+Entity *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id, int position);
 void MoveEntity(Entity *entity, int position);
 void DamageEntity(Combat *combat, Entity attacker, Technique tech);
 void KillEntity(Combat *combat, Entity *entity); //TODO
@@ -457,5 +458,6 @@ int DiceRoll(DiceType dice, int *randomValue);
 void SetSeed(int seed, int *randomValue);
 void SetTimeSeed(int *randomValue);
 void Random(int *randomValue);
+void RollInitiative(Combat *combat, int *randomValue);
 
 #endif		// ENTITY_H

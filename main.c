@@ -112,6 +112,7 @@ void PlaySecSound(StateData *state, int id);
 //void Crossfade(); // TODO
 // INFO: Some shortcuts for graphics
 void SetHorizontalKeys(StateData *state);
+void SetOnlyHorizontalKeys(StateData *state);
 void SetVerticalKeys(StateData *state);
 void SetOnlyVerticalKeys(StateData *state);
 void LoadFiles(StateData *state);
@@ -629,13 +630,10 @@ void SetState(StateData *state, GameState newState) {
 			state->sounds[3].sound = LoadSound("./resources/sfx/error.wav");
 			state->sounds[3].init = true;
 
-			state->combat = (Combat) { { NULL }, { NULL }, NULL, { 0 }, 0, 0 }; // Data from position, entities and stuff
-			state->combat.player[1] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 2);
-			state->combat.player[1]->player.position = 1;
-			state->combat.player[2] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 1);
-			state->combat.player[2]->player.position = 2;
-			state->combat.player[3] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 3);
-			state->combat.player[3]->player.position = 3;
+			state->combat = (Combat) { { NULL }, { NULL }, { NULL }, 0, { 0 }, 0, 0 }; // Data from position, entities and stuff
+			state->combat.player[1] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 2, 1);
+			state->combat.player[2] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 1, 2);
+			state->combat.player[3] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 3, 3);
 			LoadEnemiesOnCombat(state->combatData, state->enemyData, state->spriteData, state->techData, &state->combat, 1);
 
 			if (state->debug) SetState(state, STATE_DEBUG);
@@ -682,8 +680,7 @@ void SetState(StateData *state, GameState newState) {
 		case STATE_FIGHT:
 			SetHorizontalKeys(state);
 			state->onCombat = true;
-			LoadSprite(state, (Vector2) { 0, -131 }, 0, 102);
-			//LoadSprite(state, (Vector2) { 0, -86 }, 100);
+			//LoadSprite(state, (Vector2) { 0, -131 }, 0, 102);
 			//LoadButton("./resources/layout/fightButtons.tsv", state->spriteData, state->translationData, state->font, state->buttons, &state->buttonAmount, BUTTON_SIZE);
 			LoadButton(state, (Vector2) { -112, -131 }, 0, 756, 884, 0);
 			LoadButton(state, (Vector2) { -128, -131 }, 0, 772, 900, 0);
@@ -693,6 +690,10 @@ void SetState(StateData *state, GameState newState) {
 			LoadButton(state, (Vector2) { -128, -163 }, 0, 515, 643, 0);
 			ChangeSelection(state);
 			state->buttonSkip = 2;
+			break;
+		case STATE_ATTACKMENU:
+			SetOnlyHorizontalKeys(state);
+			
 			break;
 		default:
 			break;
@@ -743,6 +744,12 @@ void SetHorizontalKeys(StateData *state) {
 	state->rightKey = KEY_RIGHT;
 	state->upKey = KEY_UP;
 	state->downKey = KEY_DOWN;
+}
+void SetOnlyHorizontalKeys(StateData *state) {
+	state->leftKey = KEY_LEFT;
+	state->rightKey = KEY_RIGHT;
+	state->upKey = KEY_NULL;
+	state->downKey = KEY_NULL;
 }
 void SetVerticalKeys(StateData *state) {
 	state->leftKey = KEY_UP;

@@ -106,9 +106,11 @@ Entity *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id) {
 	}
 	return NULL;
 }
-Entity *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id) {
+Entity *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id, int position) {
 	if (id == 0) return NULL;
 	Entity *player = (Entity *) malloc(sizeof(Entity));
+
+	player->player.position = position;
 	player->player.type = ENTITY_PLAYER;
 	player->player.maxStress = 3;
 	player->player.stress = 0;
@@ -707,4 +709,20 @@ void SetTimeSeed(int *randomValue) {
 }
 void Random(int *randomValue) {
 	*randomValue = rand();
+}
+void RollInitiative(Combat *combat, int *randomValue) {
+	int init[10] = { 0 };
+	int i = 0;
+	int j = 0;
+
+	for (i = 0; i < 5; i++) {
+		if (combat->player[i] == NULL) continue;
+		init[j] = DiceRoll(DICE_D20, randomValue) + combat->player[i]->player.reflex[0];
+		j++;
+	}
+	for (i = 0; i < 5; i++) {
+		if (combat->enemy[i] == NULL) continue;
+		init[j] = DiceRoll(DICE_D20, randomValue) + combat->enemy[i]->enemy.reflex;
+		j++;
+	}
 }

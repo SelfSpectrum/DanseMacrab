@@ -665,7 +665,7 @@ void UnloadMessageRegister(Message **messages, int *messageAmount) {
 	for (i = 0; i < (*messageAmount); i++)
 		UnloadSingleMessage(&messages[i]);
 	(*messageAmount) = 0;
-	printf("INFO: MESSAGE: Messages unloaded correctly\n");
+	//printf("INFO: MESSAGE: Messages unloaded correctly\n");
 }
 void UnloadSingleMessage(Message **message) {
 	if ((*message) == NULL) return;

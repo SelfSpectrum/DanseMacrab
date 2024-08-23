@@ -8,6 +8,7 @@ typedef struct Enemy Enemy;
 typedef struct Weapon Weapon;
 typedef struct Armor Armor;
 typedef struct Charm Charm;
+typedef struct Effect Effect;
 typedef struct Technique Technique;
 typedef struct Combat Combat;
 typedef enum DamageType DamageType;
@@ -16,6 +17,7 @@ typedef enum EnemyType EnemyType;
 typedef enum EquipType EquipType;
 typedef enum DiceType DiceType;
 typedef enum TechniqueType TechniqueType;
+typedef enum EffectType EffectType;
 typedef enum AttributeType AttributeType;
 typedef enum EconomyType EconomyType;
 typedef enum StatusType StatusType;
@@ -89,6 +91,8 @@ enum TechniqueType {
 	TECH_SUMMON = 8,
 	TECH_SORCERY = 9
 };
+enum TechniqueType {
+}
 enum AttributeType {	// ATTR % 6 for index
 	ATTR_PHYSIQUE = 0,
 	ATTR_ATHLETICS = 1,
@@ -433,7 +437,7 @@ void *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id);
 void *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id, int position);
 void RollInitiative(Combat *combat, int *randomValue);
 void MoveEntity(Combat *combat, int position);
-void DamageEntity(Combat *combat, void attacker, Technique *tech);
+void DamageEntity(Combat *combat, void *attacker, Technique *tech);
 void KillEntity(Combat *combat, void *entity); //TODO
 void UnloadCombat(Combat *combat);
 void UnloadEntity(EntityType type, Combat *combat, int position);

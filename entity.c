@@ -200,25 +200,19 @@ void *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *
 	}
 	return player;
 }
-void DamageEntity(Combat *combat, Entity attacker, Technique tech) {
-	int position;
-	EntityType side;
+void DamageEntity(Combat *combat, void *attacker, EntityType side, Technique tech) {
+	int position = (side == ENTITY_PLAYER) ? ((Player *) attacker)->position : ((Enemy *) attacker)->position;
 	int i;
 	int min;
 	int max;
-	if (attacker.player.type == ENTITY_PLAYER) {
-		position = attacker.player.position;
-		side = attacker.player.type;
-	}
-	else {
-		position = attacker.enemy.position;
-		side = attacker.enemy.type;
-	}
+	Player *player;
+	Enemy *enemy;
+
 	min = (int) Clamp(-2 + position, 0, 4);
 	max = (int) Clamp(2 + position, 0, 4);
 	for (i = min; i <= max; i++) {
 		if (side == ENTITY_ENEMY) {
-			combat->enemy[i]->enemy.health = (int) Clamp(combat->enemy[i]->enemy.health - i, 0, combat->enemy[i]->enemy.maxHealth);
+			combat->enemy[i]->health = (int) Clamp(combat->enemy[i]->enemy.health - i, 0, combat->enemy[i]->enemy.maxHealth);
 		}
 		else {
 			combat->player[i]->player.health = (int) Clamp(combat->player[i]->player.health - i, 0, combat->player[i]->player.maxHealth);
@@ -232,6 +226,7 @@ void DamageEntity(Combat *combat, Entity attacker, Technique tech) {
 			break;
 		case DMG_FIRE:
 		case DMG_ICE:
+		case DMG_ELECTRIC:
 		case DMG_ACID:
 			break;
 		case DMG_PSYCHIC:
@@ -239,6 +234,7 @@ void DamageEntity(Combat *combat, Entity attacker, Technique tech) {
 		case DMG_HEALNATURE:
 		case DMG_HEALBLOODY:
 		case DMG_HEALPSY:
+		case DMG_HEALMEDICINE:
 			break;
 		case DMG_HEALARMOR:
 			break;

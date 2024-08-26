@@ -17,27 +17,24 @@ void LoadEnemiesOnCombat(FILE *file, FILE *enemyData, FILE *spriteData, FILE *te
 		token = strtok_r(line, "	", &saveptr);
 		if (atoi(token) == id) {
 			token = strtok_r(NULL, "	", &saveptr);
-			combat->enemy[0] = LoadEnemy(enemyData, spriteData, techData, atoi(token));
-			if (token[0] != '0') combat->enemy[0]->enemy.position = 0;
+			combat->enemy[0] = LoadEnemy(enemyData, spriteData, techData, atoi(token), 0);
 			token = strtok_r(NULL, "	", &saveptr);
-			combat->enemy[1] = LoadEnemy(enemyData, spriteData, techData, atoi(token));
-			if (token[0] != '0') combat->enemy[1]->enemy.position = 1;
+			combat->enemy[1] = LoadEnemy(enemyData, spriteData, techData, atoi(token), 1);
 			token = strtok_r(NULL, "	", &saveptr);
-			combat->enemy[2] = LoadEnemy(enemyData, spriteData, techData, atoi(token));
-			if (token[0] != '0') combat->enemy[2]->enemy.position = 2;
+			combat->enemy[2] = LoadEnemy(enemyData, spriteData, techData, atoi(token), 2);
 			token = strtok_r(NULL, "	", &saveptr);
-			combat->enemy[3] = LoadEnemy(enemyData, spriteData, techData, atoi(token));
-			if (token[0] != '0') combat->enemy[3]->enemy.position = 3;
+			combat->enemy[3] = LoadEnemy(enemyData, spriteData, techData, atoi(token), 3);
 			token = strtok_r(NULL, "	", &saveptr);
-			combat->enemy[4] = LoadEnemy(enemyData, spriteData, techData, atoi(token));
-			if (token[0] != '0') combat->enemy[4]->enemy.position = 4;
+			combat->enemy[4] = LoadEnemy(enemyData, spriteData, techData, atoi(token), 4);
 		}
 	}
 }
-void *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id) {
+void *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id, int position) {
 	if (id == 0) return NULL;
-	void *enemyData = malloc(sizeof(Entity));
-	Enemy *enemy = (Enemy *) enemyData;
+	void *enemyInfo = malloc(sizeof(Enemy));
+	Enemy *enemy = (Enemy *) enemyInfo;
+
+	enemy->position = position;
 	enemy->type = ENTITY_ENEMY;
 	enemy->phyBonus = 0;
 	enemy->refBonus = 0;
@@ -75,11 +72,11 @@ void *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id) {
 			token = strtok_r(NULL, "	", &saveptr);
 			enemy->size = atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
-			enemy->maxHealth = DiceMean((DiceType) enemy->enemy.size) * atoi(token) + enemy->enemy.physique * atoi(token);
-			enemy->health = enemy->enemy.maxHealth;
+			enemy->maxHealth = DiceMean((DiceType) enemy->size) * atoi(token) + enemy->physique * atoi(token);
+			enemy->health = enemy->maxHealth;
 			token = strtok_r(NULL, "	", &saveptr);
 			enemy->maxStress = atoi(token);
-			enemy->stress = enemy->enemy.maxStress;
+			enemy->stress = enemy->maxStress;
 			token = strtok_r(NULL, "	", &saveptr);
 			enemy->weakness[0] = (DamageType) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
@@ -98,7 +95,7 @@ void *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id) {
 			token = strtok_r(NULL, "	", &saveptr);
 			tech = strtok_r(token, ",", &saveptr);
 			while (tech != NULL) {
-				enemy->tech[enemy->enemy.techAmount] = LoadTech(techData, atoi(tech));
+				enemy->tech[enemy->techAmount] = LoadTech(techData, atoi(tech));
 				tech = strtok_r(NULL, ",", &saveptr);
 				enemy->techAmount++;
 			}
@@ -110,7 +107,7 @@ void *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id) {
 }
 void *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id, int position) {
 	if (id == 0) return NULL;
-	void *playerData = malloc(sizeof(Entity));
+	void *playerData = malloc(sizeof(Player));
 	Player *player = (Player *) playerData;
 
 	player->position = position;
@@ -200,7 +197,7 @@ void *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *
 	}
 	return player;
 }
-void DamageEntity(Combat *combat, void *attacker, EntityType side, Technique tech) {
+void DamageEntity(Combat *combat, void *attacker, EntityType side, Technique *tech) {
 	int position = (side == ENTITY_PLAYER) ? ((Player *) attacker)->position : ((Enemy *) attacker)->position;
 	int i;
 	int min;
@@ -212,34 +209,15 @@ void DamageEntity(Combat *combat, void *attacker, EntityType side, Technique tec
 	max = (int) Clamp(2 + position, 0, 4);
 	for (i = min; i <= max; i++) {
 		if (side == ENTITY_ENEMY) {
-			combat->enemy[i]->health = (int) Clamp(combat->enemy[i]->enemy.health - i, 0, combat->enemy[i]->enemy.maxHealth);
+			enemy = (Enemy *) combat->enemy[i];
+			enemy->health = (int) Clamp(enemy->health - i, 0, enemy->maxHealth);
+			enemy = NULL;
 		}
 		else {
-			combat->player[i]->player.health = (int) Clamp(combat->player[i]->player.health - i, 0, combat->player[i]->player.maxHealth);
+			player = (Player *) combat->player[i];
+			player->health = (int) Clamp(player->health - i, 0, player->maxHealth);
+			player = NULL;
 		}
-	}
-	switch (tech.attr) {
-		case DMG_SLASHING:
-		case DMG_BLUDGEONING:
-		case DMG_PIERCING:
-		case DMG_BALLISTIC:
-			break;
-		case DMG_FIRE:
-		case DMG_ICE:
-		case DMG_ELECTRIC:
-		case DMG_ACID:
-			break;
-		case DMG_PSYCHIC:
-			break;
-		case DMG_HEALNATURE:
-		case DMG_HEALBLOODY:
-		case DMG_HEALPSY:
-		case DMG_HEALMEDICINE:
-			break;
-		case DMG_HEALARMOR:
-			break;
-		default:
-			break;
 	}
 }
 void KillEntity(Combat *combat, void *entity, EntityType type) {
@@ -275,6 +253,7 @@ void UnloadEntity(EntityType type, Combat *combat, int position) {
 				enemy->sprite = NULL;
 			}
 			free(enemy);
+			enemy = NULL;
 			return;
 		case ENTITY_PLAYER:
 			if (combat->player[position] == NULL) return;
@@ -286,6 +265,10 @@ void UnloadEntity(EntityType type, Combat *combat, int position) {
 				player->sprite = NULL;
 			}
 			free(player);
+			player = NULL;
+			return;
+		default:
+			printf("HOW DID THIS HAPPEN! Alongtimeagoactuallynever-\n");
 			return;
 	}
 }

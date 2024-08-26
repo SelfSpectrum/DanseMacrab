@@ -11,6 +11,7 @@ typedef struct Charm Charm;
 //typedef struct Effect Effect;
 typedef struct Technique Technique;
 typedef struct Combat Combat;
+typedef enum EntityType EntityType;
 typedef enum DamageType DamageType;
 typedef enum EnemyType EnemyType;
 typedef enum EquipType EquipType;
@@ -23,6 +24,11 @@ typedef enum StatusType StatusType;
 typedef enum Feature Feature;
 typedef union Equip Equip;
 
+enum EntityType {
+	ENTITY_NONE = 0,
+	ENTITY_PLAYER = 1,
+	ENTITY_ENEMY = 2,
+};
 enum DamageType {
 	DMG_NONE = 0,
 	DMG_SLASHING = 1,
@@ -85,8 +91,8 @@ enum TechniqueType {
 	TECH_SUMMON = 8,
 	TECH_SORCERY = 9
 };
-enum TechniqueType {
-}
+//enum EffectType {	//TODO: si es que el sistema actual de tecnicas se queda chico
+//};
 enum AttributeType {	// ATTR % 6 for index
 	ATTR_PHYSIQUE = 0,
 	ATTR_ATHLETICS = 1,
@@ -418,6 +424,9 @@ struct Enemy {
 struct Combat {
 	void *enemy[5];
 	void *player[5];
+	void *timeline[10];
+	EntityType timelineType[10];
+	int timelineAmount;
 	Equip inventory[20];
 	int inventoryAmount;
 	int turn;
@@ -427,12 +436,12 @@ struct Combat {
 
 void LoadEnemiesFile(FILE **file, const char *enemySheet);
 void LoadEnemiesOnCombat(FILE *file, FILE *enemyData, FILE *spriteData, FILE *techData, Combat *combat, int id);
-void *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id);
+void *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id, int position);
 void *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id, int position);
 void RollInitiative(Combat *combat, int *randomValue);
 void MoveEntity(Combat *combat, int position);
-void DamageEntity(Combat *combat, void *attacker, Technique *tech);
-void KillEntity(Combat *combat, void *entity); //TODO
+void DamageEntity(Combat *combat, void *attacker, EntityType type, Technique *tech);
+void KillEntity(Combat *combat, void *entity, EntityType type); //TODO
 void UnloadCombat(Combat *combat);
 void UnloadEntity(EntityType type, Combat *combat, int position);
 void DrawCombat(Combat *combat, SafeTexture *textures, Color color, bool shader, bool draw);

@@ -352,7 +352,7 @@ struct Player {
 	EntityType type;
 	int id;
 	int position;
-	// INFO: VITALS
+	// INFO: VITALES
 	DiceType hitDice;
 	int maxHealth;
 	int health;
@@ -360,7 +360,7 @@ struct Player {
 	int stress;
 	int demonTally;
 	int accumulatedDamage;
-	// INFO: ATTRIBUTES
+	// INFO: ATRIBUTOS
 	int physique[6];		// Physique + Athletics, Constitution, Medicine, Melee, Vibes
 	int reflex[6];			// Reflex + Accuracy, Acrobatics, Mischief, Perception, Touch
 	int lore[6];			// Lore + Arcanum, Beasts, Dream, Dungeons, Nature
@@ -370,7 +370,7 @@ struct Player {
 	int lorBonus;
 	int chaBonus;
 	int enemyBonus[8];
-	// INFO: OTHER STUFF
+	// INFO: OTRAS COSAS
 	int name;
 	int surname;
 	int giftCurse;
@@ -389,18 +389,19 @@ struct Player {
 	Technique equipedTech[10];
 	int equipedTechAmount;
 	Sprite *sprite;
+	int initiative;
 };
 struct Enemy {
 	EntityType type;
 	int id;
 	int position;
 	int size;
-	// INFO: VITALS
+	// INFO: VITALES
 	int maxHealth;
 	int health;
 	int maxStress;
 	int stress;
-	// INFO: ATTRIBUTES
+	// INFO: ATRIBUTOS
 	int physique;
 	int reflex;
 	int lore;
@@ -409,7 +410,7 @@ struct Enemy {
 	int refBonus;
 	int lorBonus;
 	int chaBonus;
-	// INFO: OTHER STUFF
+	// INFO: OTRAS COSAS
 	int name;
 	int description;
 	EnemyType enemy;
@@ -420,6 +421,7 @@ struct Enemy {
 	int techAmount;
 	int multiattack;
 	Sprite *sprite;
+	int initiative;
 };
 struct Combat {
 	void *enemy[5];
@@ -442,9 +444,6 @@ void RollInitiative(Combat *combat, int *randomValue);
 void MoveEntity(Combat *combat, int position);
 void DamageEntity(Combat *combat, void *attacker, EntityType type, Technique *tech);
 void KillEntity(Combat *combat, void *entity, EntityType type); //TODO
-void UnloadCombat(Combat *combat);
-void UnloadEntity(EntityType type, Combat *combat, int position);
-void DrawCombat(Combat *combat, SafeTexture *textures, Color color, bool shader, bool draw);
 // Techniques
 Technique LoadTech(FILE *techData, int id);
 void PlayerLoadTech(FILE *techData, void *player); //TODO
@@ -460,5 +459,14 @@ int DiceRoll(DiceType dice, int *randomValue);
 void SetSeed(int seed, int *randomValue);
 void SetTimeSeed(int *randomValue);
 void Random(int *randomValue);
+
+// Relacionadas al combate
+void RollInitiative(Combat *combat, int *randomValue);
+void SortInitiative(void **timeline, EntityType *types, int timelineAmount);
+int GetInitiative(void *entity, EntityType type);
+void UnloadCombat(Combat *combat);
+void UnloadEntity(EntityType type, Combat *combat, int position);
+void DrawCombat(Combat *combat, SafeTexture *textures, Color color, bool shader, bool draw);
+void StartTurn();
 
 #endif		// ENTITY_H

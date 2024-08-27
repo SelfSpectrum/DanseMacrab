@@ -231,47 +231,6 @@ void KillEntity(Combat *combat, void *entity, EntityType type) {
 		player = NULL;
 	}
 }
-void UnloadCombat(Combat *combat) {
-	int i;
-	for (i = 0; i < 5; i++) {
-		UnloadEntity(ENTITY_ENEMY, combat, i);
-		printf("INFO: COMBAT: Combat %d, enemy unloaded.\n", i);
-		UnloadEntity(ENTITY_PLAYER, combat, i);
-		printf("INFO: COMBAT: Combat %d, player unloaded.\n", i);
-	}
-	printf("INFO: COMBAT: Combat unloaded successfully.\n");
-}
-void UnloadEntity(EntityType type, Combat *combat, int position) {
-	switch (type) {
-		case ENTITY_ENEMY:
-			if (combat->enemy[position] == NULL) return;
-			Enemy *enemy = (Enemy *) combat->enemy[position];
-			combat->enemy[position] = NULL;
-
-			if (enemy->sprite != NULL) {
-				free(enemy->sprite);
-				enemy->sprite = NULL;
-			}
-			free(enemy);
-			enemy = NULL;
-			return;
-		case ENTITY_PLAYER:
-			if (combat->player[position] == NULL) return;
-			Player *player = (Player *) combat->player[position];
-			combat->player[position] = NULL;
-
-			if (player->sprite != NULL) {
-				free(player->sprite);
-				player->sprite = NULL;
-			}
-			free(player);
-			player = NULL;
-			return;
-		default:
-			printf("HOW DID THIS HAPPEN! Alongtimeagoactuallynever-\n");
-			return;
-	}
-}
 void DrawCombat(Combat *combat, SafeTexture *textures, Color color, bool shader, bool draw) {
 	if (draw == false) return;
 	int i;
@@ -712,24 +671,103 @@ void SetTimeSeed(int *randomValue) {
 void Random(int *randomValue) {
 	*randomValue = rand();
 }
+
+void UnloadCombat(Combat *combat) {
+	int i;
+	for (i = 0; i < 5; i++) {
+		UnloadEntity(ENTITY_ENEMY, combat, i);
+		printf("INFO: COMBAT: Combat %d, enemy unloaded.\n", i);
+		UnloadEntity(ENTITY_PLAYER, combat, i);
+		printf("INFO: COMBAT: Combat %d, player unloaded.\n", i);
+	}
+	printf("INFO: COMBAT: Combat unloaded successfully.\n");
+}
+void UnloadEntity(EntityType type, Combat *combat, int position) {
+	switch (type) {
+		case ENTITY_ENEMY:
+			if (combat->enemy[position] == NULL) return;
+			Enemy *enemy = (Enemy *) combat->enemy[position];
+			combat->enemy[position] = NULL;
+
+			if (enemy->sprite != NULL) {
+				free(enemy->sprite);
+				enemy->sprite = NULL;
+			}
+			free(enemy);
+			enemy = NULL;
+			return;
+		case ENTITY_PLAYER:
+			if (combat->player[position] == NULL) return;
+			Player *player = (Player *) combat->player[position];
+			combat->player[position] = NULL;
+
+			if (player->sprite != NULL) {
+				free(player->sprite);
+				player->sprite = NULL;
+			}
+			free(player);
+			player = NULL;
+			return;
+		default:
+			printf("HOW DID THIS HAPPEN! Alongtimeagoactuallynever-\n");
+			return;
+	}
+}
 void RollInitiative(Combat *combat, int *randomValue) {
 	int i = 0;
-	int j = 0;
 	Enemy *enemy;
 	Player *player;
 
+	combat->timelineAmount = 0;
+	for (i = 0; i < 10; i++) {
+		combat->timeline[i] = NULL;
+		combat->timelineType[i] = ENTITY_NONE;
+	}
+
 	for (i = 0; i < 5; i++) {
 		if (combat->player[i] == NULL) continue;
+		combat->timeline[combat->timelineAmount] = combat->player[i];
 		player = (Player *) combat->player[i];
-		DiceRoll(DICE_D20, randomValue) + player->reflex[0];
-		j++;
+		player->initiative = DiceRoll(DICE_D20, randomValue) + player->reflex[0];
+		combat->timelineAmount++;
 		player = NULL;
 	}
 	for (i = 0; i < 5; i++) {
 		if (combat->enemy[i] == NULL) continue;
+		combat->timeline[combat->timelineAmount] = combat->enemy[i];
 		enemy = (Enemy *) combat->enemy[i];
-		DiceRoll(DICE_D20, randomValue) + enemy->reflex;
-		j++;
+		enemy->initiative = DiceRoll(DICE_D20, randomValue) + enemy->reflex;
+		combat->timelineAmount++;
 		enemy = NULL;
+	}
+
+	SortInitiative(combat->timeline, combat->timelineType, combat->timelineAmount);
+}
+void SortInitiative(void **timeline, EntityType *types, int timelineAmount) {
+	int i;
+	int j;
+	void *key;
+	EntityType keyType;
+	for (i = 1; i < timelineAmount; i++) {
+		key = timeline[i];
+		keyType = types[i];
+		j = i - 1;
+		while (j >= 0 && GetInitiative(timeline[j], types[i]) > GetInitiative(key, keyType)) {
+			timeline[j + 1] = timeline[j];
+			types[j + 1] = types[j];
+			j--;
+		}
+		timeline[j + 1] = key;
+		types[j + 1] = keyType;
+	}
+}
+int GetInitiative(void *entity, EntityType type) {
+	switch (type) {
+		case ENTITY_PLAYER:
+			return ((Player *) entity)->initiative;
+		case ENTITY_ENEMY:
+			return ((Enemy *) entity)->initiative;
+		default:
+			return -69;
 	}
 }

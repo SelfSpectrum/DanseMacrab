@@ -35,7 +35,6 @@ void *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id, int p
 	Enemy *enemy = (Enemy *) enemyInfo;
 
 	enemy->position = position;
-	enemy->type = ENTITY_ENEMY;
 	enemy->phyBonus = 0;
 	enemy->refBonus = 0;
 	enemy->lorBonus = 0;
@@ -111,7 +110,6 @@ void *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *
 	Player *player = (Player *) playerData;
 
 	player->position = position;
-	player->type = ENTITY_PLAYER;
 	player->maxStress = 3;
 	player->stress = 0;
 	player->demonTally = 0;
@@ -196,77 +194,6 @@ void *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *
 		}
 	}
 	return player;
-}
-void DamageEntity(Combat *combat, void *attacker, EntityType side, Technique *tech) {
-	int position = (side == ENTITY_PLAYER) ? ((Player *) attacker)->position : ((Enemy *) attacker)->position;
-	int i;
-	int min;
-	int max;
-	Player *player;
-	Enemy *enemy;
-
-	min = (int) Clamp(-2 + position, 0, 4);
-	max = (int) Clamp(2 + position, 0, 4);
-	for (i = min; i <= max; i++) {
-		if (side == ENTITY_ENEMY) {
-			enemy = (Enemy *) combat->enemy[i];
-			enemy->health = (int) Clamp(enemy->health - i, 0, enemy->maxHealth);
-			enemy = NULL;
-		}
-		else {
-			player = (Player *) combat->player[i];
-			player->health = (int) Clamp(player->health - i, 0, player->maxHealth);
-			player = NULL;
-		}
-	}
-}
-void KillEntity(Combat *combat, void *entity, EntityType type) {
-	if (type == ENTITY_ENEMY) {
-		Enemy *enemy = (Enemy *) entity;
-		UnloadEntity(type, combat, enemy->position);
-		enemy = NULL;
-	}
-	else {
-		Player *player = (Player *) entity;
-		UnloadEntity(type, combat, player->position);
-		player = NULL;
-	}
-}
-void DrawCombat(Combat *combat, SafeTexture *textures, Color color, bool shader, bool draw) {
-	if (draw == false) return;
-	int i;
-	Enemy *enemy;
-	Player *player;
-	Sprite *sprite;
-	for (i = 0; i < 5; i++) {
-		if (combat->enemy[i] != NULL) {
-			enemy = (Enemy *) combat->enemy[i];
-			sprite = enemy->sprite;
-			if (shader != sprite->shader) continue;
-			DrawTexturePro(textures[sprite->textureIndex].tex,
-				       sprite->origin,
-				       sprite->dest,
-				       (Vector2) { -48 * enemy->position - 48, -36 },
-				       sprite->rotation,
-				       color);
-			enemy = NULL;
-			sprite = NULL;
-		}
-		if (combat->player[i] != NULL) {
-			player = (Player *) combat->player[i];
-			sprite = player->sprite;
-			if (shader != sprite->shader) continue;
-			DrawTexturePro(textures[sprite->textureIndex].tex,
-				       sprite->origin,
-				       sprite->dest,
-				       (Vector2) { -48 * player->position - 48, -83 },
-				       sprite->rotation,
-				       color);
-			player = NULL;
-			sprite = NULL;
-		}
-	}
-	DrawRectangle(0, 130, 360, 1, color);
 }
 Technique LoadTech(FILE *techData, int id) {
 	Technique tech;
@@ -357,6 +284,45 @@ Technique LoadTech(FILE *techData, int id) {
 		}
 	}
 	return tech;
+}
+void PlayerLoadTech() {
+}
+void UseTech(Combat *combat, void *entity, EntityType side, Technique *tech) {
+	int position;
+	int i;
+	int min;
+	int max;
+
+	if (type == ENTITY_PLAYER) {
+		Player *player = (Player *) entity;
+		position = player->position;
+		min = (int) Clamp(-2 + position, 0, 4);
+		max = (int) Clamp(2 + position, 0, 4);
+		for (i = min; i <= max; i++) {
+			if (tech->targetEnemy[i]) {
+			}
+			if (tech->targetAlly[i]) {
+			}
+		}
+	}
+	else {
+		Enemy *enemy = (Enemy *) entity;
+		position = enemy->position;
+		min = (int) Clamp(-2 + position, 0, 4);
+		max = (int) Clamp(2 + position, 0, 4);
+	}
+	for (i = min; i <= max; i++) {
+		if (side == ENTITY_ENEMY) {
+			enemy = (Enemy *) combat->enemy[i];
+			enemy->health = (int) Clamp(enemy->health - i, 0, enemy->maxHealth);
+			enemy = NULL;
+		}
+		else {
+			player = (Player *) combat->player[i];
+			player->health = (int) Clamp(player->health - i, 0, player->maxHealth);
+			player = NULL;
+		}
+	}
 }
 Equip LoadWeapon(FILE *weaponData, int id) {
 	Equip weapon;
@@ -674,6 +640,42 @@ void Random(int *randomValue) {
 	*randomValue = rand();
 }
 
+void DrawCombat(Combat *combat, SafeTexture *textures, Color color, bool shader, bool draw) {
+	if (draw == false) return;
+	int i;
+	Enemy *enemy;
+	Player *player;
+	Sprite *sprite;
+	for (i = 0; i < 5; i++) {
+		if (combat->enemy[i] != NULL) {
+			enemy = (Enemy *) combat->enemy[i];
+			sprite = enemy->sprite;
+			if (shader != sprite->shader) continue;
+			DrawTexturePro(textures[sprite->textureIndex].tex,
+				       sprite->origin,
+				       sprite->dest,
+				       (Vector2) { -48 * enemy->position - 48, -36 },
+				       sprite->rotation,
+				       color);
+			enemy = NULL;
+			sprite = NULL;
+		}
+		if (combat->player[i] != NULL) {
+			player = (Player *) combat->player[i];
+			sprite = player->sprite;
+			if (shader != sprite->shader) continue;
+			DrawTexturePro(textures[sprite->textureIndex].tex,
+				       sprite->origin,
+				       sprite->dest,
+				       (Vector2) { -48 * player->position - 48, -83 },
+				       sprite->rotation,
+				       color);
+			player = NULL;
+			sprite = NULL;
+		}
+	}
+	DrawRectangle(0, 130, 360, 1, color);
+}
 void UnloadCombat(Combat *combat) {
 	int i;
 	for (i = 0; i < 5; i++) {
@@ -713,6 +715,22 @@ void UnloadEntity(EntityType type, Combat *combat, int position) {
 		default:
 			printf("HOW DID THIS HAPPEN! Alongtimeagoactuallynever-\n");
 			return;
+	}
+}
+void MoveEntity(Combat *combat, EntityType type, int origin, int position) {
+}
+void DamageEntity() {
+}
+void KillEntity(Combat *combat, void *entity, EntityType type) {
+	if (type == ENTITY_ENEMY) {
+		Enemy *enemy = (Enemy *) entity;
+		UnloadEntity(type, combat, enemy->position);
+		enemy = NULL;
+	}
+	else {
+		Player *player = (Player *) entity;
+		UnloadEntity(type, combat, player->position);
+		player = NULL;
 	}
 }
 void RollInitiative(Combat *combat, int *randomValue) {
@@ -781,8 +799,13 @@ void StartTurn(Combat *combat) {
 	switch (combat->timelineType[combat->timelineOrder]) {
 		case ENTITY_PLAYER:
 			Player *player = (Player *) combat->timeline[combat->timelineOrder];
+			player->major = true;
+			player->minor = true;
+			player->reaction = true;
+			player->movement = true;
 			break;
 		case ENTITY_ENEMY:
+			Enemy *enemy = (Enemy *) combat->timeline[combat->timelineOrder];
 			break;
 		default:
 			EndTurn(combat);

@@ -91,7 +91,7 @@ enum TechniqueType {
 	TECH_SUMMON = 8,
 	TECH_SORCERY = 9
 };
-//enum EffectType {	//TODO: si es que el sistema actual de tecnicas se queda chico
+//enum EffectType {	//TODO: si es que el sistema actual de tecnicas se queda chico (y lo hará)
 //};
 enum AttributeType {	// ATTR % 6 for index
 	ATTR_PHYSIQUE = 0,
@@ -120,18 +120,18 @@ enum AttributeType {	// ATTR % 6 for index
 	ATTR_PASSION = 23
 };
 enum StatusType {
-	STATUS_NONE = 0, // No effect
-	STATUS_BLEED = 1, // Take damage everytime the entity moves
-	STATUS_BLINDED = 2, // Must succeed on 12 reflex check before attacks or checks
-	STATUS_BRUISED = 3, // Take extra bludgeoning damage
-	STATUS_BURNING = 4, // 1d10 fire damage, might destroy items
-	STATUS_CONFUSED = 5, // If a tech don't hit, counts as critical fumble
-	STATUS_CURSED = 6, //
-	STATUS_DEAFENED = 7, // Can't communicate
-	STATUS_DEATH = 8, // Die after some turns
-	STATUS_DEVOURED = 9, // 1d10 acid damage, deal stress
-	STATUS_DROWNING = 10, // Deal stress
-	STATUS_GRAPPLED = 11, // Can't move or dodge
+	STATUS_NONE = 0, // Sin efecto
+	STATUS_BLEED = 1, // Recibe daño cada vez que una entidad se mueve
+	STATUS_BLINDED = 2, // Debe superar un 12 en reflejos antes de atacar o hacer pruebas
+	STATUS_BRUISED = 3, // Recibe daño contundente adicional
+	STATUS_BURNING = 4, // Recibe 1d10 de daño de fuego, puede destruir objetos
+	STATUS_CONFUSED = 5, // Si un ataque no impacta, entonces cuenta como un fallo crítico
+	STATUS_CURSED = 6, // No puede recibir sanación natural
+	STATUS_DEAFENED = 7, // No se puede beneficiar de las canciones
+	STATUS_DEATH = 8, // Muere luego de algunos turnos
+	STATUS_DEVOURED = 9, // Recibe 1d10 de daño de ácido, puede dar estrés
+	STATUS_DROWNING = 10, // Recibe 1d10 de daño de frío, puede dar estrés
+	STATUS_GRAPPLED = 11, // No puede moverse o esquivar
 	STATUS_HORRIFIED = 12, // Can't be in front of an enemy
 	STATUS_INVISIBLE = 13, // Must succeed a 12 perception check before roll or attack
 	STATUS_LINKED = 14, // Two or more creatures link, what happens to one, happens to all
@@ -349,9 +349,7 @@ union Equip {
 	Charm charm;
 };
 struct Player {
-	EntityType type;
 	int id;
-	int position;
 	// INFO: VITALES
 	DiceType hitDice;
 	int maxHealth;
@@ -389,12 +387,16 @@ struct Player {
 	Technique equipedTech[10];
 	int equipedTechAmount;
 	Sprite *sprite;
+	// INFO: ESPECIFICO DEL COMBATE
+	int position;
 	int initiative;
+	bool major;
+	bool minor;
+	bool reaction;
+	bool movement;
 };
 struct Enemy {
-	EntityType type;
 	int id;
-	int position;
 	int size;
 	// INFO: VITALES
 	int maxHealth;
@@ -421,6 +423,8 @@ struct Enemy {
 	int techAmount;
 	int multiattack;
 	Sprite *sprite;
+	// INFO: ESPECIFICO DEL COMBATE
+	int position;
 	int initiative;
 };
 struct Combat {
@@ -441,13 +445,11 @@ void LoadEnemiesFile(FILE **file, const char *enemySheet);
 void LoadEnemiesOnCombat(FILE *file, FILE *enemyData, FILE *spriteData, FILE *techData, Combat *combat, int id);
 void *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id, int position);
 void *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id, int position);
-void RollInitiative(Combat *combat, int *randomValue);
-void MoveEntity(Combat *combat, int position);
-void DamageEntity(Combat *combat, void *attacker, EntityType type, Technique *tech);
-void KillEntity(Combat *combat, void *entity, EntityType type); //TODO
+void UnloadEntity(EntityType type, Combat *combat, int position);
 // Techniques
 Technique LoadTech(FILE *techData, int id);
 void PlayerLoadTech(FILE *techData, void *player); //TODO
+void UseTech();
 // Equipment
 Equip LoadWeapon(FILE *weaponData, int id);
 Equip LoadArmor(FILE *armorData, int id);
@@ -466,9 +468,12 @@ void RollInitiative(Combat *combat, int *randomValue);
 void SortInitiative(void **timeline, EntityType *types, int timelineAmount);
 int GetInitiative(void *entity, EntityType type);
 void UnloadCombat(Combat *combat);
-void UnloadEntity(EntityType type, Combat *combat, int position);
 void DrawCombat(Combat *combat, SafeTexture *textures, Color color, bool shader, bool draw);
 void StartCombat(FILE *file, FILE *enemyData, FILE *spriteData, FILE *techData, int id, Combat *combat, int *randomValue);
+void MoveEntity(Combat *combat, int position);
+void DamageEntity(Combat *combat, void *attacker, EntityType type, Technique *tech);
+void KillEntity(Combat *combat, void *entity, EntityType type); //TODO
 void StartTurn(Combat *combat);
+void EndTurn(Combat *combat);
 
 #endif		// ENTITY_H

@@ -223,6 +223,7 @@ void DamageEntity(Combat *combat, void *attacker, EntityType side, Technique *te
 void KillEntity(Combat *combat, void *entity, EntityType type) {
 	if (type == ENTITY_ENEMY) {
 		Enemy *enemy = (Enemy *) entity;
+		UnloadEntity(type, combat, enemy->position);
 		enemy = NULL;
 	}
 	else {
@@ -588,6 +589,7 @@ void SetFeature(FILE *weaponData, FILE *charmFile, FILE *techData, void *playerD
 			break;
 		case FEAT_LUXURIOUSGEM:
 			player->charm = LoadCharm(charmFile, 1);
+			break;
 		default:
 			break;
 	}
@@ -770,4 +772,22 @@ int GetInitiative(void *entity, EntityType type) {
 		default:
 			return -69;
 	}
+}
+void StartCombat(FILE *file, FILE *enemyData, FILE *spriteData, FILE *techData, int id, Combat *combat, int *randomValue);
+	LoadEnemiesOnCombat(file, enemyData, spriteData, techData, combat, id);
+	RollInitiative(combat, randomValue);
+}
+void StartTurn(Combat *combat) {
+	switch (combat->timelineType[combat->timelineOrder]) {
+		case ENTITY_PLAYER:
+			Player *player = (Player *) combat->timeline[combat->timelineOrder];
+			break;
+		case ENTITY_ENEMY:
+			break;
+		default:
+			EndTurn(combat);
+	}
+}
+void EndTurn(Combat *combat) {
+	combat->timelineOrder = (combat->timelineOrder + 1) % combat->timelineAmount;
 }

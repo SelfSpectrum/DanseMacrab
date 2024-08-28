@@ -379,9 +379,9 @@ struct Player {
 	Equip weapon;
 	Equip armor;
 	Equip charm;
-	DamageType weakness;		// Weakness against certain damage types, x2 damage
-	DamageType resistance;		// Resistance against certain damage types, x0.5 damage
-	StatusType inmunity;		// Inmunity against status effects
+	DamageType weakness; // Debilidad ante ciertos tipos de daño, x2 de daño
+	DamageType resistance; // Resistencia ante ciertos tipos de daño, x0.5 de daño
+	StatusType inmunity; // Inmunidades ante efectos de estado
 	Feature features[16];
 	int featuresAmount;
 	Technique tech[20];
@@ -414,9 +414,9 @@ struct Enemy {
 	int name;
 	int description;
 	EnemyType enemy;
-	DamageType weakness[2];		// Weakness against certain damage types, x2 damage
-	DamageType resistances[2];	// Resistance against certain damage types, x0.5 damage
-	StatusType inmunities[2];	// Inmunity against status effects
+	DamageType weakness[2]; // Debilidad ante ciertos tipos de daño, x2 de daño
+	DamageType resistances[2]; // Resistencia ante ciertos tipos de daño, x0.5 de daño
+	StatusType inmunities[2]; // Inmunidades ante efectos de estado
 	Technique tech[10];
 	int techAmount;
 	int multiattack;
@@ -429,6 +429,7 @@ struct Combat {
 	void *timeline[10];
 	EntityType timelineType[10];
 	int timelineAmount;
+	int timelineOrder;
 	Equip inventory[20];
 	int inventoryAmount;
 	int turn;
@@ -467,6 +468,7 @@ int GetInitiative(void *entity, EntityType type);
 void UnloadCombat(Combat *combat);
 void UnloadEntity(EntityType type, Combat *combat, int position);
 void DrawCombat(Combat *combat, SafeTexture *textures, Color color, bool shader, bool draw);
-void StartTurn();
+void StartCombat(FILE *file, FILE *enemyData, FILE *spriteData, FILE *techData, int id, Combat *combat, int *randomValue);
+void StartTurn(Combat *combat);
 
 #endif		// ENTITY_H

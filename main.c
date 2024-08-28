@@ -632,12 +632,12 @@ void SetState(StateData *state, GameState newState) {
 			state->sounds[3].init = true;
 
 			state->combat = (Combat) { { NULL }, { NULL }, // Enemigos y personajes jugables
-						   { NULL }, { ENTITY_NONE }, 0, // Línea de tiempo
+						   { NULL }, { ENTITY_NONE }, 0, 0, // Línea de tiempo
 						   { 0 }, 0, 0 }; // Inventario y turnos
 			state->combat.player[1] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 2, 1);
 			state->combat.player[2] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 1, 2);
 			state->combat.player[3] = LoadPlayer(state->characterData, state->spriteData, state->weaponData, state->armorData, state->charmData, state->techData, 3, 3);
-			LoadEnemiesOnCombat(state->combatData, state->enemyData, state->spriteData, state->techData, &state->combat, 1);
+			StartCombat(state->combatData, state->enemyData, state->spriteData, state->techData, 1, &state->combat, &state->randomValue);
 
 			if (state->debug) SetState(state, STATE_DEBUG);
 			else {

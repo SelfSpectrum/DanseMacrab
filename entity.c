@@ -287,11 +287,12 @@ Technique LoadTech(FILE *techData, int id) {
 }
 void PlayerLoadTech() {
 }
-void UseTech(Combat *combat, void *entity, EntityType side, Technique *tech) {
+void UseTech(Combat *combat, void *entity, EntityType side, Technique *tech, int *randomValue) {
 	int position;
 	int i;
 	int min;
 	int max;
+	int damage = DiceRoll(tech->roll, randomValue);
 
 	if (type == ENTITY_PLAYER) {
 		Player *player = (Player *) entity;
@@ -299,9 +300,11 @@ void UseTech(Combat *combat, void *entity, EntityType side, Technique *tech) {
 		min = (int) Clamp(-2 + position, 0, 4);
 		max = (int) Clamp(2 + position, 0, 4);
 		for (i = min; i <= max; i++) {
-			if (tech->targetEnemy[i]) {
+			if (tech->targetEnemy[2 - position + i]) {
+				DamageEntity(combat->enemy[i], ENTITY_ENEMY, damage, tech->type);
 			}
-			if (tech->targetAlly[i]) {
+			if (tech->targetAlly[2 - position + i]) {
+				DamageEntity(combat->player[i], ENTITY_PLAYER, damage, tech->type);
 			}
 		}
 	}
@@ -310,17 +313,13 @@ void UseTech(Combat *combat, void *entity, EntityType side, Technique *tech) {
 		position = enemy->position;
 		min = (int) Clamp(-2 + position, 0, 4);
 		max = (int) Clamp(2 + position, 0, 4);
-	}
-	for (i = min; i <= max; i++) {
-		if (side == ENTITY_ENEMY) {
-			enemy = (Enemy *) combat->enemy[i];
-			enemy->health = (int) Clamp(enemy->health - i, 0, enemy->maxHealth);
-			enemy = NULL;
-		}
-		else {
-			player = (Player *) combat->player[i];
-			player->health = (int) Clamp(player->health - i, 0, player->maxHealth);
-			player = NULL;
+		for (i = min; i <= max; i++) {
+			if (tech->targetEnemy[2 - position + i]) {
+				DamageEntity(combat->player[i], ENTITY_PLAYER, damage, tech->type);
+			}
+			if (tech->targetAlly[2 - position + i]) {
+				DamageEntity(combat->enemy[i], ENTITY_ENEMY, damage, tech->type);
+			}
 		}
 	}
 }
@@ -719,7 +718,17 @@ void UnloadEntity(EntityType type, Combat *combat, int position) {
 }
 void MoveEntity(Combat *combat, EntityType type, int origin, int position) {
 }
-void DamageEntity() {
+void DamageEntity(void *entity, EntityType type, Technique *tech, int damage) {
+	if (type == ENTITY_PLAYER) {
+		Player *player = (Player *) entity;
+		player->health = (int) Clamp(player->health, 0, player->maxHealth);
+		player = NULL;
+	}
+	else {
+		Enemy *enemy = (Enemy *) combat->enemy[i];
+		enemy->health = (int) Clamp(enemy->health, 0, enemy->maxHealth);
+		enemy = NULL;
+	}
 }
 void KillEntity(Combat *combat, void *entity, EntityType type) {
 	if (type == ENTITY_ENEMY) {

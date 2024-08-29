@@ -263,6 +263,7 @@ struct Technique {
 	int costHP;
 	int costStress;
 	// Value pool, could be used for damage or healing
+	DamageType type;
 	DiceType diceSide;
 	int diceAmount;
 	bool applyBonuses;
@@ -449,7 +450,7 @@ void UnloadEntity(EntityType type, Combat *combat, int position);
 // Techniques
 Technique LoadTech(FILE *techData, int id);
 void PlayerLoadTech(FILE *techData, void *player); //TODO
-void UseTech();
+void UseTech(Combat *combat, void *entity, EntityType side, Technique *tech, int *randomValue);
 // Equipment
 Equip LoadWeapon(FILE *weaponData, int id);
 Equip LoadArmor(FILE *armorData, int id);
@@ -471,8 +472,8 @@ void UnloadCombat(Combat *combat);
 void DrawCombat(Combat *combat, SafeTexture *textures, Color color, bool shader, bool draw);
 void StartCombat(FILE *file, FILE *enemyData, FILE *spriteData, FILE *techData, int id, Combat *combat, int *randomValue);
 void MoveEntity(Combat *combat, int position);
-void DamageEntity(Combat *combat, void *attacker, EntityType type, Technique *tech);
-void KillEntity(Combat *combat, void *entity, EntityType type); //TODO
+void DamageEntity(void *entity, EntityType type, int damage, DamageType damageType);
+void KillEntity(Combat *combat, void *entity, EntityType type);
 void StartTurn(Combat *combat);
 void EndTurn(Combat *combat);
 

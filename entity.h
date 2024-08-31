@@ -132,20 +132,20 @@ enum StatusType {
 	STATUS_DEVOURED = 9, // Recibe 1d10 de daño de ácido, puede dar estrés
 	STATUS_DROWNING = 10, // Recibe 1d10 de daño de frío, puede dar estrés
 	STATUS_GRAPPLED = 11, // No puede moverse o esquivar
-	STATUS_HORRIFIED = 12, // Can't be in front of an enemy
-	STATUS_INVISIBLE = 13, // Must succeed a 12 perception check before roll or attack
-	STATUS_LINKED = 14, // Two or more creatures link, what happens to one, happens to all
-	STATUS_MOURNFUL = 15, // Can't do anything
-	STATUS_OILED = 16, // Recieve extra fire damage
-	STATUS_PARALYZED = 17, // Can't move or take actions
-	STATUS_PASSENGER = 18, // Carry an entity
-	STATUS_POISONED = 19, // Disadvantage on all rolls
-	STATUS_POSSESSION = 20, // Another creature controls actions
-	STATUS_PRONE = 21, // Melee are crits
-	STATUS_RAGE = 22, // Attack the closest creature
-	STATUS_SCARRED = 23, // Recieve extra slashing damage
-	STATUS_SLEEPING = 24, // Attacks autohit
-	STATUS_SUFFOCATING = 25 // Deal stress
+	STATUS_HORRIFIED = 12, // No puede estar frente a un enemigo
+	STATUS_INVISIBLE = 13, // Debe superar un 12 en una prueba de percepción antes de realizar tiradas o ataques
+	STATUS_LINKED = 14, // Dos o más criaturas enlazadas, lo que le ocurra a una, le ocurre a todas
+	STATUS_MOURNFUL = 15, // No puede hacer nada
+	STATUS_OILED = 16, // Recibe daño de fuego adicional
+	STATUS_PARALYZED = 17, // No se puede mover o tomar acciones
+	STATUS_PASSENGER = 18, // Carga con una entidad
+	STATUS_POISONED = 19, // Desventaja en todas las tiradas
+	STATUS_POSSESSION = 20, // Otra criatura toma control sobre las acciones
+	STATUS_PRONE = 21, // Los ataques cuerpo a cuerpo contra esta entidad son críticos automáticos
+	STATUS_RAGE = 22, // Durante sus turnos, sólo puede utilizar ataques básicos
+	STATUS_SCARRED = 23, // Recibe daño cortante adicional
+	STATUS_SLEEPING = 24, // Los ataques le impactan de manera automática, no puede tomar acciones
+	STATUS_SUFFOCATING = 25 // Recibe estrés
 };
 enum EconomyType {
 	ECO_ACTION = 0,
@@ -251,30 +251,30 @@ enum Feature {
 };
 struct Technique {
 	int id;
-	int name;
-	int description;
-	// For when rolling and stuff (?
+	int name; // Nombre de la técnica (es un id para cargar de la BD)
+	int description; // Descripción (idem ac <<name>>)
+	// Para cuando se deben hacer tiradas y cosas (?
 	EconomyType economy;
-	DiceType roll;
+	DiceType roll; // Para saber si esto será una salvación o una tirada de ataque (o algo más exótico)
 	TechniqueType tech;
-	AttributeType attr;		// Used for bonusses on the roll, save or difficulty
-	// Costs, money and HP are the commonest
+	AttributeType attr; // Utilizado para aplicar bonos a la tirada, salvada o dificultad
+	// Costes. Dinero y PS son lo más común
 	int costMoney;
 	int costHP;
 	int costStress;
-	// Value pool, could be used for damage or healing
-	DamageType type;
-	DiceType diceSide;
-	int diceAmount;
-	bool applyBonuses;
-	int flatBonus;
-	bool ignoreArmor;		// If the damage should ignore armor, or if healing should heal HP
-	StatusType status;		// Apply status effect to apply
+	// Montón de valores, utilizado para realizar curaciones o aplicar daños
+	DamageType type; // Esto puede determinar el elemento del daño o la naturaleza de la curación
+	DiceType diceSide; // Cantidad de caras que puede tener el dado con el que se aplique el daño o sanación (D4, D6, D8, D10, D12, D20, D100)
+	int diceAmount; // Incrementa el número de tiradas que se realiza con los dados previamente mencionados
+	bool applyBonuses; // Si es que la técnica puede recibir bonos de atributos o bonos planos
+	int flatBonus; // Un bono plano al ataque o sanación
+	bool ignoreArmor; // Si es que el daño debe ignorar armadura, o si la sanación debe sanar PS
+	StatusType status; // Para aplicar efectos de estado
 	bool targetEnemy[5];
 	bool targetAlly[5];
-	// Spawn entity?
+	// ¿Generar entidad?
 	int spawnId;
-	// Modify stats
+	// Modificar estadísticas
 	int physique;
 	int reflex;
 	int lore;
@@ -283,13 +283,13 @@ struct Technique {
 	float damageMultiplayer;
 	float hurtMultiplayer;
 	float healMultiplayer;
-	// Graphical stuff?
+	// ¿Cosas gráficas?
 	int spriteId;
 	int animationId;
 };
 struct Weapon {
 	EquipType type;
-	// Important stuff, what really makes the weapon unique
+	// Cosas importantes, lo que realmente hace que un arma sea única
 	int name;
 	int description;
 	int cost;
@@ -332,7 +332,7 @@ struct Charm {
 	int health;
 	int armor;
 	int stress;
-	StatusType inmunity;		// To what status effect the charm grants inmunity
+	StatusType inmunity; // A qué efectos de estado el amuleto otorga inmunidad
 	int tech;
 	// Stat modifier
 	int physique;
@@ -340,7 +340,7 @@ struct Charm {
 	int lore;
 	int charisma;
 	int hurtMultiplayer;
-	bool canUnequip;		// Useful for cursed charms
+	bool canUnequip; // Util para amuletos malditos
 	// Graphics
 	int spriteId;
 };
@@ -360,10 +360,10 @@ struct Player {
 	int demonTally;
 	int accumulatedDamage;
 	// INFO: ATRIBUTOS
-	int physique[6];		// Physique + Athletics, Constitution, Medicine, Melee, Vibes
-	int reflex[6];			// Reflex + Accuracy, Acrobatics, Mischief, Perception, Touch
-	int lore[6];			// Lore + Arcanum, Beasts, Dream, Dungeons, Nature
-	int charisma[6];		// Charisma + Anima, Authority, Drama, Kinship, Passion
+	int physique[6]; // Physique + Athletics, Constitution, Medicine, Melee, Vibes
+	int reflex[6]; // Reflex + Accuracy, Acrobatics, Mischief, Perception, Touch
+	int lore[6]; // Lore + Arcanum, Beasts, Dream, Dungeons, Nature
+	int charisma[6]; // Charisma + Anima, Authority, Drama, Kinship, Passion
 	int phyBonus;
 	int refBonus;
 	int lorBonus;

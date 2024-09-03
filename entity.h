@@ -3,12 +3,16 @@
 
 #include "graphic.h"
 
-typedef struct Player Player;
+typedef struct Player Player; //
 typedef struct Enemy Enemy;
 typedef struct Weapon Weapon;
 typedef struct Armor Armor;
 typedef struct Charm Charm;
-//typedef struct Effect Effect;
+typedef struct Effect Effect; // Esqueleto para los efectos
+typedef struct FXSet FXSet;
+typedef struct FXDmg FXDmg; // Efecto de daño, el encargado de dañar entidades
+typedef struct FXSpawn FXSpawn; // Para generar entidades en el campo
+typedef struct FXStatus FXStatus;
 typedef struct Technique Technique;
 typedef struct Combat Combat;
 typedef enum EntityType EntityType;
@@ -17,7 +21,7 @@ typedef enum EnemyType EnemyType;
 typedef enum EquipType EquipType;
 typedef enum DiceType DiceType;
 typedef enum TechniqueType TechniqueType;
-//typedef enum EffectType EffectType;
+typedef enum EffectType EffectType;
 typedef enum AttributeType AttributeType;
 typedef enum EconomyType EconomyType;
 typedef enum StatusType StatusType;
@@ -91,8 +95,13 @@ enum TechniqueType {
 	TECH_SUMMON = 8,
 	TECH_SORCERY = 9
 };
-//enum EffectType {	//TODO: si es que el sistema actual de tecnicas se queda chico (y lo hará)
-//};
+enum EffectType { // Diferentes efectos para que las técnicas sean más completas
+	EFFECT_NONE = 0;
+	EFFECT_SET = 1,
+	EFFECT_DMG = 2,
+	EFFECT_STATUS = 3,
+	EFFECT_SPAWN = 4
+};
 enum AttributeType {	// ATTR % 6 for index
 	ATTR_PHYSIQUE = 0,
 	ATTR_ATHLETICS = 1,
@@ -154,59 +163,59 @@ enum EconomyType {
 	ECO_OFF = 3
 };
 enum Feature {
-	// Berserk
+	// Berserker
 	FEAT_SELFSTEEM = 0,
 	FEAT_BEASTHORNS = 1,
 	FEAT_EMOTIONSCENT = 2,
 	FEAT_DARKVISION = 3,
-	// Blue Mage
+	// Mago Azul
 	FEAT_TOME = 16,
 	FEAT_DECODER = 17,
 	FEAT_DETECTMAGIC = 18,
 	FEAT_PATHFINDER = 19,
-	// Dragoon
+	// Dragón
 	FEAT_DRAGONSPEECH = 32,
 	FEAT_DRACONIC = 33,
 	FEAT_SNAKEBLOOD = 34,
 	FEAT_DETECTSUPERNATURAL = 35,
-	// Fang
+	// Colmillo
 	FEAT_STRESSRITUAL = 48,
 	FEAT_STRESSMARKS = 49,
 	FEAT_SCARRED = 50,
 	FEAT_SCARSOFEXPERIENCE = 51,
-	// Moon Child
+	// Hijo de la Luna
 	FEAT_LUCKY = 64,
 	FEAT_FAVOROFLUCK = 65,
 	FEAT_DETECTDANGER = 66,
 	FEAT_SECRETDOOR = 67,
-	// Red Mage
+	// Mago Rojo
 	FEAT_BLODDYLEARNING = 80,
 	FEAT_LIPREADING = 81,
 	FEAT_LIFEABSORTION = 82,
 	FEAT_BLOODUNLEASHED = 83,
-	// Songbird Maiden
+	// Doncella Songbird
 	FEAT_SONGS = 96,
 	FEAT_EARTHLYSONG = 97,
 	FEAT_BLESS = 98,
 	FEAT_FAREWELL = 99,
-	// Sorcerer
+	// Hechicero
 	FEAT_WISH = 112,
-	// Volfe Knight
+	// Caballero de Volfe
 	FEAT_WOLFCOMPANION = 128,
 	FEAT_WOLFSENSE = 129,
 	FEAT_DREAMWALKER = 130,
 	FEAT_RANGEATTACKER = 131,
-	// Unseelie
+	// Ocultista
 	FEAT_ANIMALSHAPE = 144,
 	FEAT_TRUENAME = 145,
 	FEAT_ANIMALFEELING = 146,
 	FEAT_DRUIDSPEECH = 147,
-	// Black Dog
+	// Perro Negro
 	FEAT_BLACKDOG = 160,
 	FEAT_UNDYING = 161,
 	FEAT_SHADOWFREEDOM = 162,
 	FEAT_SHADOWTELEPORT = 163,
-	// Black Mage
+	// Mago Azul
 	FEAT_DEMONHANDS = 176,
 	FEAT_LABERYNTHIASPEECH = 177,
 	FEAT_FORKEDTONGE = 178,
@@ -216,38 +225,52 @@ enum Feature {
 	FEAT_HELPBOND = 193,
 	FEAT_FREEFLY = 194,
 	FEAT_BOOKOFOOL = 195,
-	// Guardian Nail
+	// Guardian del Clavo
 	FEAT_PASSIONNAIL = 208,
 	FEAT_SPECTRALHAND = 209,
 	FEAT_PRINCESSLAMENT = 210,
 	FEAT_DEMONHUNTER = 211,
-	// Tiefling
+	// Tiflin
 	FEAT_DEMONHEARING = 224,
 	FEAT_TAIL = 225,
 	FEAT_DEMONVIAL = 226,
 	FEAT_BORNFORMISCHIEF = 227,
-	// Necromancer
+	// Nigromante
 	FEAT_RAISESKELETON = 240,
 	FEAT_MINIONCONTROL = 241,
 	FEAT_SKELLYDOMINION = 242,
 	FEAT_UNDEADHUNTER = 243,
-	// Princess
+	// Princesa
 	FEAT_ANIMALCOMUNICATION = 256,
 	FEAT_ROYALWEAPON = 257,
 	FEAT_LOYALSQUIRE = 258,
 	FEAT_LUXURIOUSGEM = 259,
-	// Experiment X09
+	// Experimento X09
 	FEAT_PSYCHIC = 272,
-	// Jinx
+	// Gafe
 	FEAT_JINXIMP = 288,
 	FEAT_BANE = 289,
 	FEAT_BANEFULHEALTH = 290,
 	FEAT_JINXEDKNOWLEDGE = 291,
-	// White Mage
+	// Mago Blanco
 	FEAT_GOREARTS = 304,
 	FEAT_HEARTBEAT = 305,
 	FEAT_HEALTHYINSIDES = 306,
 	FEAT_DESPERATESTRIKES = 307
+};
+struct Effect {
+	void *fx;
+	EffectType type;
+};
+struct FXSet {
+	Effect fxs[8];
+};
+struct FXDmg {
+
+};
+struct FXSpawn {
+};
+struct FXStatus {
 };
 struct Technique {
 	int id;

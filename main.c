@@ -139,15 +139,15 @@ int main() {
 	Rectangle sourceRec = { 0.0f, 0.0f, (float) target.texture.width, - (float) target.texture.height };
 	Rectangle destRec = { -virtualRatio, -virtualRatio , screenWidth + (virtualRatio * 2), screenHeight + (virtualRatio * 2) };
 	Vector2 origin = { 0.0f, 0.0f };
-	SetTargetFPS(60);// INFO: Set our game to run at 60 frames-per-second
+	SetTargetFPS(60);// INFO: Establece al juego para que corra a 60 FPS
 
 	//-------------------------------------------------------------
 	// Game Inputs and State
 	//-------------------------------------------------------------
 	
-	StateData state; // Contains the current state of the game
+	StateData state; // Contiene el estado actual del juego
 
-	SetExitKey(KEY_NULL); // Disable KEY_ESCAPE to close window, X-button still works
+	SetExitKey(KEY_NULL); // Desabilita la el cerrado del juego con la tecla ESC, el boton X aún funciona
 
 	Shader shader = LoadShader(0, "contour.fs");
 
@@ -309,7 +309,7 @@ int main() {
 	return 0;
 }
 
-void PlaySecSound(StateData *state, int id) {
+void PlaySecSound(StateData *state, int id) { // INFO: Para permitir sonidos de manera secuencial, sin que se interrumpan entre ellos
 	id = id % SOUND_SIZE;
 	if (state->sfxAlias[state->sfxPosition].init)
 		UnloadSoundAlias(state->sfxAlias[state->sfxPosition].sound);
@@ -717,7 +717,7 @@ void SavePrefs(PlayerPref prefs) {
 	SaveFileText("PlayerPrefs.data", buffer);
 }
 PlayerPref LoadPrefs() {
-	PlayerPref prefs = { true, "AAA", 0, 0.0f, 0.0f, 0.0f, 5 }; // Preferencias por defecto
+	PlayerPref prefs = { true, "Survivor", 0, 0.0f, 0.0f, 0.0f, 5 }; // Preferencias por defecto
 	if (!FileExists("PlayerPrefs.data")) {
 		printf("INFO: PREFS: Prefs file does not exist, creating one.\n");
 		SavePrefs(prefs);

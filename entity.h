@@ -8,12 +8,14 @@ typedef struct Enemy Enemy;
 typedef struct Weapon Weapon;
 typedef struct Armor Armor;
 typedef struct Charm Charm;
+
 typedef struct Effect Effect; // Esqueleto para los efectos
 typedef struct FXSet FXSet;
 typedef struct FXDmg FXDmg; // Efecto de daño, el encargado de dañar entidades
 typedef struct FXSpawn FXSpawn; // Para generar entidades en el campo
 typedef struct FXStatus FXStatus;
 typedef struct Technique Technique;
+
 typedef struct Combat Combat;
 typedef enum EntityType EntityType;
 typedef enum DamageType DamageType;
@@ -266,11 +268,35 @@ struct FXSet {
 	Effect fxs[8];
 };
 struct FXDmg {
-
+	int id;
+	DamageType type; // Esto puede determinar el elemento del daño o la naturaleza de la curación
+	DiceType diceSide; // Cantidad de caras que puede tener el dado con el que se aplique el daño o sanación (D4, D6, D8, D10, D12, D20, D100)
+	int diceAmount; // Incrementa el número de tiradas que se realiza con los dados previamente mencionados
+	bool applyBonuses; // Si es que la técnica puede recibir bonos de atributos o bonos planos
+	int flatBonus; // Un bono plano al ataque o sanación
+	bool ignoreArmor; // Si es que el daño debe ignorar armadura, o si la sanación debe sanar PS
+	float healAmount;
+	int animId;
 };
 struct FXSpawn {
+	int id;
+	int entity;
+	int amount;
+	int animId;
 };
 struct FXStatus {
+	int id;
+	StatusType status;
+	int modPhy;
+	int modRef;
+	int modLor;
+	int modCha;
+	int modRoll;
+	float multDmg;
+	float multHurt;
+	float multHeal;
+	int duration;
+	int animId;
 };
 struct Technique {
 	int id;
@@ -286,29 +312,10 @@ struct Technique {
 	int costHP;
 	int costStress;
 	// Montón de valores, utilizado para realizar curaciones o aplicar daños
-	DamageType type; // Esto puede determinar el elemento del daño o la naturaleza de la curación
-	DiceType diceSide; // Cantidad de caras que puede tener el dado con el que se aplique el daño o sanación (D4, D6, D8, D10, D12, D20, D100)
-	int diceAmount; // Incrementa el número de tiradas que se realiza con los dados previamente mencionados
-	bool applyBonuses; // Si es que la técnica puede recibir bonos de atributos o bonos planos
-	int flatBonus; // Un bono plano al ataque o sanación
-	bool ignoreArmor; // Si es que el daño debe ignorar armadura, o si la sanación debe sanar PS
-	StatusType status; // Para aplicar efectos de estado
-	bool targetEnemy[5];
-	bool targetAlly[5];
-	// ¿Generar entidad?
-	int spawnId;
-	// Modificar estadísticas
-	int physique;
-	int reflex;
-	int lore;
-	int charisma;
-	int rollBonus;
-	float damageMultiplayer;
-	float hurtMultiplayer;
-	float healMultiplayer;
+	int targetEnemy[5];
+	int targetAlly[5];
 	// ¿Cosas gráficas?
 	int spriteId;
-	int animationId;
 };
 struct Weapon {
 	EquipType type;
@@ -471,9 +478,15 @@ void *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id, int p
 void *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id, int position);
 void UnloadEntity(EntityType type, Combat *combat, int position);
 // Techniques
-Technique LoadTech(FILE *techData, int id);
+Technique *LoadTech(FILE *techData, int id);
 void PlayerLoadTech(FILE *techData, void *player); //TODO
 void UseTech(Combat *combat, void *entity, EntityType side, Technique *tech, int *randomValue);
+Effect LoadEffect();
+void *LoadEffectSet();
+void *LoadEffectDamage();
+void *LoadEffectStatus();
+void *LoadEffectSpawn();
+
 // Equipment
 Equip LoadWeapon(FILE *weaponData, int id);
 Equip LoadArmor(FILE *armorData, int id);

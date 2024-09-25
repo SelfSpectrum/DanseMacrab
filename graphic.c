@@ -2,11 +2,11 @@
 
 void LoadAnimationIntoRegister(FILE *animsData, FILE *spriteData, Animation **anims, int *animAmount, int ANIM_SIZE, Vector2 position, float rotation, int id) {
 	if (animsData == NULL) {
-		printf("ERROR: ANIMATION: Animation file is not open.\n");
+		TRACELOG(LOG_INFO, "ERROR: ANIMATION: Animation file is not open.\n");
 		return;
 	}
 	if (spriteData == NULL) {
-		printf("ERROR: SPRITE: Sprite file is not open.\n");
+		TRACELOG(LOG_INFO, "ERROR: SPRITE: Sprite file is not open.\n");
 		return;
 	}
 	if ((*animAmount) < ANIM_SIZE) {
@@ -20,12 +20,12 @@ void LoadAnimationIntoRegister(FILE *animsData, FILE *spriteData, Animation **an
 }
 Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 	if (spriteData == NULL) {
-		printf("ERROR: SPRITE: Sprite file is not open.\n");
+		TRACELOG(LOG_INFO, "ERROR: SPRITE: Sprite file is not open.\n");
 		return NULL;
 	}
 	Animation *anim = (Animation *) malloc(sizeof(Animation));
 	if (anim == NULL) {
-		printf("ERROR: ANIMATION: Animation load failed.\n");
+		TRACELOG(LOG_INFO, "ERROR: ANIMATION: Animation load failed.\n");
 		return NULL;
 	}
 	anim->currentFrame = 0;
@@ -47,7 +47,7 @@ Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 		if (animId == id) {
 			anim->id = animId;
 			token = strtok_r(NULL, "	", &saveptr);
-			//printf("INFO: ANIMATION: Loading %s.\n", token);
+			//TRACELOG(LOG_INFO, "INFO: ANIMATION: Loading %s.\n", token);
 			token = strtok_r(NULL, "	", &saveptr);
 			anim->repeat = (bool) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
@@ -78,25 +78,25 @@ Animable *LoadSingleAnimable(FILE *spriteData, char *animSheet) {
 	// Línea del archivo que contiene toda la información del struct
 	if (!FileExists(animSheet)) return NULL;
 
-	//printf("INFO: ANIMATION: Reading from %s.\n", animSheet);
+	//TRACELOG(LOG_INFO, "INFO: ANIMATION: Reading from %s.\n", animSheet);
 	FILE *file = fopen(animSheet, "r");
 	char line[256];
 	if (fgets(line, sizeof(line), file) != NULL) {
 		Animable *anim = ParseAnimable(spriteData, line, 0);
 		anim->data = file;
 
-		//printf("INFO: ANIMABLE: Animable loaded succesfully\n");
+		//TRACELOG(LOG_INFO, "INFO: ANIMABLE: Animable loaded succesfully\n");
 
 		return anim;
 	}
-	else printf("INFO: ANIMABLE: Error opening the animation file %s!\n", animSheet);
+	else TRACELOG(LOG_INFO, "INFO: ANIMABLE: Error opening the animation file %s!\n", animSheet);
 	return NULL;
 }
 Animable *ParseAnimable(FILE *spriteData, char *line, int deltaFrame) {
 	// Alocación dinámica, ya que muchos de los animables pueden y deben ser creados y destruidos en sucesiones rápidas, no olvidar liberar la memoria luego
 	Animable *anim = (Animable *) malloc(sizeof(Animable));	
 	if (anim == NULL) {
-		printf("ERROR: ANIMABLE: Animable load failed.\n");
+		TRACELOG(LOG_INFO, "ERROR: ANIMABLE: Animable load failed.\n");
 		return NULL;
 	}
 	int id;
@@ -248,7 +248,7 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 				anims[index]->deltaRotation = aux->deltaRotation;
 
 				free(aux);
-				//printf("INFO: ANIMABLE: Next animable loaded.\n");
+				//TRACELOG(LOG_INFO, "INFO: ANIMABLE: Next animable loaded.\n");
 			}
 		}
 		else {
@@ -261,7 +261,7 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 			anims[index] = NULL;
 
 			animation->freedAmount++;
-			//printf("INFO: ANIMABLE: Animable %d freed.\n", index);
+			//TRACELOG(LOG_INFO, "INFO: ANIMABLE: Animable %d freed.\n", index);
 		}
 	}
 }
@@ -313,7 +313,7 @@ void UnloadAnimationRegister(Animation **anims, int *animAmount) {
 		//for (j = 0; j < 8; j++) printf("%p\n", anims[j]);
 		UnloadSingleAnimationFromRegister(anims, animAmount, 0);
 	}
-	printf("INFO: ANIMATION: Animable array data unloaded.\n");
+	TRACELOG(LOG_INFO, "INFO: ANIMATION: Animable array data unloaded.\n");
 }
 void UnloadSingleAnimationFromRegister(Animation **anims, int *animAmount, int index) {
 	if (anims[index] == NULL) return;
@@ -348,7 +348,7 @@ void UnloadSingleAnimationFromRegister(Animation **anims, int *animAmount, int i
 }
 void LoadSpriteFromFile(const char *spriteSheet, FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE) {
 	if (!FileExists(spriteSheet)) {
-		printf("INFO: SPRITE: Sprite file \"%s\" not available.\n", spriteSheet);
+		TRACELOG(LOG_INFO, "INFO: SPRITE: Sprite file \"%s\" not available.\n", spriteSheet);
 		return;
 	}
 	FILE *file = fopen(spriteSheet, "r");
@@ -356,7 +356,7 @@ void LoadSpriteFromFile(const char *spriteSheet, FILE *spriteData, Sprite **spri
 	char *saveptr;
 	while (fgets(line, sizeof(line), file) != NULL) {
 		if ((*spriteAmount) >= SPRITE_SIZE) {
-			printf("WARNING: SPRITE: Sprites register full.\n");
+			TRACELOG(LOG_INFO, "WARNING: SPRITE: Sprites register full.\n");
 			return;
 		}
 		Vector2 position = { 0 };
@@ -367,18 +367,19 @@ void LoadSpriteFromFile(const char *spriteSheet, FILE *spriteData, Sprite **spri
 		sprites[(*spriteAmount)] = LoadSingleSprite(spriteData, position, rotation, id);
 		(*spriteAmount)++;
 	}
-	printf("INFO: SPRITE: Sprites loaded from \"%s\" correctly.\n", spriteSheet);
+	TRACELOG(LOG_INFO, "INFO: SPRITE: Sprites loaded from \"%s\" correctly.\n", spriteSheet);
 	fclose(file);
 }
 void LoadSpriteIntoRegister(FILE *spriteData, Sprite **sprites, int *spriteAmount, int SPRITE_SIZE, Vector2 position, float rotation, int id) {
 	if (spriteData == NULL) {
-		printf("ERROR: SPRITE: Sprite file is not open.\n");
+		TRACELOG(LOG_INFO, "ERROR: SPRITE: Sprite file is not open.\n");
 		return;
 	}
 	if ((*spriteAmount) < SPRITE_SIZE) {
 		sprites[*spriteAmount] = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, id);
 		if (sprites[*spriteAmount] != NULL) {
-			sprites[*spriteAmount]->position = position;
+			sprites[*spriteAmount]->dest.x = position.x;
+			sprites[*spriteAmount]->dest.y = position.y;
 			sprites[*spriteAmount]->rotation = rotation;
 			(*spriteAmount)++;
 		}
@@ -386,7 +387,7 @@ void LoadSpriteIntoRegister(FILE *spriteData, Sprite **sprites, int *spriteAmoun
 }
 Sprite *LoadSingleSprite(FILE *spriteData, Vector2 position, float rotation, int id) {
 	if (spriteData == NULL) {
-		printf("ERROR: SPRITE: Sprite file is not open.\n");
+		TRACELOG(LOG_INFO, "ERROR: SPRITE: Sprite file is not open.\n");
 		return NULL;
 	}
 	rewind(spriteData);
@@ -401,10 +402,11 @@ Sprite *LoadSingleSprite(FILE *spriteData, Vector2 position, float rotation, int
 		spriteId = atoi(token);
 		if (spriteId == id) {
 			token = strtok_r(NULL, "	", &saveptr); //To delete the sprite name
-			//printf("INFO: SPRITE: Parsing %s\n", token);
+			//TRACELOG(LOG_INFO, "INFO: SPRITE: Parsing %s\n", token);
 			sprite = ParseSprite(saveptr);
 			if (sprite != NULL) {
-				sprite->position = position;
+				sprite->dest.x = position.x;
+				sprite->dest.y = position.y;
 				sprite->rotation = rotation;
 			}
 			return sprite;
@@ -420,17 +422,19 @@ Sprite *ParseSprite(char *line) {
 		token = strtok_r(line, "	", &saveptr);
 		sprite->textureIndex = atoi(token);
 		token = strtok_r(NULL, "	", &saveptr);
+		sprite->source.x = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		sprite->source.y = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		sprite->source.width = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
+		sprite->source.height = atof(token);
+		token = strtok_r(NULL, "	", &saveptr);
 		sprite->origin.x = atof(token);
 		token = strtok_r(NULL, "	", &saveptr);
 		sprite->origin.y = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		sprite->origin.width = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		sprite->origin.height = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		sprite->dest.x = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		sprite->dest.y = atof(token);
+		sprite->dest.x = 0;
+		sprite->dest.y = 0;
 		token = strtok_r(NULL, "	", &saveptr);
 		sprite->dest.width = atof(token);
 		token = strtok_r(NULL, "	", &saveptr);
@@ -450,9 +454,9 @@ void DrawSingleSprite(Sprite *sprite, SafeTexture *textures, Color color, bool s
 	if (sprite == NULL) return;
 	if (shader != sprite->shader) return;
 	DrawTexturePro(textures[sprite->textureIndex].tex,
-			sprite->origin,
+			sprite->source,
 			sprite->dest,
-			sprite->position,
+			sprite->origin,
 			sprite->rotation,
 			color);
 }
@@ -460,7 +464,7 @@ void UnloadSpriteRegister(Sprite **sprites, int *spriteAmount) {
 	int i;
 	int amount = *spriteAmount;
 	for (i = 0; i < amount; i++) UnloadSingleSpriteFromRegister(sprites, spriteAmount, 0);
-	printf("INFO: SPRITE: Sprites unloaded correctly\n");
+	TRACELOG(LOG_INFO, "INFO: SPRITE: Sprites unloaded correctly\n");
 }
 void UnloadSingleSpriteFromRegister(Sprite **sprites, int *spriteAmount, int index) {
 	if (sprites[index] == NULL) return;
@@ -477,7 +481,7 @@ void UnloadSingleSpriteFromRegister(Sprite **sprites, int *spriteAmount, int ind
 }
 void LoadButtonFromFile(const char *buttonSheet, FILE *spriteData, FILE *translationData, Font font, Button **buttons, int *buttonAmount, int BUTTON_SIZE) {
 	if (spriteData == NULL) {
-		printf("ERROR: SPRITE: Sprite file is not open.\n");
+		TRACELOG(LOG_INFO, "ERROR: SPRITE: Sprite file is not open.\n");
 		return;
 	}
 	if (FileExists(buttonSheet)) {
@@ -500,7 +504,7 @@ void LoadButtonFromFile(const char *buttonSheet, FILE *spriteData, FILE *transla
 }
 void LoadButtonIntoRegister(FILE *spriteData, FILE *translationData, Font font, Button **buttons, int *buttonAmount, int BUTTON_SIZE, Vector2 position, float rotation, int idOff, int idOn, int idMessage) {
 	if (spriteData == NULL) {
-		printf("ERROR: SPRITE: Sprite file is not open.\n");
+		TRACELOG(LOG_INFO, "ERROR: SPRITE: Sprite file is not open.\n");
 		return;
 	}
 	if ((*buttonAmount) < BUTTON_SIZE) {
@@ -514,7 +518,7 @@ void LoadButtonIntoRegister(FILE *spriteData, FILE *translationData, Font font, 
 }
 Button *LoadSingleButton(FILE *spriteData, FILE *translationData, Font font, Vector2 position, float rotation, int idOff, int idOn, int idMessage) {
 	if (spriteData == NULL) {
-		printf("ERROR: SPRITE: Sprite file is not open.\n");
+		TRACELOG(LOG_INFO, "ERROR: SPRITE: Sprite file is not open.\n");
 		return NULL;
 	}
 	Button *button = (Button *) malloc(sizeof(Button));
@@ -539,9 +543,9 @@ void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Font 
 		if (buttons[i]->selected) {
 			if (shader != buttons[i]->spriteOn->shader) continue;
 			DrawTexturePro(textures[buttons[i]->spriteOn->textureIndex].tex,
-						buttons[i]->spriteOn->origin,
+						buttons[i]->spriteOn->source,
 						buttons[i]->spriteOn->dest,
-						buttons[i]->position,
+						buttons[i]->origin,
 						buttons[i]->rotation,
 						color);
 			//DrawButtonMessage(buttons[i], (Vector2) { buttons[i]->spriteOn->dest.width / 2, buttons[i]->spriteOn->dest.height / 2 }, font, color);
@@ -568,7 +572,7 @@ void UnloadButtonRegister(Button **buttons, int *buttonAmount) {
 		buttons[i] = NULL;
 	}
 	(*buttonAmount) = 0;
-	printf("INFO: BUTTONS: Buttons unloaded correctly\n");
+	TRACELOG(LOG_INFO, "INFO: BUTTONS: Buttons unloaded correctly\n");
 }
 void LoadMessageIntoRegister(FILE *translationData, Font font, Message **messages, int *messageAmount, int MSG_SIZE, Vector2 position, float fontSize, float spacing, bool useColor, Align align, int id) {
 	if ((*messageAmount) < MSG_SIZE) {
@@ -586,12 +590,12 @@ void LoadMessageIntoRegister(FILE *translationData, Font font, Message **message
 Message *LoadSingleMessage(FILE *translationData, Font font, int id, Vector2 position, float fontSize, float spacing, bool useColor, Align align) {
 	if (id <= 0) return NULL;
 	if (translationData == NULL) {
-		printf("INFO: MESSAGE: The translation data is not available.\n");
+		TRACELOG(LOG_INFO, "INFO: MESSAGE: The translation data is not available.\n");
 		return NULL;
 	}
 	Message *message = (Message *) malloc(sizeof(Message));
 	if (message == NULL) {
-		printf("INFO: MESSAGE: Couldn't allocate memory for the message.\n");
+		TRACELOG(LOG_INFO, "INFO: MESSAGE: Couldn't allocate memory for the message.\n");
 		return NULL;
 	}
 
@@ -665,7 +669,7 @@ void UnloadMessageRegister(Message **messages, int *messageAmount) {
 	for (i = 0; i < (*messageAmount); i++)
 		UnloadSingleMessage(&messages[i]);
 	(*messageAmount) = 0;
-	//printf("INFO: MESSAGE: Messages unloaded correctly\n");
+	//TRACELOG(LOG_INFO, "INFO: MESSAGE: Messages unloaded correctly\n");
 }
 void UnloadSingleMessage(Message **message) {
 	if ((*message) == NULL) return;

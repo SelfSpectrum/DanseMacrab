@@ -46,9 +46,9 @@ struct Message {
 };
 struct Sprite {
 	int textureIndex; // Índice de la textura en el array del estado para extraer el sprite
-	Rectangle origin; // Origen del sprite dentro de la textura
+	Rectangle source; // Origen del sprite dentro de la textura
 	Rectangle dest; // Rectángulo de destino, que establece posición y escala del sprite
-	Vector2 position; // Posición del pivote en la textura
+	Vector2 origin; // Posición del pivote en la textura
 	float rotation; // Rotacion aplicada a la textura respecto al pivote
 	bool shader; // ¿Dibujar animable dentro del modo sombreador?
 };

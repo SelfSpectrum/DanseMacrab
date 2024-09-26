@@ -525,8 +525,8 @@ Button *LoadSingleButton(FILE *spriteData, FILE *translationData, Font font, Vec
 	if (button != NULL) {
 		button->position = position;
 		button->rotation = rotation;
-		button->spriteOff = LoadSingleSprite(spriteData, position, rotation, idOff);
-		button->spriteOn = LoadSingleSprite(spriteData, position, rotation, idOn);
+		button->spriteOff = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, idOff);
+		button->spriteOn = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, idOn);
 		button->message = LoadSingleMessage(translationData,
 						    font,
 						    idMessage,
@@ -539,25 +539,36 @@ Button *LoadSingleButton(FILE *spriteData, FILE *translationData, Font font, Vec
 }
 void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Font font, Color color, bool shader) {
 	int i;
+	Rectangle dest;
 	for (i = 0; i < buttonAmount; i++) {
 		if (buttons[i]->selected) {
 			if (shader != buttons[i]->spriteOn->shader) continue;
+			dest = (Rectangle) { 0, 0, 0, 0 };
+			dest.x = buttons[i]->position.x;
+			dest.y = buttons[i]->position.y;
+			dest.width = buttons[i]->spriteOn->width;
+			dest.height = buttons[i]->spriteOn->height;
 			DrawTexturePro(textures[buttons[i]->spriteOn->textureIndex].tex,
-						buttons[i]->spriteOn->source,
-						buttons[i]->spriteOn->dest,
-						buttons[i]->origin,
-						buttons[i]->rotation,
-						color);
+					buttons[i]->spriteOn->source,
+					dest,
+					buttons[i]->spriteOn->origin,
+					buttons[i]->rotation,
+					color);
 			//DrawButtonMessage(buttons[i], (Vector2) { buttons[i]->spriteOn->dest.width / 2, buttons[i]->spriteOn->dest.height / 2 }, font, color);
 			DrawButtonMessage(buttons[i], (Vector2) { buttons[i]->spriteOn->dest.width / 2, -1 }, font, color);
 		}
 		else {
 			if (shader != buttons[i]->spriteOff->shader) continue;
+			dest = (Rectangle) { 0, 0, 0, 0 };
+			dest.x = buttons[i]->position.x;
+			dest.y = buttons[i]->position.y;
+			dest.width = buttons[i]->spriteOff->width;
+			dest.height = buttons[i]->spriteOff->height;
 			DrawTexturePro(textures[buttons[i]->spriteOff->textureIndex].tex,
-						buttons[i]->spriteOff->origin,
-						buttons[i]->spriteOff->dest,
-						buttons[i]->position,
-						buttons[i]->rotation,
+					buttons[i]->spriteOff->origin,
+					buttons[i]->spriteOff->dest,
+					buttons[i]->position,
+					buttons[i]->rotation,
 					color);
 			//DrawButtonMessage(buttons[i], (Vector2) { buttons[i]->spriteOff->dest.width / 2, buttons[i]->spriteOff->dest.height / 2 }, font, color);
 			DrawButtonMessage(buttons[i], (Vector2) { buttons[i]->spriteOff->dest.width / 2, -1 }, font, color);
@@ -646,22 +657,22 @@ void DrawMessage(Message **messages, int messageAmount, Font font, Color color) 
 }
 void DrawSingleMessage(Message *message, Font font, Color color) {
 	DrawTextCodepoints(font,
-		    message->codepoints,
-		    message->codepointAmount,
-		    message->position,
-		    message->fontSize,
-		    message->spacing,
-		    message->useColor ? color : BLACK);
+			   message->codepoints,
+			   message->codepointAmount,
+			   message->position,
+			   message->fontSize,
+			   message->spacing,
+			   message->useColor ? color : BLACK);
 }
 void DrawButtonMessage(Button *button, Vector2 position, Font font, Color color) {
 	if (button->message == NULL) return;
 	DrawTextCodepoints(font,
-		    button->message->codepoints,
-		    button->message->codepointAmount,
-		    Vector2Add(button->message->position, position),
-		    button->message->fontSize,
-		    button->message->spacing,
-		    button->message->useColor != button->selected ? color : BLACK);
+			    button->message->codepoints,
+			    button->message->codepointAmount,
+			    Vector2Add(button->message->position, position),
+			    button->message->fontSize,
+			    button->message->spacing,
+			    button->message->useColor != button->selected ? color : BLACK);
 
 }
 void UnloadMessageRegister(Message **messages, int *messageAmount) {

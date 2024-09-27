@@ -11,6 +11,7 @@
 
 typedef enum Language Language;
 typedef enum Align Align;
+typedef enum DrawOrigin DrawOrigin;
 typedef struct SafeTexture SafeTexture;
 typedef struct Message Message;
 typedef struct Sprite Sprite;
@@ -29,6 +30,20 @@ enum Align {
 	ALIGN_CENTER = 1,
 	ALIGN_RIGHT = 2
 };
+// Posición del pivote en sprites u otras cuestiones gráficas
+enum DrawOrigin {
+	DRAWORIGIN_NONE = 0,
+	DRAWORIGIN_CENTER = 1,
+	DRAWORIGIN_TOPLEFT = 2,
+	DRAWORIGIN_TOP = 3,
+	DRAWORIGIN_TOPRIGHT = 4,
+	DRAWORIGIN_CENTERLEFT = 5,
+	DRAWORIGIN_CENTER = 6,
+	DRAWORIGIN_CENTERRIGHT = 7,
+	DRAWORIGIN_BOTTOMLEFT = 8,
+	DRAWORIGIN_BOTTOM = 9,
+	DRAWORIGIN_BOTTOMRIGHT = 10,
+}
 struct SafeTexture {
 	Texture2D tex;
 	bool init;
@@ -51,6 +66,7 @@ struct Sprite {
 	Vector2 origin; // Posición del pivote en la textura
 	float rotation; // Rotacion aplicada a la textura respecto al pivote
 	bool shader; // ¿Dibujar animable dentro del modo sombreador?
+	DrawOrigin drawOrigin; // ¿Dar una posición predefinida al pivote?
 };
 struct Button {
 	Message *message;
@@ -65,11 +81,12 @@ struct Animable {
 	FILE *data; // Archivo que contiene la información de la animación
 	int frame; // Frame necesario para cambiar al siguiente evento
 	Sprite *sprite; // Sprite que será modificado en el tiempo. Para tener cambios bruscos, se requiere un nuevo sprite (ID)
-	Rectangle deltaOrigin;
-	Rectangle deltaDest;
-	Vector2 offset;
-	Vector2 deltaPos;
-	float deltaRotation;
+	Rectangle deltaSource; // Cuánto va a cambiar las coordenadas de origen y tamaño de la fuente del sprite en un tiempo dado
+	Rectangle deltaDest; // Cuánto va a moverse y escalar (en píxeles y proporción respectivamente) el sprite en un tiempo dado
+	Vector2 deltaOrigin; // Cuánto se va a mover el pivote en un tiempo dado
+	float deltaRotation; // Cuánto va a rotar el sprite en un tiempo dado (en grados)
+	Vector2 offset; // Desfase inicial constante del sprite
+	Vector2 scale; // Escala de las proporciones del sprite ({1,1} dejaria el sprite inalterado, {2,2} duplicaria el tamaño y tal)
 	int parentId;
 };
 struct Animation {

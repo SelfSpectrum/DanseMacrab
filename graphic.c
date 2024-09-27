@@ -107,11 +107,18 @@ Animable *ParseAnimable(FILE *spriteData, char *line, int deltaFrame) {
 	token = strtok_r(line, "	", &saveptr);
 	anim->frame = atoi(token);
 
+	// Primero se parsea el offset del sprite
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->offset.x = atof(token);
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->offset.y = atof(token);
 	//printf("Offset - X: %f\tY: %f\n", anim->offset.x, anim->offset.y);
+	// Continuamos con la escala del sprite, para multiplicarlo por su tamaño base
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->scale.x = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->scale.y = atof(token);
+	// Finalmente parseamos la rotación base del sprite
 	token = strtok_r(NULL, "	", &saveptr);
 	rotation = atof(token);
 
@@ -119,27 +126,27 @@ Animable *ParseAnimable(FILE *spriteData, char *line, int deltaFrame) {
 	id = atoi(token);
 
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaOrigin.width = atof(token) / (anim->frame - deltaFrame);
+	anim->deltaSource.width = atof(token) / (anim->frame - deltaFrame);
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaOrigin.height = atof(token) / (anim->frame - deltaFrame);
+	anim->deltaSource.height = atof(token) / (anim->frame - deltaFrame);
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaOrigin.x = atof(token) / (anim->frame - deltaFrame);
+	anim->deltaSource.x = atof(token) / (anim->frame - deltaFrame);
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaOrigin.y = atof(token) / (anim->frame - deltaFrame);
+	anim->deltaSource.y = atof(token) / (anim->frame - deltaFrame);
 
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaDest.width = atof(token) / (anim->frame - deltaFrame);
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaDest.height = atof(token) / (anim->frame - deltaFrame);
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaPos.x = atof(token) / (anim->frame - deltaFrame);
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaPos.y = atof(token) / (anim->frame - deltaFrame);
-
-	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaDest.x = atof(token) / (anim->frame - deltaFrame);
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaDest.y = atof(token) / (anim->frame - deltaFrame);
+
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->deltaOrigin.x = atof(token) / (anim->frame - deltaFrame);
+	token = strtok_r(NULL, "	", &saveptr);
+	anim->deltaOrigin.y = atof(token) / (anim->frame - deltaFrame);
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaRotation = atof(token) / (anim->frame - deltaFrame);
 
@@ -186,10 +193,10 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 
 	Animable *aux;
 
-	anims[index]->sprite->origin.x += anims[index]->deltaOrigin.x;
-	anims[index]->sprite->origin.y += anims[index]->deltaOrigin.y;
-	anims[index]->sprite->origin.width += anims[index]->deltaOrigin.width;
-	anims[index]->sprite->origin.height += anims[index]->deltaOrigin.height;
+	anims[index]->sprite->source.x += anims[index]->deltaSource.x;
+	anims[index]->sprite->source.y += anims[index]->deltaSource.y;
+	anims[index]->sprite->source.width += anims[index]->deltaSource.width;
+	anims[index]->sprite->source.height += anims[index]->deltaSource.height;
 
 	//Rectangle dest = anims[index]->sprite->dest;
 
@@ -198,18 +205,18 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 	anims[index]->sprite->dest.width += anims[index]->deltaDest.width;
 	anims[index]->sprite->dest.height += anims[index]->deltaDest.height;
 
-	anims[index]->sprite->position.x += anims[index]->deltaPos.x;
-	anims[index]->sprite->position.y += anims[index]->deltaPos.y;
+	anims[index]->sprite->origin.x += anims[index]->deltaOrigin.x;
+	anims[index]->sprite->origin.y += anims[index]->deltaOrigin.y;
 	anims[index]->sprite->rotation += anims[index]->deltaRotation;
 
 	if (anims[index]->parentId != 0) {
 		if (anims[anims[index]->parentId - 1] != NULL) {
 			Animable *parent = anims[anims[index]->parentId - 1];
 
-			anims[index]->sprite->origin.x += parent->deltaOrigin.x;
-			anims[index]->sprite->origin.y += parent->deltaOrigin.y;
-			anims[index]->sprite->origin.width += parent->deltaOrigin.width;
-			anims[index]->sprite->origin.height += parent->deltaOrigin.height;
+			anims[index]->sprite->source.x += parent->deltaSource.x;
+			anims[index]->sprite->source.y += parent->deltaSource.y;
+			anims[index]->sprite->source.width += parent->deltaSource.width;
+			anims[index]->sprite->source.height += parent->deltaSource.height;
 
 			//Rectangle dest = anims[index]->sprite->dest;
 
@@ -218,8 +225,8 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 			anims[index]->sprite->dest.width += parent->deltaDest.width;
 			anims[index]->sprite->dest.height += parent->deltaDest.height;
 
-			anims[index]->sprite->position.x += parent->deltaPos.x;
-			anims[index]->sprite->position.y += parent->deltaPos.y;
+			anims[index]->sprite->origin.x += parent->deltaOrigin.x;
+			anims[index]->sprite->origin.y += parent->deltaOrigin.y;
 			anims[index]->sprite->rotation += parent->deltaRotation;
 
 			parent = NULL;
@@ -667,12 +674,12 @@ void DrawSingleMessage(Message *message, Font font, Color color) {
 void DrawButtonMessage(Button *button, Vector2 position, Font font, Color color) {
 	if (button->message == NULL) return;
 	DrawTextCodepoints(font,
-			    button->message->codepoints,
-			    button->message->codepointAmount,
-			    Vector2Add(button->message->position, position),
-			    button->message->fontSize,
-			    button->message->spacing,
-			    button->message->useColor != button->selected ? color : BLACK);
+			   button->message->codepoints,
+			   button->message->codepointAmount,
+			   Vector2Add(button->message->position, position),
+			   button->message->fontSize,
+			   button->message->spacing,
+			   button->message->useColor != button->selected ? color : BLACK);
 
 }
 void UnloadMessageRegister(Message **messages, int *messageAmount) {

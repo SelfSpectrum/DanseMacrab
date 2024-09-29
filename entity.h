@@ -413,10 +413,10 @@ struct Player {
 	StatusType inmunity; // Inmunidades ante efectos de estado
 	Feature features[16];
 	int featuresAmount;
-	Technique tech[20];
+	void *tech[10];
 	int techAmount;
-	Technique equipedTech[10];
-	int equipedTechAmount;
+	void *skill[10];
+	int skillAmount;
 	Sprite *sprite;
 	// INFO: ESPECIFICO DEL COMBATE
 	int position;

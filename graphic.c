@@ -102,29 +102,31 @@ Animable *ParseAnimable(FILE *spriteData, char *line, int deltaFrame) {
 	int id;
 	char *token; // Para ir partiendo el string
 	char *saveptr; // String cortado restante tras cada partición
+	Vector2 scale = { 0 };
 	float rotation = 0;
 
 	token = strtok_r(line, "	", &saveptr);
 	anim->frame = atoi(token);
 
-	// Primero se parsea el offset del sprite
+	// Offset del sprite respecto al punto de origen de la animación
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->offset.x = atof(token);
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->offset.y = atof(token);
-	//printf("Offset - X: %f\tY: %f\n", anim->offset.x, anim->offset.y);
-	// Continuamos con la escala del sprite, para multiplicarlo por su tamaño base
+	// Escala del sprite, modifica los valores base
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->scale.x = atof(token);
+	scale.x = atof(token);
 	token = strtok_r(NULL, "	", &saveptr);
-	anim->scale.y = atof(token);
-	// Finalmente parseamos la rotación base del sprite
+	scale.y = atof(token);
+	// Rotación base del sprite
 	token = strtok_r(NULL, "	", &saveptr);
 	rotation = atof(token);
 
+	// Id del sprite que hay que cargar luego
 	token = strtok_r(NULL, "	", &saveptr);
 	id = atoi(token);
 
+	// Se obtiene cuánto va a cambiar el rectángulo de la fuente en el tiempo
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaSource.width = atof(token) / (anim->frame - deltaFrame);
 	token = strtok_r(NULL, "	", &saveptr);
@@ -134,6 +136,7 @@ Animable *ParseAnimable(FILE *spriteData, char *line, int deltaFrame) {
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaSource.y = atof(token) / (anim->frame - deltaFrame);
 
+	// Se obtiene cuánto va a cambiar el rectángulo del destino (posicion y escala) en el tiempo
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaDest.width = atof(token) / (anim->frame - deltaFrame);
 	token = strtok_r(NULL, "	", &saveptr);
@@ -143,16 +146,20 @@ Animable *ParseAnimable(FILE *spriteData, char *line, int deltaFrame) {
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaDest.y = atof(token) / (anim->frame - deltaFrame);
 
+	// Se obtiene cuánto va a cambiar el vector del pivote en el tiempo
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaOrigin.x = atof(token) / (anim->frame - deltaFrame);
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaOrigin.y = atof(token) / (anim->frame - deltaFrame);
+
+	// Se obtiene cuánto va a cambiar la rotación en el tiempo
 	token = strtok_r(NULL, "	", &saveptr);
 	anim->deltaRotation = atof(token) / (anim->frame - deltaFrame);
 
-	anim->sprite = LoadSingleSprite(spriteData, (Vector2) { 0 }, rotation, id);
-
-	//printf("Dest - X: %f\tY: %f\n", anim->sprite->dest.x, anim->sprite->dest.y);
+	// Se carga el sprite con las variaciones iniciales del inicio
+	anim->sprite = LoadSingleSprite(spriteData, anim->offset, rotation, id);
+	anim->sprite.dest.width += scale.x;
+	anim->sprite.dest.height += scale.y;
 
 	return anim;
 }
@@ -165,6 +172,7 @@ void UpdateAnimation(FILE *animsData, FILE *spriteData, Animation **anims, int *
 		for (j = 0; j < anims[i]->animAmount; j++)
 			UpdateAnimable(spriteData, anims[i], anims[i]->anims, j, anims[i]->currentFrame);
 		anims[i]->currentFrame++;
+
 		if (anims[i]->freedAmount == anims[i]->animAmount) {
 			if (anims[i]->repeat) {
 				int id;
@@ -181,6 +189,7 @@ void UpdateAnimation(FILE *animsData, FILE *spriteData, Animation **anims, int *
 				anims[i]->rotation = rot;
 			}
 			else {
+				// Libero una animación y retrocedo un paso para continuar con la siguiente
 				UnloadSingleAnimationFromRegister(anims, animAmount, i);
 				i--;
 			}
@@ -248,11 +257,12 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 				anims[index]->sprite = aux->sprite;
 				aux->sprite = NULL;
 
-				anims[index]->deltaOrigin = aux->deltaOrigin;
+				anims[index]->deltaSource = aux->deltaSource;
 				anims[index]->deltaDest = aux->deltaDest;
-				anims[index]->deltaPos = aux->deltaPos;
-				anims[index]->offset = aux->offset;
+				anims[index]->deltaOrigin = aux->deltaOrigin;
 				anims[index]->deltaRotation = aux->deltaRotation;
+				anims[index]->offset = aux->offset;
+				anims[index]->scale = aux->scale;
 
 				free(aux);
 				//TRACELOG(LOG_INFO, "INFO: ANIMABLE: Next animable loaded.\n");
@@ -264,8 +274,9 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 			anims[index]->sprite = NULL;
 			fclose(anims[index]->data);
 			anims[index]->data = NULL;
+
 			free(anims[index]);
-			anims[index] = NULL;
+			animation->anims[index] = NULL;
 
 			animation->freedAmount++;
 			//TRACELOG(LOG_INFO, "INFO: ANIMABLE: Animable %d freed.\n", index);
@@ -291,8 +302,8 @@ void DrawAnimable(Animable *anim, Animable *parent, SafeTexture *textures, Color
 	dest.x = 0;
 	dest.y = 0;
 
-	dest.x += position.x + anim->offset.x + anim->sprite->position.x;
-	dest.y += position.y + anim->offset.y + anim->sprite->position.y;
+	dest.x += position.x + anim->sprite->position.x;
+	dest.y += position.y + anim->sprite->position.y;
 	if (parent != NULL) {
 		dest.x += parent->offset.x + parent->sprite->position.x;
 		dest.y += parent->offset.y + parent->sprite->position.y;

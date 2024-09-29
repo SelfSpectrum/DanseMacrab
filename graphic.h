@@ -82,11 +82,10 @@ struct Animable {
 	int frame; // Frame necesario para cambiar al siguiente evento
 	Sprite *sprite; // Sprite que será modificado en el tiempo. Para tener cambios bruscos, se requiere un nuevo sprite (ID)
 	Rectangle deltaSource; // Cuánto va a cambiar las coordenadas de origen y tamaño de la fuente del sprite en un tiempo dado
-	Rectangle deltaDest; // Cuánto va a moverse y escalar (en píxeles y proporción respectivamente) el sprite en un tiempo dado
+	Rectangle deltaDest; // Cuánto va a moverse y escalar el sprite en un tiempo dado
 	Vector2 deltaOrigin; // Cuánto se va a mover el pivote en un tiempo dado
 	float deltaRotation; // Cuánto va a rotar el sprite en un tiempo dado (en grados)
-	Vector2 offset; // Desfase inicial constante del sprite
-	Vector2 scale; // Escala de las proporciones del sprite ({1,1} dejaria el sprite inalterado, {2,2} duplicaria el tamaño y tal)
+	Vector2 offset; // Desfase inicial constante del sprite, útil para el sistema de padres
 	int parentId;
 };
 struct Animation {

@@ -241,11 +241,6 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 			parent = NULL;
 		}
 	}
-
-	//printf("Origin - W: %f\tH: %f\tX: %f\tY: %f\n", anims[index]->sprite->origin.width, anims[index]->sprite->origin.height, anims[index]->sprite->origin.x, anims[index]->sprite->origin.y);
-	//printf("Dest - W: %f\tH: %f\tX: %f\tY: %f\n", anims[index]->sprite->dest.width, anims[index]->sprite->dest.height, anims[index]->sprite->dest.x, anims[index]->sprite->dest.y);
-	//printf("Position - X: %f\tY: %f\n", anims[index]->sprite->position.x, anims[index]->sprite->position.y);
-
 	if (currentFrame >= anims[index]->frame) {
 		if (anims[index]->frame != 0) {
 			if (fgets(line, sizeof(line), anims[index]->data) != NULL) {
@@ -269,7 +264,6 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 			}
 		}
 		else {
-
 			free(anims[index]->sprite);
 			anims[index]->sprite = NULL;
 			fclose(anims[index]->data);
@@ -298,24 +292,22 @@ void DrawAnimable(Animable *anim, Animable *parent, SafeTexture *textures, Color
 	if (shader != anim->sprite->shader) return;
 
 	Rectangle dest = anim->sprite->dest;
-	
-	dest.x = 0;
-	dest.y = 0;
+	float rot = anim->sprite->rotation;
 
-	dest.x += position.x + anim->sprite->position.x;
-	dest.y += position.y + anim->sprite->position.y;
+	dest.x += position.x;
+	dest.y += position.y;
+	rot += rotation;
 	if (parent != NULL) {
-		dest.x += parent->offset.x + parent->sprite->position.x;
-		dest.y += parent->offset.y + parent->sprite->position.y;
+		dest.x += parent->offset.x;
+		dest.y += parent->offset.y;
+		rot += parent->sprite->rotation;
 	}
 
 	DrawTexturePro( textures[anim->sprite->textureIndex].tex,
-			anim->sprite->origin,
-			//anim->sprite->dest,
+			anim->sprite->source,
 			dest,
-			// Vector2Add(anim->sprite->position, position),
-			(Vector2) { anim->sprite->dest.x, anim->sprite->dest.y },
-			anim->sprite->rotation + rotation,
+			anim->sprite->origin,
+			rot,
 			color);
 
 	//printf("Origin - W: %f\tH: %f\tX: %f\tY: %f\n", anim->sprite->origin.width, anim->sprite->origin.height, anim->sprite->origin.x, anim->sprite->origin.y);

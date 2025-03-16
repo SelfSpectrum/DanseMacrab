@@ -99,62 +99,48 @@ Animable *ParseAnimable(FILE *spriteData, char *line, int deltaFrame) {
 		TraceLog(LOG_INFO, "ERROR: ANIMABLE: Animable load failed.\n");
 		return NULL;
 	}
-	int id;
-	char *token; // Para ir partiendo el string
-	char *saveptr; // String cortado restante tras cada partición
+
 	Vector2 scale = { 0 };
 	float rotation = 0;
+	int id;
+	sscanf(line, "%d\t%f\t%f\t%f\t%f\t%f\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f",
+			&anim->frame,
+			&anim->offset.x,
+			&anim->offset.y,
+			&scale.x,
+			&scale.y,
+			&rotation,
+			&id,
+			&anim->deltaSource.width,
+			&anim->deltaSource.height,
+			&anim->deltaSource.x,
+			&anim->deltaSource.y,
+			&anim->deltaDest.width,
+			&anim->deltaDest.height,
+			&anim->deltaDest.x,
+			&anim->deltaDest.y,
+			&anim->deltaOrigin.x,
+			&anim->deltaOrigin.y,
+			&anim->deltaRotation);
 
-	token = strtok_r(line, "	", &saveptr);
-	anim->frame = atoi(token);
+	// Se normaliza la diferencia de cambio del rectángulo fuente para aplicarla cada frame
+	anim->deltaSource.width /= (anim->frame - deltaFrame);
+	anim->deltaSource.height /= (anim->frame - deltaFrame);
+	anim->deltaSource.x /= (anim->frame - deltaFrame);
+	anim->deltaSource.y /= (anim->frame - deltaFrame);
 
-	// Offset del sprite respecto al punto de origen de la animación
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->offset.x = atof(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->offset.y = atof(token);
-	// Escala del sprite, modifica los valores base
-	token = strtok_r(NULL, "	", &saveptr);
-	scale.x = atof(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	scale.y = atof(token);
-	// Rotación base del sprite
-	token = strtok_r(NULL, "	", &saveptr);
-	rotation = atof(token);
+	// Se normaliza la diferencia de cambio del rectángulo destino (posicion y escala) para aplicarla cada frame
+	anim->deltaDest.width /= (anim->frame - deltaFrame);
+	anim->deltaDest.height /= (anim->frame - deltaFrame);
+	anim->deltaDest.x /= (anim->frame - deltaFrame);
+	anim->deltaDest.y /= (anim->frame - deltaFrame);
 
-	// Id del sprite que hay que cargar luego
-	token = strtok_r(NULL, "	", &saveptr);
-	id = atoi(token);
+	// Se normaliza la diferencia de cambio del vector del pivote para aplicarla cada frame
+	anim->deltaOrigin.x /= (anim->frame - deltaFrame);
+	anim->deltaOrigin.y /= (anim->frame - deltaFrame);
 
-	// Se obtiene cuánto va a cambiar el rectángulo de la fuente en el tiempo
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaSource.width = atof(token) / (anim->frame - deltaFrame);
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaSource.height = atof(token) / (anim->frame - deltaFrame);
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaSource.x = atof(token) / (anim->frame - deltaFrame);
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaSource.y = atof(token) / (anim->frame - deltaFrame);
-
-	// Se obtiene cuánto va a cambiar el rectángulo del destino (posicion y escala) en el tiempo
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaDest.width = atof(token) / (anim->frame - deltaFrame);
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaDest.height = atof(token) / (anim->frame - deltaFrame);
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaDest.x = atof(token) / (anim->frame - deltaFrame);
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaDest.y = atof(token) / (anim->frame - deltaFrame);
-
-	// Se obtiene cuánto va a cambiar el vector del pivote en el tiempo
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaOrigin.x = atof(token) / (anim->frame - deltaFrame);
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaOrigin.y = atof(token) / (anim->frame - deltaFrame);
-
-	// Se obtiene cuánto va a cambiar la rotación en el tiempo
-	token = strtok_r(NULL, "	", &saveptr);
-	anim->deltaRotation = atof(token) / (anim->frame - deltaFrame);
+	// Se normaliza la diferencia de cambio de la rotación para aplicarla cada frame
+	anim->deltaRotation /= (anim->frame - deltaFrame);
 
 	// Se carga el sprite con las variaciones iniciales del inicio
 	anim->sprite = LoadSingleSprite(spriteData, anim->offset, rotation, id);
@@ -257,7 +243,6 @@ void UpdateAnimable(FILE *spriteData, Animation *animation, Animable **anims, in
 				anims[index]->deltaOrigin = aux->deltaOrigin;
 				anims[index]->deltaRotation = aux->deltaRotation;
 				anims[index]->offset = aux->offset;
-				anims[index]->scale = aux->scale;
 
 				free(aux);
 				//TraceLog(LOG_INFO, "INFO: ANIMABLE: Next animable loaded.\n");
@@ -292,23 +277,22 @@ void DrawAnimable(Animable *anim, Animable *parent, SafeTexture *textures, Color
 	if (shader != anim->sprite->shader) return;
 
 	Rectangle dest = anim->sprite->dest;
+	Vector2 origin = anim->sprite->origin;
 	
-	dest.x = 0;
-	dest.y = 0;
+	//TODO: Test this thing if it actually works
+	dest.x += position.x;
+	dest.y += position.y;
 
-	dest.x += position.x + anim->sprite->position.x;
-	dest.y += position.y + anim->sprite->position.y;
 	if (parent != NULL) {
-		dest.x += parent->offset.x + parent->sprite->position.x;
-		dest.y += parent->offset.y + parent->sprite->position.y;
+		dest.x += parent->offset.x + parent->sprite->dest.x;
+		dest.y += parent->offset.y + parent->sprite->dest.y;
+		origin = Vector2Add(origin, parent->sprite->origin);
 	}
 
 	DrawTexturePro( textures[anim->sprite->textureIndex].tex,
-			anim->sprite->origin,
-			//anim->sprite->dest,
+			anim->sprite->source,
 			dest,
-			// Vector2Add(anim->sprite->position, position),
-			(Vector2) { anim->sprite->dest.x, anim->sprite->dest.y },
+			origin,
 			anim->sprite->rotation + rotation,
 			color);
 
@@ -430,30 +414,34 @@ Sprite *ParseSprite(char *line) {
 	Sprite *sprite = (Sprite *) malloc(sizeof(Sprite));
 	char *token;
 	char *saveptr;
-	if (sprite != NULL) {
-		token = strtok_r(line, "	", &saveptr);
-		sprite->textureIndex = atoi(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		sprite->source.x = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		sprite->source.y = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		sprite->source.width = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		sprite->source.height = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		sprite->origin.x = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		sprite->origin.y = atof(token);
-		sprite->dest.x = 0;
-		sprite->dest.y = 0;
-		token = strtok_r(NULL, "	", &saveptr);
-		sprite->dest.width = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		sprite->dest.height = atof(token);
-		token = strtok_r(NULL, "	", &saveptr);
-		sprite->shader = (bool) atoi(token);
+	if (sprite == NULL) {
+		TraceLog(LOG_ERROR, "ERROR: SPRITE: Sprite load failed.\n");
+		return NULL;
 	}
+
+	token = strtok_r(line, "	", &saveptr);
+	sprite->textureIndex = atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	sprite->source.x = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	sprite->source.y = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	sprite->source.width = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	sprite->source.height = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	sprite->origin.x = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	sprite->origin.y = atof(token);
+	sprite->dest.x = 0;
+	sprite->dest.y = 0;
+	token = strtok_r(NULL, "	", &saveptr);
+	sprite->dest.width = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	sprite->dest.height = atof(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	sprite->shader = (bool) atoi(token);
+
 	return sprite;
 }
 void DrawSprite(Sprite **sprites, SafeTexture *textures, int spriteAmount, Color color, bool shader) {

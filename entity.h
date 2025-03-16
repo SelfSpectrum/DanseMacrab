@@ -98,7 +98,7 @@ enum TechniqueType {
 	TECH_SORCERY = 9
 };
 enum EffectType { // Diferentes efectos para que las técnicas sean más completas
-	EFFECT_NONE = 0;
+	EFFECT_NONE = 0,
 	EFFECT_SET = 1,
 	EFFECT_DMG = 2,
 	EFFECT_STATUS = 3,

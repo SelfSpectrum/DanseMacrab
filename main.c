@@ -142,7 +142,7 @@ int main() {
 	SetTargetFPS(60);// INFO: Establece al juego para que corra a 60 FPS
 
 	//-------------------------------------------------------------
-	// Game Inputs and State
+	// Inputs del juego y estado del mismo
 	//-------------------------------------------------------------
 	
 	StateData state; // Contiene el estado actual del juego
@@ -151,10 +151,10 @@ int main() {
 
 	Shader shader = LoadShader(0, "contour.fs");
 
-	int i = 0;
+	int i = 0; // Embeces hay que iterar sobre arreglos, como en el caso de las texturas o sonidos cargados
 
 	//-------------------------------------------------------------
-	// Audio and Sound
+	// Audio y sonido
 	//-------------------------------------------------------------
 	
 	InitAudioDevice();
@@ -164,13 +164,13 @@ int main() {
 	while (!state.exitWindow) {
 
 		//-------------------------------------------------------------
-		// INFO: Update: This is for calculations and events which do not affect Texture or Drawing in a direct way
+		// INFO: Bloque de Actualizado: Aquí se realizan cálculos y eventos los cuales no afecten el Texturizado ni el Dibujado de manera directa
 		//-------------------------------------------------------------
 
-		UpdateMusicStream(state.music);// Update music buffer with new stream data
-		if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) state.exitWindowRequested = true;// Detect if X-button or KEY_ESCAPE have been pressed to close window
+		UpdateMusicStream(state.music);// Actualiza el buffer de la música con nueva información
+		if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) state.exitWindowRequested = true;// Detecta si se presiona la X o KEY_ESCAPE para cerrar el juego
 		if (state.exitWindowRequested) {
-			// A request for close window has been issued, we can save data before closing or just show a message asking for confirmation
+			// Una solicitud para cerrar la ventana se ha envíado, aquí ahora se puede pedir confirmación y guardar cambios.
 			if (IsKeyPressed(state.acceptKey) || IsKeyPressed(state.startKey)) state.exitWindow = true;
 			else if (IsKeyPressed(state.cancelKey)) state.exitWindowRequested = false;
 		}
@@ -188,7 +188,7 @@ int main() {
 		}
 
 		//-------------------------------------------------------------
-		// INFO: Texture: In this texture mode I create an smaller version of the game which is later rescaled in the draw mode
+		// INFO: Bloque de Texturizado: Aquí se renderiza todos los contenidos que capta la cámara sobre una textura pequeña, bastante útil para preservar el aspecto de los píxeles.
 		//-------------------------------------------------------------
 
 		BeginTextureMode(target);
@@ -216,7 +216,7 @@ int main() {
 		EndTextureMode();
 
 		//-------------------------------------------------------------
-		// INFO: Draw: Take the texture in lower resolution and rescale it to a bigger res, all this while preserving pixel perfect
+		// INFO: Bloque de Dibujado: Los contenidos de la cámara son renderizados en un nuevo tamaño para tener una resolución deseada sin afectar al resto del juego.
 		//-------------------------------------------------------------
 
 		BeginDrawing();
@@ -236,7 +236,7 @@ int main() {
 	UnloadCombat(&state.combat);
 	UnloadAnimationRegister(state.anims, &state.animAmount);
 	UnloadMessageRegister(state.messages, &state.messageAmount);
-	UnloadMusicStream(state.music); // Unload music stream buffers from RAM
+	UnloadMusicStream(state.music); // Se descargan los buffers para los canales de música de la RAM
 	UnloadFont(state.font);
 
 	if (state.animsData != NULL) {
@@ -303,8 +303,8 @@ int main() {
 		}
 	}
 
-	CloseAudioDevice(); // Close audio device (music streaming is automatically stopped)
-	CloseWindow(); // Close window and OpenGL context
+	CloseAudioDevice(); // Cerrar el dispositivo de audio (también para el canal de música)
+	CloseWindow(); // Cierra la ventana y el contexto de OpenGL
 
 	return 0;
 }
@@ -539,7 +539,7 @@ void SetState(StateData *state, GameState newState) {
 		UnloadMessageRegister(state->messages, &state->messageAmount);
 	}
 	state->state = newState;
-	printf("INFO: STATE: Loading state %d.\n", (int) newState);
+	TraceLog(LOG_INFO, "INFO: STATE: Loading state %d.\n", (int) newState);
 	switch (state->state) {
 		case STATE_INIT:
 			state->pref = LoadPrefs();
@@ -719,14 +719,14 @@ void SavePrefs(PlayerPref prefs) {
 PlayerPref LoadPrefs() {
 	PlayerPref prefs = { true, "Survivor", 0, 0.0f, 0.0f, 0.0f, 5 }; // Preferencias por defecto
 	if (!FileExists("PlayerPrefs.data")) {
-		printf("INFO: PREFS: Prefs file does not exist, creating one.\n");
+		TraceLog(LOG_INFO, "INFO: PREFS: Prefs file does not exist, creating one.\n");
 		SavePrefs(prefs);
 		return prefs;
 	}
 	char *buffer = LoadFileText("PlayerPrefs.data");
 	if (buffer == NULL) {
 		//TODO: Recuerda crear un error cuando esto ocurra, para abortar la carga de datos, informando si se quiere recargar o sobreescribir
-		printf("INFO: PREFS: Prefs file loading error, returning default.\n");
+		TraceLog(LOG_INFO, "INFO: PREFS: Prefs file loading error, returning default.\n");
 		return prefs;
 	}
 	int ftp;
@@ -741,7 +741,7 @@ PlayerPref LoadPrefs() {
 			&prefs.textSpeed);
 	prefs.firstTime = (bool) ftp;
 	prefs.language = (Language) lang;
-	UnloadFileText(buffer); // Unload this file data
+	UnloadFileText(buffer); // Descargo el archivo de datos
 	return prefs;
 }
 void SetHorizontalKeys(StateData *state) {

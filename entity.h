@@ -2,6 +2,7 @@
 #define ENTITY_H
 
 #include "graphic.h"
+#define FXSET_SIZE 8
 
 typedef struct Player Player; // Contiene toda la información relevante para un personaje jugable
 typedef struct Enemy Enemy; // Idem ac player, pero pa' los enemigos
@@ -268,7 +269,7 @@ struct Effect {
 	EffectType type;
 };
 struct FXSet {
-	Effect fxs[8];
+	Effect fxs[FXSET_SIZE];
 };
 struct FXDmg {
 	int id;

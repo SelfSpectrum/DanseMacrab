@@ -407,35 +407,27 @@ Sprite *LoadSingleSprite(FILE *spriteData, Vector2 position, float rotation, int
 }
 Sprite *ParseSprite(char *line) {
 	Sprite *sprite = (Sprite *) malloc(sizeof(Sprite));
-	char *token;
-	char *saveptr;
+	int shader = 0;
 	if (sprite == NULL) {
 		TraceLog(LOG_ERROR, "ERROR: SPRITE: Sprite load failed.\n");
 		return NULL;
 	}
 
-	token = strtok_r(line, "	", &saveptr);
-	sprite->textureIndex = atoi(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	sprite->source.x = atof(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	sprite->source.y = atof(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	sprite->source.width = atof(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	sprite->source.height = atof(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	sprite->origin.x = atof(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	sprite->origin.y = atof(token);
+	sscanf(line, "%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%d",
+			&sprite->textureIndex,
+			&sprite->source.x,
+			&sprite->source.y,
+			&sprite->source.width,
+			&sprite->source.height,
+			&sprite->origin.x,
+			&sprite->origin.y,
+			&sprite->dest.width,
+			&sprite->dest.height,
+			&shader);
+
 	sprite->dest.x = 0;
 	sprite->dest.y = 0;
-	token = strtok_r(NULL, "	", &saveptr);
-	sprite->dest.width = atof(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	sprite->dest.height = atof(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	sprite->shader = (bool) atoi(token);
+	sprite->shader = (bool) shader;
 
 	return sprite;
 }

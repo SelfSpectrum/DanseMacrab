@@ -31,78 +31,80 @@ void LoadEnemiesOnCombat(FILE *file, FILE *enemyData, FILE *spriteData, FILE *te
 }
 void *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id, int position) {
 	if (id == 0) return NULL;
+
+	char line[512];
+	int enemyId;
+	rewind(enemyData);
+	fgets(line, sizeof(line), enemyData);
+	while (fgets(line, sizeof(line), enemyData) != NULL) {
+		sscanf(line, "%d", &enemyId);
+		if (enemyId == id) return ParseEnemy(spriteData, techData, line, position);
+	}
+	return NULL;
+}
+void *ParseEnemy(FILE *spriteData, FILE *techData, char *line, int enemyId, int position) {
 	void *enemyInfo = malloc(sizeof(Enemy));
 	Enemy *enemy = (Enemy *) enemyInfo;
+	if (enemy == NULL) {
+		TraceLog(LOG_ERROR, "ERROR: ENTITY: Enemy load failed.\n");
+		return NULL;
+	}
 
+	int spriteId;
+	int enemyType;
+	int maxHealth;
+	int stats[6];
+	char tech[256];
+	char *token;
+	char *saveptr;
+
+	sscanf(line, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%[^\n]",
+			&enemy->id,
+			&enemy->name,
+			&enemy->description,
+			&spriteId,
+			&enemyType,
+			&enemy->physique,
+			&enemy->reflex,
+			&enemy->lore,
+			&enemy->charisma,
+			&enemy->size,
+			&maxHealth,
+			&enemy->maxStress,
+			&stats[0],
+			&stats[1],
+			&stats[2],
+			&stats[3],
+			&stats[4],
+			&stats[5],
+			&enemy->multiattack,
+			tech);
+	enemy->sprite = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, atoi(spriteId));
+	enemy->enemy = (EnemyType) enemyType;
+	enemy->maxHealth = DiceMean((DiceType) enemy->size) * maxHealth + enemy->physique * maxHealth;
+	enemy->health = enemy->maxHealth;
+	enemy->stress = enemy->maxStress;
+	enemy->weakness[0] = (DamageType) stats[0];
+	enemy->weakness[1] = (DamageType) stats[1];
+	enemy->resistances[0] = (DamageType) stats[2];
+	enemy->resistances[1] = (DamageType) stats[3];
+	enemy->inmunities[0] = (StatusType) stats[4];
+	enemy->inmunities[1] = (StatusType) stats[5];
 	enemy->position = position;
 	enemy->phyBonus = 0;
 	enemy->refBonus = 0;
 	enemy->lorBonus = 0;
 	enemy->chaBonus = 0;
 	enemy->techAmount = 0;
-	char line[512];
-	char *saveptr;
-	char *token;
-	char *tech;
-	int enemyId;
-	rewind(enemyData);
-	fgets(line, sizeof(line), enemyData);
-	while (fgets(line, sizeof(line), enemyData) != NULL) {
-		token = strtok_r(line, "	", &saveptr);
-		enemyId = atoi(token);
-		if (enemyId == id) {
-			enemy->id = enemyId;
-			token = strtok_r(NULL, "	", &saveptr);
-			enemy->name = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			enemy->description = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			enemy->sprite = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, atoi(token));
-			token = strtok_r(NULL, "	", &saveptr);
-			enemy->enemy = (EnemyType) atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			enemy->physique = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			enemy->reflex = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			enemy->lore = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			enemy->charisma = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			enemy->size = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			enemy->maxHealth = DiceMean((DiceType) enemy->size) * atoi(token) + enemy->physique * atoi(token);
-			enemy->health = enemy->maxHealth;
-			token = strtok_r(NULL, "	", &saveptr);
-			enemy->maxStress = atoi(token);
-			enemy->stress = enemy->maxStress;
-			token = strtok_r(NULL, "	", &saveptr);
-			enemy->weakness[0] = (DamageType) atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			enemy->weakness[1] = (DamageType) atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			enemy->resistances[0] = (DamageType) atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			enemy->resistances[1] = (DamageType) atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			enemy->inmunities[0] = (StatusType) atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			enemy->inmunities[1] = (StatusType) atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			enemy->multiattack = atoi(token);
-			// Loading techniques
-			token = strtok_r(NULL, "	", &saveptr);
-			tech = strtok_r(token, ",", &saveptr);
-			while (tech != NULL) {
-				enemy->tech[enemy->techAmount] = LoadTech(techData, atoi(tech));
-				tech = strtok_r(NULL, ",", &saveptr);
-				enemy->techAmount++;
-			}
-			enemy = NULL;
-			return enemyData;
-		}
+	// Loading techniques
+	token = strtok_r(tech, ",", &saveptr);
+	while (tech != NULL) {
+		enemy->tech[enemy->techAmount] = LoadTech(techData, atoi(token));
+		token = strtok_r(NULL, ",", &saveptr);
+		enemy->techAmount++;
 	}
-	return NULL;
+	enemy = NULL;
+	return enemyData;
 }
 void *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id, int position) {
 	if (id == 0) return NULL;
@@ -140,60 +142,63 @@ void *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *
 		token = strtok_r(line, "	", &saveptr);
 		playerId = atoi(token);
 		if (playerId == id) {
-			player->id = playerId;
-			token = strtok_r(NULL, "	", &saveptr);
-			player->name = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			player->surname = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			player->giftCurse = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			player->nomGuerre = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			player->description = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			player->sprite = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, atoi(token));
-			token = strtok_r(NULL, "	", &saveptr);
-			player->physique[0] = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			player->reflex[0] = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			player->lore[0] = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			player->charisma[0] = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			SetProficiency(playerData, (AttributeType) atoi(token));
-			token = strtok_r(NULL, "	", &saveptr);
-			SetProficiency(playerData, (AttributeType) atoi(token));
-			token = strtok_r(NULL, "	", &saveptr);
-			SetProficiency(playerData, (AttributeType) atoi(token));
-			token = strtok_r(NULL, "	", &saveptr);
-			player->hitDice = (DiceType) atoi(token);
-			player->maxHealth = DiceMean(player->hitDice) + player->physique[0];
-			player->health = player->maxHealth;
-			token = strtok_r(NULL, "	", &saveptr);
-			player->weakness = (DamageType) atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			player->resistance = (DamageType) atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			player->inmunity = (StatusType) atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			player->weapon = LoadWeapon(weaponData, atoi(token));
-			token = strtok_r(NULL, "	", &saveptr);
-			player->armor = LoadArmor(armorData, atoi(token));
-			token = strtok_r(NULL, "	", &saveptr);
-			player->charm = LoadCharm(charmData, atoi(token));
-			token = strtok_r(NULL, "	", &saveptr);
-			feature = strtok_r(token, ",", &saveptr);
-			while (feature != NULL) {
-				SetFeature(weaponData, charmData, techData, playerData, (Feature) atoi(feature));
-				feature = strtok_r(NULL, ",", &saveptr);
-			}
-			player = NULL;
-			return playerData;
+			
 		}
 	}
 	return player;
+}
+void *ParsePlayer(FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, char *line, int position) {
+	player->id = playerId;
+	token = strtok_r(NULL, "	", &saveptr);
+	player->name = atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	player->surname = atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	player->giftCurse = atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	player->nomGuerre = atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	player->description = atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	player->sprite = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, atoi(token));
+	token = strtok_r(NULL, "	", &saveptr);
+	player->physique[0] = atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	player->reflex[0] = atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	player->lore[0] = atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	player->charisma[0] = atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	SetProficiency(playerData, (AttributeType) atoi(token));
+	token = strtok_r(NULL, "	", &saveptr);
+	SetProficiency(playerData, (AttributeType) atoi(token));
+	token = strtok_r(NULL, "	", &saveptr);
+	SetProficiency(playerData, (AttributeType) atoi(token));
+	token = strtok_r(NULL, "	", &saveptr);
+	player->hitDice = (DiceType) atoi(token);
+	player->maxHealth = DiceMean(player->hitDice) + player->physique[0];
+	player->health = player->maxHealth;
+	token = strtok_r(NULL, "	", &saveptr);
+	player->weakness = (DamageType) atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	player->resistance = (DamageType) atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	player->inmunity = (StatusType) atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	player->weapon = LoadWeapon(weaponData, atoi(token));
+	token = strtok_r(NULL, "	", &saveptr);
+	player->armor = LoadArmor(armorData, atoi(token));
+	token = strtok_r(NULL, "	", &saveptr);
+	player->charm = LoadCharm(charmData, atoi(token));
+	token = strtok_r(NULL, "	", &saveptr);
+	feature = strtok_r(token, ",", &saveptr);
+	while (feature != NULL) {
+		SetFeature(weaponData, charmData, techData, playerData, (Feature) atoi(feature));
+		feature = strtok_r(NULL, ",", &saveptr);
+	}
+	player = NULL;
+	return playerData;
 }
 Technique *LoadTech(FILE *techData, int id) {
 	Technique tech;

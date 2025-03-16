@@ -479,7 +479,9 @@ struct Combat {
 void LoadEnemiesFile(FILE **file, const char *enemySheet);
 void LoadEnemiesOnCombat(FILE *file, FILE *enemyData, FILE *spriteData, FILE *techData, Combat *combat, int id);
 void *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id, int position);
+void *ParseEnemy(FILE *spriteData, FILE *techData, char *line, int position);
 void *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id, int position);
+void *ParsePlayer(FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, char *line, int position);
 void UnloadEntity(EntityType type, Combat *combat, int position);
 // Techniques
 Technique *LoadTech(FILE *techData, int id);

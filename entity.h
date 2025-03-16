@@ -3,23 +3,23 @@
 
 #include "graphic.h"
 
-typedef struct Player Player; //
-typedef struct Enemy Enemy;
-typedef struct Weapon Weapon;
-typedef struct Armor Armor;
-typedef struct Charm Charm;
+typedef struct Player Player; // Contiene toda la información relevante para un personaje jugable
+typedef struct Enemy Enemy; // Idem ac player, pero pa' los enemigos
+typedef struct Weapon Weapon; // Armas
+typedef struct Armor Armor; // Armaduras
+typedef struct Charm Charm; // Accesorios
 
 typedef struct Effect Effect; // Esqueleto para los efectos
-typedef struct FXSet FXSet;
-typedef struct FXDmg FXDmg; // Efecto de daño, el encargado de dañar entidades
-typedef struct FXSpawn FXSpawn; // Para generar entidades en el campo
-typedef struct FXStatus FXStatus;
-typedef struct Technique Technique;
+typedef struct FXSet FXSet; // Conjunto: Para agrupar múltiples efectos
+typedef struct FXDmg FXDmg; // Daño: Para alterar las variables vitales de las entidades
+typedef struct FXSpawn FXSpawn; // Generar: Para generar entidades en el campo
+typedef struct FXStatus FXStatus; // Estados: Para aplicar efectos de estados a las entidades
+typedef struct Technique Technique; // Técnicas, estas aplican estados durante el combate
 
-typedef struct Combat Combat;
-typedef enum EntityType EntityType;
-typedef enum DamageType DamageType;
-typedef enum EnemyType EnemyType;
+typedef struct Combat Combat; // Contiene toda la información relevante para los combates
+typedef enum EntityType EntityType; // Tipo de entidad, pueden haber jugadores o enemigos, pero esto podría cambiar en el futuro
+typedef enum DamageType DamageType; // Tipo de daño, existe para añadirle más sabor a las armas dentro y fuera del combate
+typedef enum EnemyType EnemyType; // jiji, diferentes tipos de enemigos para darle más sabor al juego en general u know?
 typedef enum EquipType EquipType;
 typedef enum DiceType DiceType;
 typedef enum TechniqueType TechniqueType;
@@ -36,32 +36,35 @@ enum EntityType {
 	ENTITY_ENEMY = 2,
 };
 enum DamageType {
-	DMG_NONE = 0,
-	DMG_SLASHING = 1,
-	DMG_BLUDGEONING = 2,
-	DMG_PIERCING = 3,
-	DMG_BALLISTIC = 4,
-	DMG_FIRE = 5,
-	DMG_ICE = 6,
-	DMG_ELECTRIC = 7,
-	DMG_ACID = 8,
-	DMG_PSYCHIC = 9,
-	DMG_HEALNATURE = 10,
-	DMG_HEALBLOODY = 11,
-	DMG_HEALPSY = 12,
-	DMG_HEALARMOR = 13,
-	DMG_HEALMEDICINE = 14,
-	DMG_TRUE = 15
+	DMG_NONE = 0, // Ningún daño, no debería utilizarse, creo que voy a programar las cosas para que si tienen este daño, no hagan nada
+	DMG_SLASHING = 1, // Daño cortante, ideal para espadas, cuchillos y garras
+	DMG_BLUDGEONING = 2, // Daño contundente, ideal para martillos, puñetazos y placajes
+	DMG_PIERCING = 3, // Daño perforante, ideal para lanzas, estoques y mordidas
+	DMG_BALLISTIC = 4, // Daño balístico, ideal para pistolas, mosquetes y cañones
+	DMG_FIRE = 5, // Daño de fuego, ideal para llamas, quemaduras e incendios
+	DMG_ICE = 6, // Daño de hielo, ideal para congelamientos, maldiciones y frío extremo
+	DMG_ELECTRIC = 7, // Daño de electricidad, ideal para rayos, centellas y descargas
+	DMG_ACID = 8, // Daño de ácido, ideal para vómitos, gases y devoramientos
+	DMG_PSYCHIC = 9, // Daño psíquico, ideal para quebrar voluntades, herir el alma y desgarrar mentes
+	DMG_HEALNATURE = 10, // Curación natural, ideal para ungüentos, vahos y grageas
+	DMG_HEALBLOODY = 11, // Curación sangrienta, ideal para curaciones relacionadas a las artes sangrientas
+	DMG_HEALPSY = 12, // Curación psíquica, ideal para curaciones relacionadas a los poderes psiónicos
+	DMG_HEALARMOR = 13, // Curación de armadura, ideal para pulidores de armaduras, servicios de reparación y herrería
+	DMG_HEALMEDICINE = 14, // Curación médica, ideal para cirugías, primeros auxilios y medicamentos
+	DMG_HEALLOVE = 15, // Curación amorosa, ideal para orgías, intimidad y vampirismo
+	DMG_HEALREST = 16, // Curación de descanso, ideal para banquetes, acampar de manera exitosa y comida de calidad
+	DMG_TRUE = 17 // Daño real, ignora todas las resistencias
 };
 enum EnemyType {
-	ENEMY_BEAST = 0,
-	ENEMY_DEMON = 1,
-	ENEMY_DRAGON = 2,
-	ENEMY_FASCIST = 3,
-	ENEMY_GRUDGE = 4,
-	ENEMY_MUTANT = 5,
-	ENEMY_NIGHTMARE = 6,
-	ENEMY_UNDEAD = 7
+	ENEMY_NONE = 0, // Ninguno, por si acaso
+	ENEMY_BEAST = 1, // Bestias: Criaturas de la naturaleza que intentan vivir sus vidas en esta nueva normalidad
+	ENEMY_DEMON = 2, // Demonios: 
+	ENEMY_DRAGON = 3, // Dragones:
+	ENEMY_FASCIST = 4, // Fascistas:
+	ENEMY_GRUDGE = 5, // Rencor: Espíritu que se niega a descansar y que habita ligado a algún objeto físico inanimado
+	ENEMY_MUTANT = 6, // Mutante: Criaturas cuyos espírirus han sido profanados, mutando más allá de lo natural
+	ENEMY_NIGHTMARE = 7, // Pesadilla:
+	ENEMY_UNDEAD = 8 // No-Muerto:
 };
 enum EquipType {
 	EQUIP_WEAPON = 0,
@@ -98,37 +101,37 @@ enum TechniqueType {
 	TECH_SORCERY = 9
 };
 enum EffectType { // Diferentes efectos para que las técnicas sean más completas
-	EFFECT_NONE = 0,
-	EFFECT_SET = 1,
-	EFFECT_DMG = 2,
-	EFFECT_STATUS = 3,
-	EFFECT_SPAWN = 4
+	EFFECT_NONE = 0, // Ninguno, ignorar
+	EFFECT_SET = 1, // Conjunto, para crear técnicas complejas
+	EFFECT_DMG = 2, // Daño, para disminuir o aumentar vitales
+	EFFECT_STATUS = 3, // Estado, para aplicar buffs y debuffs
+	EFFECT_SPAWN = 4, // Engendrar, para crear entidades en el campo de combate
 };
 enum AttributeType {	// ATTR % 6 for index
-	ATTR_PHYSIQUE = 0,
-	ATTR_ATHLETICS = 1,
-	ATTR_CONSTITUTION = 2,
-	ATTR_MEDICINE = 3,
-	ATTR_MELEE = 4,
-	ATTR_VIBES = 5,
-	ATTR_REFLEX = 6,
-	ATTR_ACCURACY = 7,
-	ATTR_ACROBATICS = 8,
-	ATTR_MISCHIEF = 9,
-	ATTR_PERCEPTION = 10,
-	ATTR_TOUCH = 11,
-	ATTR_LORE = 12,
-	ATTR_ARCANUM = 13,
-	ATTR_BEASTS = 14,
-	ATTR_DREAMS = 15,
-	ATTR_DUNGEONS = 16,
-	ATTR_NATURE = 17,
-	ATTR_CHARISMA = 18,
-	ATTR_ANIMA = 19,
-	ATTR_AUTHORITY = 20,
-	ATTR_DRAMA = 21,
-	ATTR_KINSHIP = 22,
-	ATTR_PASSION = 23
+	ATTR_PHYSIQUE = 0, // Físico
+	ATTR_ATHLETICS = 1, // Atletismo
+	ATTR_CONSTITUTION = 2, // Constitución
+	ATTR_MEDICINE = 3, // Medicina
+	ATTR_MELEE = 4, // Combate cuerpo a cuerpo
+	ATTR_VIBES = 5, // Vibras
+	ATTR_REFLEX = 6, // Reflejos
+	ATTR_ACCURACY = 7, // Precisión
+	ATTR_ACROBATICS = 8, // Acrobacias
+	ATTR_MISCHIEF = 9, // Travesuras
+	ATTR_PERCEPTION = 10, // Percepción
+	ATTR_TOUCH = 11, // Tacto
+	ATTR_LORE = 12, // Conocimiento
+	ATTR_ARCANUM = 13, // Arcano
+	ATTR_BEASTS = 14, // Bestias
+	ATTR_DREAMS = 15, // Sueños
+	ATTR_DUNGEONS = 16, // Mazmorras
+	ATTR_NATURE = 17, // Naturaleza
+	ATTR_CHARISMA = 18, // Carisma
+	ATTR_ANIMA = 19, // Alma
+	ATTR_AUTHORITY = 20, // Autoridad
+	ATTR_DRAMA = 21, // Drama
+	ATTR_KINSHIP = 22, // Afinidad
+	ATTR_PASSION = 23 // Pasión
 };
 enum StatusType {
 	STATUS_NONE = 0, // Sin efecto

@@ -50,7 +50,7 @@ struct SafeTexture {
 struct Message {
 	int *codepoints; // Array de números que representan en Unicode las letras del mensaje
 	int codepointAmount; // Cantidad de números dentro del array
-	int id;
+	int id; // ID del mensaje dentro del archivo de diálogos
 	Vector2 position;
 	Vector2 origin;
 	float fontSize;
@@ -68,12 +68,12 @@ struct Sprite {
 	DrawOrigin drawOrigin; // ¿Dar una posición predefinida al pivote?
 };
 struct Button {
-	Message *message;
-	Sprite *spriteOff;
-	Sprite *spriteOn;
-	Vector2 position;
-	float rotation;
-	bool selected;
+	Message *message; // Mensaje que puede, o no, tener un botón asociado
+	Sprite *spriteOff; // Sprite que se muestra cuando no se está seleccionando este botón
+	Sprite *spriteOn; // Sprite que se muestra cuando si se está seleccionando este botón
+	Vector2 position; // Posición del botón respecto a su pivote
+	float rotation; // Rotación en grados del botón respecto a su pivote
+	bool selected; // ¿Se está seleccionando este botón?
 };
 // Los animables son las piezas que componen una animación, son sprites que cambian en el tiempo
 struct Animable {
@@ -148,7 +148,7 @@ void LoadMessageIntoRegister(FILE *translationData,
 			     float spacing,
 			     bool useColor,
 			     Align align,
-			     int id); // To load a text line with the corresponding translation
+			     int id); // Para cargar la línea de texto con la traducción correspondiente
 Message *LoadSingleMessage(FILE *translationData, Font font, int id, Vector2 position, float fontSize, float spacing, bool useColor, Align align);
 void DrawMessage(Message **messages, int messageAmount, Font font, Color color);
 void DrawSingleMessage(Message *message, Font font, Color color);

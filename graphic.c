@@ -2,11 +2,11 @@
 
 void LoadAnimationIntoRegister(FILE *animsData, FILE *spriteData, Animation **anims, int *animAmount, int ANIM_SIZE, Vector2 position, float rotation, int id) {
 	if (animsData == NULL) {
-		TRACELOG(LOG_INFO, "ERROR: ANIMATION: Animation file is not open.\n");
+		TraceLog(LOG_INFO, "ERROR: ANIMATION: Animation file is not open.\n");
 		return;
 	}
 	if (spriteData == NULL) {
-		TRACELOG(LOG_INFO, "ERROR: SPRITE: Sprite file is not open.\n");
+		TraceLog(LOG_INFO, "ERROR: SPRITE: Sprite file is not open.\n");
 		return;
 	}
 	if ((*animAmount) < ANIM_SIZE) {
@@ -20,12 +20,12 @@ void LoadAnimationIntoRegister(FILE *animsData, FILE *spriteData, Animation **an
 }
 Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 	if (spriteData == NULL) {
-		TRACELOG(LOG_INFO, "ERROR: SPRITE: Sprite file is not open.\n");
+		TraceLog(LOG_INFO, "ERROR: SPRITE: Sprite file is not open.\n");
 		return NULL;
 	}
 	Animation *anim = (Animation *) malloc(sizeof(Animation));
 	if (anim == NULL) {
-		TRACELOG(LOG_INFO, "ERROR: ANIMATION: Animation load failed.\n");
+		TraceLog(LOG_INFO, "ERROR: ANIMATION: Animation load failed.\n");
 		return NULL;
 	}
 	anim->currentFrame = 0;
@@ -47,7 +47,7 @@ Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 		if (animId == id) {
 			anim->id = animId;
 			token = strtok_r(NULL, "	", &saveptr);
-			//TRACELOG(LOG_INFO, "INFO: ANIMATION: Loading %s.\n", token);
+			//TraceLog(LOG_INFO, "INFO: ANIMATION: Loading %s.\n", token);
 			token = strtok_r(NULL, "	", &saveptr);
 			anim->repeat = (bool) atoi(token);
 			token = strtok_r(NULL, "	", &saveptr);
@@ -62,7 +62,7 @@ Animation *LoadSingleAnimation(FILE *animsData, FILE *spriteData, int id) {
 			int i;
 			token = strtok_r(NULL, "	", &saveptr);
 			parents = strtok_r(token, ",", &saveptr);
-			//TRACELOG("Parents left %s\n", parents);
+			//TraceLog("Parents left %s\n", parents);
 
 			for (i = 0; (i < anim->animAmount) && (parents != NULL); i++) {
 				anim->anims[i]->parentId = atoi(parents);
@@ -158,8 +158,8 @@ Animable *ParseAnimable(FILE *spriteData, char *line, int deltaFrame) {
 
 	// Se carga el sprite con las variaciones iniciales del inicio
 	anim->sprite = LoadSingleSprite(spriteData, anim->offset, rotation, id);
-	anim->sprite.dest.width += scale.x;
-	anim->sprite.dest.height += scale.y;
+	anim->sprite->dest.width += scale.x;
+	anim->sprite->dest.height += scale.y;
 
 	return anim;
 }
@@ -368,7 +368,7 @@ void LoadSpriteFromFile(const char *spriteSheet, FILE *spriteData, Sprite **spri
 	char *saveptr;
 	while (fgets(line, sizeof(line), file) != NULL) {
 		if ((*spriteAmount) >= SPRITE_SIZE) {
-			TRACELOG(LOG_INFO, "WARNING: SPRITE: Sprites register full.\n");
+			TraceLog(LOG_INFO, "WARNING: SPRITE: Sprites register full.\n");
 			return;
 		}
 		Vector2 position = { 0 };
@@ -692,7 +692,7 @@ void UnloadMessageRegister(Message **messages, int *messageAmount) {
 	for (i = 0; i < (*messageAmount); i++)
 		UnloadSingleMessage(&messages[i]);
 	(*messageAmount) = 0;
-	//TRACELOG(LOG_INFO, "INFO: MESSAGE: Messages unloaded correctly\n");
+	//TraceLog(LOG_INFO, "INFO: MESSAGE: Messages unloaded correctly\n");
 }
 void UnloadSingleMessage(Message **message) {
 	if ((*message) == NULL) return;

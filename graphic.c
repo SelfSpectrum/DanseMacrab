@@ -295,11 +295,6 @@ void DrawAnimable(Animable *anim, Animable *parent, SafeTexture *textures, Color
 			origin,
 			anim->sprite->rotation + rotation,
 			color);
-
-	//printf("Origin - W: %f\tH: %f\tX: %f\tY: %f\n", anim->sprite->origin.width, anim->sprite->origin.height, anim->sprite->origin.x, anim->sprite->origin.y);
-	//printf("Dest - W: %f\tH: %f\tX: %f\tY: %f\n", dest.width, dest.height, anim->sprite->position.x, anim->sprite->position.y);
-	//printf("Position - X: %f\tY: %f\n", dest.x, dest.y);
-	//printf("Offset - X: %f\tY: %f\n", anim->offset.x, anim->offset.y);
 }
 void UnloadAnimationRegister(Animation **anims, int *animAmount) {
 	int i;
@@ -546,8 +541,8 @@ void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Font 
 			dest = (Rectangle) { 0, 0, 0, 0 };
 			dest.x = buttons[i]->position.x;
 			dest.y = buttons[i]->position.y;
-			dest.width = buttons[i]->spriteOn->width;
-			dest.height = buttons[i]->spriteOn->height;
+			dest.width = buttons[i]->spriteOn->dest.width;
+			dest.height = buttons[i]->spriteOn->dest.height;
 			DrawTexturePro(textures[buttons[i]->spriteOn->textureIndex].tex,
 					buttons[i]->spriteOn->source,
 					dest,
@@ -562,8 +557,8 @@ void DrawButton(Button **buttons, SafeTexture *textures, int buttonAmount, Font 
 			dest = (Rectangle) { 0, 0, 0, 0 };
 			dest.x = buttons[i]->position.x;
 			dest.y = buttons[i]->position.y;
-			dest.width = buttons[i]->spriteOff->width;
-			dest.height = buttons[i]->spriteOff->height;
+			dest.width = buttons[i]->spriteOff->dest.width;
+			dest.height = buttons[i]->spriteOff->dest.height;
 			DrawTexturePro(textures[buttons[i]->spriteOff->textureIndex].tex,
 					buttons[i]->spriteOff->origin,
 					buttons[i]->spriteOff->dest,

@@ -102,7 +102,7 @@ void *ParseEnemy(FILE *spriteData, FILE *techData, char *line, int position) {
 	enemy->inmunities[1] = (StatusType) stats[5];
 	// Loading techniques
 	token = strtok_r(tech, ",", &saveptr);
-	while (tech != NULL) {
+	while (token != NULL) {
 		enemy->tech[enemy->techAmount] = LoadTech(techData, atoi(token));
 		token = strtok_r(NULL, ",", &saveptr);
 		enemy->techAmount++;
@@ -125,7 +125,7 @@ void *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *
 }
 void *ParsePlayer(FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, char *line, int position) {
 	void *playerInfo = malloc(sizeof(Player));
-	if (playerData == NULL) {
+	if (playerInfo == NULL) {
 		TraceLog(LOG_ERROR, "ERROR: ENTITY: Player load failed.\n");
 		return NULL;
 	}
@@ -209,7 +209,7 @@ void *ParsePlayer(FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *cha
 	player->charm[0] = LoadCharm(charmData, equipment[2]);
 
 	token = strtok_r(feature, ",", &saveptr);
-	while (feature != NULL) {
+	while (token != NULL) {
 		SetFeature(weaponData, charmData, techData, playerData, (Feature) atoi(token));
 		token = strtok_r(NULL, ",", &saveptr);
 	}
@@ -306,7 +306,9 @@ Technique *LoadTech(FILE *techData, int id) {
 	}
 	return tech;
 }
-void PlayerLoadTech() {
+Technique *ParseTech(char *line) {
+}
+void PlayerLoadTech(FILE *techData, Player *player) {
 }
 void UseTech(Combat *combat, void *entity, EntityType side, Technique *tech, int *randomValue) {
 	int position;
@@ -344,9 +346,7 @@ void UseTech(Combat *combat, void *entity, EntityType side, Technique *tech, int
 		}
 	}
 }
-Equip LoadWeapon(FILE *weaponData, int id) {
-	Equip weapon;
-	weapon.weapon.type = EQUIP_WEAPON;
+Weapon *LoadWeapon(FILE *weaponData, int id) {
 	int weaponId;
 	char line[256];
 	char *token;
@@ -386,7 +386,11 @@ Equip LoadWeapon(FILE *weaponData, int id) {
 	}
 	return weapon;
 }
-Equip LoadArmor(FILE *armorData, int id) {
+Weapon *ParseWeapon(char *line) {
+	Weapon *weapon;
+	weapon.weapon.type = EQUIP_WEAPON;
+}
+Armor *LoadArmor(FILE *armorData, int id) {
 	Equip armor;
 	armor.armor.type = EQUIP_ARMOR;
 	int armorId;
@@ -428,7 +432,7 @@ Equip LoadArmor(FILE *armorData, int id) {
 	}
 	return armor;
 }
-Equip LoadCharm(FILE *charmData, int id) {
+Charm *LoadCharm(FILE *charmData, int id) {
 	Equip charm;
 	charm.charm.type = EQUIP_CHARM;
 	int charmId;
@@ -475,6 +479,16 @@ Equip LoadCharm(FILE *charmData, int id) {
 		}
 	}
 	return charm;
+}
+void PlayerEquip(Player *player, void *equipment) { 
+	Equipment *equip = (Equipment *) equipment;
+	switch (equip->type) {
+		case EQUIP_WEAPON:
+			Weapon *weapon = (Weapon *) equipment;
+			weapon = NULL;
+			break;	
+	}
+	equip = NULL;
 }
 void SetProficiency(void *playerData, AttributeType attr) {
 	Player *player = (Player *) playerData;

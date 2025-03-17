@@ -7,11 +7,12 @@
 
 typedef struct Player Player; // Contiene toda la información relevante para un personaje jugable
 typedef struct Enemy Enemy; // Idem ac player, pero pa' los enemigos
+typedef struct Equipment Equipment; // Estructura base para el equipo
 typedef struct Weapon Weapon; // Armas
 typedef struct Armor Armor; // Armaduras
 typedef struct Charm Charm; // Accesorios
 
-typedef struct Effect Effect; // Esqueleto para los efectos
+typedef struct Effect Effect; // Estructura base para los efectos
 typedef struct FXSet FXSet; // Conjunto: Para agrupar múltiples efectos
 typedef struct FXDmg FXDmg; // Daño: Para alterar las variables vitales de las entidades
 typedef struct FXSpawn FXSpawn; // Generar: Para generar entidades en el campo
@@ -21,6 +22,7 @@ typedef struct Technique Technique; // Técnicas, estas aplican estados durante 
 typedef struct Combat Combat; // Contiene toda la información relevante para los combates
 typedef enum EntityType EntityType; // Tipo de entidad, pueden haber jugadores o enemigos, pero esto podría cambiar en el futuro
 typedef enum DamageType DamageType; // Tipo de daño, existe para añadirle más sabor a las armas dentro y fuera del combate
+typedef enum MaterialType MaterialType; // Tipo de material, para reparar armaduras
 typedef enum EnemyType EnemyType; // jiji, diferentes tipos de enemigos para darle más sabor al juego en general u know?
 typedef enum EquipType EquipType;
 typedef enum DiceType DiceType;
@@ -30,7 +32,6 @@ typedef enum AttributeType AttributeType;
 typedef enum EconomyType EconomyType;
 typedef enum StatusType StatusType;
 typedef enum Feature Feature;
-typedef union Equip Equip;
 
 enum EntityType {
 	ENTITY_NONE = 0,
@@ -94,12 +95,12 @@ enum TechniqueType {
 	TECH_ATTACK = 0,
 	TECH_FEATURE = 1,
 	TECH_CHECK = 2,
-	TECH_TOME = 3,
-	TECH_SONG = 4,
-	TECH_DRACONIC = 5,
-	TECH_GOREART = 6,
-	TECH_DEMONHAND = 7,
-	TECH_SUMMON = 8,
+	TECH_TOME = 3, // Magia escrita en libros
+	TECH_SONG = 4, // Canciones o bailes
+	TECH_DRACONIC = 5, // Palabras de dragones que cambian el mundo
+	TECH_GOREART = 6, // Deja que tus entrañas pinten un hermoso cuadro
+	TECH_DEMONHAND = 7, // Resulta que la lengua de señas sí era útil
+	TECH_SUMMON = 8, // Llama a un ser paranormal para que te asista
 	TECH_SORCERY = 9
 };
 enum EffectType { // Diferentes efectos para que las técnicas sean más completas
@@ -266,14 +267,15 @@ enum Feature {
 	FEAT_DESPERATESTRIKES = 307
 };
 struct Effect {
-	void *fx;
 	EffectType type;
+	int id;
 };
 struct FXSet {
-	Effect fxs[FXSET_SIZE];
+	Effect base;
+	void *fxs[FXSET_SIZE];
 };
 struct FXDmg {
-	int id;
+	Effect base;
 	DamageType type; // Esto puede determinar el elemento del daño o la naturaleza de la curación
 	DiceType diceSide; // Cantidad de caras que puede tener el dado con el que se aplique el daño o sanación (D4, D6, D8, D10, D12, D20, D100)
 	int diceAmount; // Incrementa el número de tiradas que se realiza con los dados previamente mencionados
@@ -284,13 +286,13 @@ struct FXDmg {
 	int animId;
 };
 struct FXSpawn {
-	int id;
+	Effect base;
 	int entity;
 	int amount;
 	int animId;
 };
 struct FXStatus {
-	int id;
+	Effect base;
 	StatusType status;
 	int modPhy;
 	int modRef;
@@ -322,67 +324,42 @@ struct Technique {
 	// ¿Cosas gráficas?
 	int spriteId;
 };
-struct Weapon {
+struct Equipment {
 	EquipType type;
-	// Cosas importantes, lo que realmente hace que un arma sea única
 	int name;
 	int description;
 	int cost;
-	int attack;
-	int tech;
-	// Stats modifier
+	int tech; // ID de la técnica que el equipamiento otorga a un personaje al tenerlo equipado
+	// Modificadores de estadísticas
 	int physique;
 	int reflex;
 	int lore;
 	int charisma;
 	int hurtMultiplayer;
-	bool canUnequip;		// Useful for cursed weapons
+	bool canUnequip; // Util para equipo maldito
 	// Graphics
 	int spriteId;
+};
+struct Weapon { // Lo ideal es que todas las armas tengan una técnica de ataque, pero encima pueden tener una técnica extra que sirva para tener más opciones
+	Equipment base;
+	// Cosas importantes, lo que realmente hace que un arma sea única
+	int attack; // ID de la técnica asociada al ataque común del arma
+	int attackAlt; // ID de la técnica alternativa asociada al ataque común del arma
 };
 struct Armor {
-	EquipType type;
-	// Important stuff, what really makes the armor unique
-	int name;
-	int description;
-	int cost;
+	Equipment base;
+	// Cosas importantes, lo que realmente hace que una armadura sea única
+	MaterialType material; // Material de la armadura, necesario para poder repararla
+	int maxArmor;
 	int armor;
-	int tech;
-	// Stats modifier
-	int physique;
-	int reflex;
-	int lore;
-	int charisma;
-	int hurtMultiplayer;
-	bool canUnequip;		// Useful for cursed armors
-	// Graphics
-	int spriteId;
 };
 struct Charm {
-	EquipType type;
-	// Important stuff, what really makes the charm unique
-	int name;
-	int description;
-	int cost;
+	Equipment base;
+	// Cosas importantes, lo que realmente hace que un accesorio sea único
 	int health;
 	int armor;
 	int stress;
 	StatusType inmunity; // A qué efectos de estado el amuleto otorga inmunidad
-	int tech;
-	// Stat modifier
-	int physique;
-	int reflex;
-	int lore;
-	int charisma;
-	int hurtMultiplayer;
-	bool canUnequip; // Util para amuletos malditos
-	// Graphics
-	int spriteId;
-};
-union Equip {
-	Weapon weapon;
-	Armor armor;
-	Charm charm;
 };
 struct Player {
 	int id;
@@ -486,7 +463,8 @@ void *ParsePlayer(FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *cha
 void UnloadEntity(EntityType type, Combat *combat, int position);
 // Techniques
 Technique *LoadTech(FILE *techData, int id);
-void PlayerLoadTech(FILE *techData, void *player); //TODO
+Technique *ParseTech(char *line);
+void PlayerLoadTech(FILE *techData, Player *player); //TODO
 void UseTech(Combat *combat, void *entity, EntityType side, Technique *tech, int *randomValue);
 Effect LoadEffect();
 void *LoadEffectSet();
@@ -495,9 +473,13 @@ void *LoadEffectStatus();
 void *LoadEffectSpawn();
 
 // Equipment
-Equip LoadWeapon(FILE *weaponData, int id);
-Equip LoadArmor(FILE *armorData, int id);
-Equip LoadCharm(FILE *charmData, int id);
+Weapon *LoadWeapon(FILE *weaponData, int id);
+Weapon *ParseWeapon(char *line);
+Armor *LoadArmor(FILE *armorData, int id);
+Armor *ParseArmor(char *line);
+Charm *LoadCharm(FILE *charmData, int id);
+Charm *ParseCharm(char *line);
+void PlayerEquip(Player *player, void *equipment);
 void SetProficiency(void *player, AttributeType attr);
 void SetFeature(FILE *weaponData, FILE *charmData, FILE *tech, void *player, Feature feature);
 // Dice related

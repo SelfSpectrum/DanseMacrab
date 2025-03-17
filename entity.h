@@ -3,6 +3,7 @@
 
 #include "graphic.h"
 #define FXSET_SIZE 8
+#define ENEMYTECH_SIZE 10
 
 typedef struct Player Player; // Contiene toda la información relevante para un personaje jugable
 typedef struct Enemy Enemy; // Idem ac player, pero pa' los enemigos
@@ -409,17 +410,17 @@ struct Player {
 	int giftCurse;
 	int nomGuerre;
 	int description;
-	Equip weapon;
-	Equip armor;
-	Equip charm;
+	Equip *weapon[3];
+	Equip *armor;
+	Equip *charm[2];
 	DamageType weakness; // Debilidad ante ciertos tipos de daño, x2 de daño
 	DamageType resistance; // Resistencia ante ciertos tipos de daño, x0.5 de daño
 	StatusType inmunity; // Inmunidades ante efectos de estado
 	Feature features[16];
 	int featuresAmount;
-	void *tech[10];
+	Technique *tech[10];
 	int techAmount;
-	void *skill[10];
+	Technique *skill[10];
 	int skillAmount;
 	Sprite *sprite;
 	// INFO: ESPECIFICO DEL COMBATE
@@ -454,7 +455,7 @@ struct Enemy {
 	DamageType weakness[2]; // Debilidad ante ciertos tipos de daño, x2 de daño
 	DamageType resistances[2]; // Resistencia ante ciertos tipos de daño, x0.5 de daño
 	StatusType inmunities[2]; // Inmunidades ante efectos de estado
-	Technique tech[10];
+	Technique *tech[ENEMYTECH_SIZE];
 	int techAmount;
 	int multiattack;
 	Sprite *sprite;

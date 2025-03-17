@@ -42,21 +42,31 @@ void *LoadEnemy(FILE *enemyData, FILE *spriteData, FILE *techData, int id, int p
 	}
 	return NULL;
 }
-void *ParseEnemy(FILE *spriteData, FILE *techData, char *line, int enemyId, int position) {
+void *ParseEnemy(FILE *spriteData, FILE *techData, char *line, int position) {
 	void *enemyInfo = malloc(sizeof(Enemy));
-	Enemy *enemy = (Enemy *) enemyInfo;
-	if (enemy == NULL) {
+	if (enemyInfo == NULL) {
 		TraceLog(LOG_ERROR, "ERROR: ENTITY: Enemy load failed.\n");
 		return NULL;
 	}
 
+	Enemy *enemy = (Enemy *) enemyInfo;
 	int spriteId;
 	int enemyType;
 	int maxHealth;
 	int stats[6];
+	int i;
 	char tech[256];
 	char *token;
 	char *saveptr;
+
+	enemy->position = position;
+	enemy->phyBonus = 0;
+	enemy->refBonus = 0;
+	enemy->lorBonus = 0;
+	enemy->chaBonus = 0;
+	enemy->techAmount = 0;
+
+	for (i = 0; i < ENEMYTECH_SIZE; i++) enemy->tech[i] = NULL;
 
 	sscanf(line, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%[^\n]",
 			&enemy->id,
@@ -79,7 +89,7 @@ void *ParseEnemy(FILE *spriteData, FILE *techData, char *line, int enemyId, int 
 			&stats[5],
 			&enemy->multiattack,
 			tech);
-	enemy->sprite = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, atoi(spriteId));
+	enemy->sprite = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, spriteId);
 	enemy->enemy = (EnemyType) enemyType;
 	enemy->maxHealth = DiceMean((DiceType) enemy->size) * maxHealth + enemy->physique * maxHealth;
 	enemy->health = enemy->maxHealth;
@@ -90,12 +100,6 @@ void *ParseEnemy(FILE *spriteData, FILE *techData, char *line, int enemyId, int 
 	enemy->resistances[1] = (DamageType) stats[3];
 	enemy->inmunities[0] = (StatusType) stats[4];
 	enemy->inmunities[1] = (StatusType) stats[5];
-	enemy->position = position;
-	enemy->phyBonus = 0;
-	enemy->refBonus = 0;
-	enemy->lorBonus = 0;
-	enemy->chaBonus = 0;
-	enemy->techAmount = 0;
 	// Loading techniques
 	token = strtok_r(tech, ",", &saveptr);
 	while (tech != NULL) {
@@ -104,12 +108,38 @@ void *ParseEnemy(FILE *spriteData, FILE *techData, char *line, int enemyId, int 
 		enemy->techAmount++;
 	}
 	enemy = NULL;
-	return enemyData;
+	return enemyInfo;
 }
 void *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, int id, int position) {
 	if (id == 0) return NULL;
-	void *playerData = malloc(sizeof(Player));
-	Player *player = (Player *) playerData;
+
+	char line[512];
+	int playerId;
+	rewind(characterData);
+	fgets(line, sizeof(line), characterData);
+	while (fgets(line, sizeof(line), characterData)) {
+		sscanf(line, "%d", &playerId);
+		if (playerId == id) return ParsePlayer(spriteData, weaponData, armorData, charmData, techData, line, position);
+	}
+	return NULL;
+}
+void *ParsePlayer(FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, char *line, int position) {
+	void *playerInfo = malloc(sizeof(Player));
+	if (playerData == NULL) {
+		TraceLog(LOG_ERROR, "ERROR: ENTITY: Player load failed.\n");
+		return NULL;
+	}
+
+	Player *player = (Player *) playerInfo;
+	int spriteId;
+	int proficiency[3];
+	int hitDice;
+	int stats[3];
+	int equipment[3];
+	int i;
+	char *saveptr;
+	char *token;
+	char feature[128];
 
 	player->position = position;
 	player->maxStress = 3;
@@ -122,13 +152,6 @@ void *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *
 	player->chaBonus = 0;
 	player->featuresAmount = 0;
 	player->techAmount = 0;
-	player->equipedTechAmount = 0;
-	char line[512];
-	char *saveptr;
-	char *token;
-	char *feature;
-	int playerId;
-	int i;
 	for (i = 0; i < 6; i++) {
 		player->physique[i] = 0;
 		player->reflex[i] = 0;
@@ -136,69 +159,62 @@ void *LoadPlayer(FILE *characterData, FILE *spriteData, FILE *weaponData, FILE *
 		player->charisma[i] = 0;
 	}
 	for (i = 0; i < 8; i++) player->enemyBonus[i] = 0;
-	rewind(characterData);
-	fgets(line, sizeof(line), characterData);
-	while (fgets(line, sizeof(line), characterData)) {
-		token = strtok_r(line, "	", &saveptr);
-		playerId = atoi(token);
-		if (playerId == id) {
-			
-		}
+	for (i = 0; i < 10; i++) {
+		player->tech[i] = NULL;
+		player->skill[i] = NULL;
 	}
-	return player;
-}
-void *ParsePlayer(FILE *spriteData, FILE *weaponData, FILE *armorData, FILE *charmData, FILE *techData, char *line, int position) {
-	player->id = playerId;
-	token = strtok_r(NULL, "	", &saveptr);
-	player->name = atoi(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	player->surname = atoi(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	player->giftCurse = atoi(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	player->nomGuerre = atoi(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	player->description = atoi(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	player->sprite = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, atoi(token));
-	token = strtok_r(NULL, "	", &saveptr);
-	player->physique[0] = atoi(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	player->reflex[0] = atoi(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	player->lore[0] = atoi(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	player->charisma[0] = atoi(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	SetProficiency(playerData, (AttributeType) atoi(token));
-	token = strtok_r(NULL, "	", &saveptr);
-	SetProficiency(playerData, (AttributeType) atoi(token));
-	token = strtok_r(NULL, "	", &saveptr);
-	SetProficiency(playerData, (AttributeType) atoi(token));
-	token = strtok_r(NULL, "	", &saveptr);
-	player->hitDice = (DiceType) atoi(token);
+	player->weapon[0] = NULL;
+	player->weapon[1] = NULL;
+	player->weapon[2] = NULL;
+	player->armor[0] = NULL;
+	player->charm[0] = NULL;
+	player->charm[1] = NULL;
+
+	sscanf(line, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%[^\n]",
+			&player->id,
+			&player->name,
+			&player->surname,
+			&player->giftCurse,
+			&player->nomGuerre,
+			&player->description,
+			&spriteId,
+			&player->physique[0],
+			&player->reflex[0],
+			&player->lore[0],
+			&player->charisma[0],
+			&proficiency[0],
+			&proficiency[1],
+			&proficiency[2],
+			&hitDice,
+			&stats[0],
+			&stats[1],
+			&stats[2],
+			&equipment[0],
+			&equipment[1],
+			&equipment[2],
+			feature);
+
+	player->sprite = LoadSingleSprite(spriteData, (Vector2) { 0, 0 }, 0, spriteId);
+	SetProficiency(playerData, (AttributeType) &proficiency[0]);
+	SetProficiency(playerData, (AttributeType) &proficiency[1]);
+	SetProficiency(playerData, (AttributeType) &proficiency[2]);
+	player->hitDice = (DiceType) hitDice;
 	player->maxHealth = DiceMean(player->hitDice) + player->physique[0];
 	player->health = player->maxHealth;
-	token = strtok_r(NULL, "	", &saveptr);
-	player->weakness = (DamageType) atoi(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	player->resistance = (DamageType) atoi(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	player->inmunity = (StatusType) atoi(token);
-	token = strtok_r(NULL, "	", &saveptr);
-	player->weapon = LoadWeapon(weaponData, atoi(token));
-	token = strtok_r(NULL, "	", &saveptr);
-	player->armor = LoadArmor(armorData, atoi(token));
-	token = strtok_r(NULL, "	", &saveptr);
-	player->charm = LoadCharm(charmData, atoi(token));
-	token = strtok_r(NULL, "	", &saveptr);
-	feature = strtok_r(token, ",", &saveptr);
+	player->weakness = (DamageType) stats[0];
+	player->resistance = (DamageType) stats[1];
+	player->inmunity = (StatusType) stats[2];
+	player->weapon[0] = LoadWeapon(weaponData, equipment[0]);
+	player->armor = LoadArmor(armorData, equipment[1]);
+	player->charm[0] = LoadCharm(charmData, equipment[2]);
+
+	token = strtok_r(feature, ",", &saveptr);
 	while (feature != NULL) {
-		SetFeature(weaponData, charmData, techData, playerData, (Feature) atoi(feature));
-		feature = strtok_r(NULL, ",", &saveptr);
+		SetFeature(weaponData, charmData, techData, playerData, (Feature) atoi(token));
+		token = strtok_r(NULL, ",", &saveptr);
 	}
 	player = NULL;
-	return playerData;
+	return playerInfo;
 }
 Technique *LoadTech(FILE *techData, int id) {
 	Technique tech;

@@ -277,7 +277,6 @@ void DrawAnimable(Animable *anim, Animable *parent, SafeTexture *textures, Color
 	if (shader != anim->sprite->shader) return;
 
 	Rectangle dest = anim->sprite->dest;
-	Vector2 origin = anim->sprite->origin;
 	
 	//TODO: Test this thing if it actually works
 	dest.x += position.x;
@@ -286,13 +285,12 @@ void DrawAnimable(Animable *anim, Animable *parent, SafeTexture *textures, Color
 	if (parent != NULL) {
 		dest.x += parent->offset.x + parent->sprite->dest.x;
 		dest.y += parent->offset.y + parent->sprite->dest.y;
-		origin = Vector2Add(origin, parent->sprite->origin);
 	}
 
 	DrawTexturePro( textures[anim->sprite->textureIndex].tex,
 			anim->sprite->source,
 			dest,
-			origin,
+			anim->sprite->origin,
 			anim->sprite->rotation + rotation,
 			color);
 }

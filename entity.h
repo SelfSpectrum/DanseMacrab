@@ -326,6 +326,7 @@ struct Technique {
 };
 struct Equipment {
 	EquipType type;
+	int id;
 	int name;
 	int description;
 	int cost;

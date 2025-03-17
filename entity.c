@@ -349,46 +349,58 @@ void UseTech(Combat *combat, void *entity, EntityType side, Technique *tech, int
 Weapon *LoadWeapon(FILE *weaponData, int id) {
 	int weaponId;
 	char line[256];
-	char *token;
-	char *saveptr;
 	rewind(weaponData);
 	fgets(line, sizeof(line), weaponData);
 	while (fgets(line, sizeof(line), weaponData) != NULL) {
-		token = strtok_r(line, "	", &saveptr);
-		weaponId = atoi(token);
-		if (weaponId == id) {
-			token = strtok_r(NULL, "	", &saveptr);
-			weapon.weapon.name = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			weapon.weapon.description = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			weapon.weapon.spriteId = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			weapon.weapon.canUnequip = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			weapon.weapon.cost = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			weapon.weapon.attack = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			weapon.weapon.tech = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			weapon.weapon.physique = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			weapon.weapon.reflex = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			weapon.weapon.lore = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			weapon.weapon.charisma = atoi(token);
-			token = strtok_r(NULL, "	", &saveptr);
-			weapon.weapon.hurtMultiplayer = atoi(token);
-			return weapon;
-		}
+		sscanf(line, "%d", &weaponId);
+		if (weaponId == id) return ParseWeapon(line)
 	}
-	return weapon;
+	return NULL;
 }
 Weapon *ParseWeapon(char *line) {
-	Weapon *weapon;
-	weapon.weapon.type = EQUIP_WEAPON;
+	void *weaponInfo = malloc(sizeof(Weapon));
+	if (weaponInfo == NULL) {
+		TraceLog(LOG_ERROR, "ERROR: EQUIPMENT: Weapon load failed.\n");
+		return NULL;
+	}
+
+	Weapon *weapon = (Weapon *) weaponInfo;
+	int canUnequip;
+
+	sscanf(line, "",
+			&weapon->base.id,
+			&weapon->base.name,
+			&weapon->base.description,
+			&weapon->base.spriteId,
+			&canUnequip,
+			,
+			,
+			,
+			,
+			,
+			,
+			,
+			);
+
+	weapon->base.type = EQUIP_WEAPON;
+	weapon.weapon.canUnequip = (bool) canUnequip;
+	token = strtok_r(NULL, "	", &saveptr);
+	weapon.weapon.cost = atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	weapon.weapon.attack = atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	weapon.weapon.tech = atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	weapon.weapon.physique = atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	weapon.weapon.reflex = atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	weapon.weapon.lore = atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	weapon.weapon.charisma = atoi(token);
+	token = strtok_r(NULL, "	", &saveptr);
+	weapon.weapon.hurtMultiplayer = atoi(token);
+	return weapon;
 }
 Armor *LoadArmor(FILE *armorData, int id) {
 	Equip armor;

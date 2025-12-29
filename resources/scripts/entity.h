@@ -386,9 +386,9 @@ struct Player {
 	int giftCurse;
 	int nomGuerre;
 	int description;
-	Equip *weapon[3];
-	Equip *armor;
-	Equip *charm[2];
+	Weapon *weapon[3];
+	Armor *armor;
+	Charm *charm[2];
 	DamageType weakness; // Debilidad ante ciertos tipos de daño, x2 de daño
 	DamageType resistance; // Resistencia ante ciertos tipos de daño, x0.5 de daño
 	StatusType inmunity; // Inmunidades ante efectos de estado
@@ -446,7 +446,7 @@ struct Combat {
 	EntityType timelineType[10];
 	int timelineAmount;
 	int timelineOrder;
-	Equip inventory[20];
+	Equipment inventory[20];
 	int inventoryAmount;
 	int turn;
 };

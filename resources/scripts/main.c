@@ -8,12 +8,11 @@
 #define BUTTON_SIZE 8
 #define MSG_SIZE 8
 
-typedef enum GameState GameState;
 typedef struct StateData StateData;
 typedef struct PlayerPref PlayerPref;
 typedef struct SafeSound SafeSound;
 
-enum GameState {
+typedef enum GameState {
 	STATE_INIT, // Inicialziacion y carga del estado del juego y todos los archivos necesarios, si hay errores de archivos, se detectan aquí
 	STATE_SELECTLANGUAGE,
 	STATE_INITIALSCENE,
@@ -24,7 +23,7 @@ enum GameState {
 	STATE_ATTACKMENU,
 	STATE_FIGHTTIMELINE,
 	STATE_DEBUG
-};
+} GameState;
 struct SafeSound {
 	Sound sound;
 	bool init;
@@ -126,7 +125,7 @@ int main() {
 	//-------------------------------------------------------------
 	// Cámara y efecto de Píxeles Perfectos
 	//-------------------------------------------------------------
-	
+
 	const int virtualScreenWidth = 320;
 	const int virtualScreenHeight = 180;
 	const int screenWidth = 960;
@@ -144,7 +143,7 @@ int main() {
 	//-------------------------------------------------------------
 	// Inputs del juego y estado del mismo
 	//-------------------------------------------------------------
-	
+
 	StateData state; // Contiene el estado actual del juego
 
 	SetExitKey(KEY_NULL); // Desabilita la el cerrado del juego con la tecla ESC, el boton X aún funciona
@@ -156,7 +155,7 @@ int main() {
 	//-------------------------------------------------------------
 	// Audio y sonido
 	//-------------------------------------------------------------
-	
+
 	InitAudioDevice();
 
 	SetState(&state, STATE_INIT);
@@ -209,7 +208,7 @@ int main() {
 						DrawSprite(state.sprites, state.textures, state.spriteAmount, state.globalColor, true);
 						DrawButton(state.buttons, state.textures, state.buttonAmount, state.font, state.globalColor, true);
 					EndShaderMode();
-					
+
 					DrawMessage(state.messages, state.messageAmount, state.font, state.globalColor);
 				}
 			EndMode2D();
@@ -558,7 +557,7 @@ void SetState(StateData *state, GameState newState) {
 			SetHorizontalKeys(state);
 			state->extraAKey = KEY_A;
 			state->extraBKey = KEY_S;
-			
+
 			state->sfxPosition = 0;
 			state->animAmount = 0;
 			state->spriteAmount = 0;
@@ -576,7 +575,7 @@ void SetState(StateData *state, GameState newState) {
 			for (i = 0; i < ANIM_SIZE; i++) state->anims[i] = NULL;
 			for (i = 0; i < SPRITE_SIZE; i++) state->sprites[i]  = NULL;
 			for (i = 0; i < MSG_SIZE; i++) state->messages[i] = NULL;
-			
+
 			// Carga de todos los archivos/base de datos
 			state->animsData = NULL;
 			state->spriteData = NULL;
@@ -618,7 +617,7 @@ void SetState(StateData *state, GameState newState) {
 			state->textures[6].init = true;
 			state->textures[7].tex = LoadTexture("./resources/gfx/entities.png");
 			state->textures[7].init = true;
-			
+
 			state->music = LoadMusicStream("./resources/sfx/title.mp3");
 			state->music.looping = true;
 
@@ -696,7 +695,7 @@ void SetState(StateData *state, GameState newState) {
 			break;
 		case STATE_ATTACKMENU:
 			SetOnlyHorizontalKeys(state);
-			
+
 			break;
 		case STATE_FIGHTTIMELINE:
 			break;
@@ -824,7 +823,7 @@ void LoadFiles(StateData *state) {
 		state->techData = fopen("./resources/combat/techniques.tsv", "r");
 	else state->techData = NULL;
 
-	// Estableciendo el archivo para cargar la información de los personajes jugables 
+	// Estableciendo el archivo para cargar la información de los personajes jugables
 	if (state->characterData) {
 		fclose(state->characterData);
 		state->characterData = NULL;

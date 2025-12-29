@@ -1,0 +1,32 @@
+{
+	"rustyKatana": {
+		"id": 1,
+		"idNombre": 2000,
+		"idDescripcion": 2001,
+		"idSprite": 500,
+		"desequipable": true,
+		"coste": 1,
+		"idTecAtaque": 1,
+		"idTecEspecial": 2,
+		"modFis": 0,
+		"modRef": 0,
+		"modCon": 0,
+		"modCar": 0,
+		"multDanoRecibido": 1
+	},
+	"oldWoodenHammer": {
+		"id": 2,
+		"idNombre": 2002,
+		"idDescripcion": 2003,
+		"idSprite": 502,
+		"desequipable": true,
+		"coste": 10,
+		"idTecAtaque": 1,
+		"idTecEspecial": 2,
+		"modFis": 0,
+		"modRef": 0,
+		"modCon": 0,
+		"modCar": 0,
+		"multDanoRecibido": 1
+	}
+}

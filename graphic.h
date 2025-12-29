@@ -9,9 +9,6 @@
 #include <raylib.h>
 #include <raymath.h>
 
-typedef enum Language Language;
-typedef enum Align Align;
-typedef enum DrawOrigin DrawOrigin;
 typedef struct SafeTexture SafeTexture;
 typedef struct Message Message;
 typedef struct Sprite Sprite;
@@ -19,19 +16,19 @@ typedef struct Animable Animable;
 typedef struct Animation Animation;
 typedef struct Button Button;
 
-enum Language {
+typedef enum Language {
 	LANG_SPANISH = 0,
 	LANG_ENGLISH = 1,
 	LANG_RUSSIAN = 2
-};
+} Language;
 // Alineamiento del texto
-enum Align {
+typedef enum Align {
 	ALIGN_LEFT = 0,
 	ALIGN_CENTER = 1,
 	ALIGN_RIGHT = 2
-};
+} Align;
 // Posición del pivote en sprites u otras cuestiones gráficas
-enum DrawOrigin {
+typedef enum DrawOrigin {
 	DRAWORIGIN_NONE = 0,
 	DRAWORIGIN_TOPLEFT = 1,
 	DRAWORIGIN_TOP = 2,
@@ -42,7 +39,7 @@ enum DrawOrigin {
 	DRAWORIGIN_BOTTOMLEFT = 7,
 	DRAWORIGIN_BOTTOM = 8,
 	DRAWORIGIN_BOTTOMRIGHT = 9,
-};
+} DrawOrigin;
 struct SafeTexture {
 	Texture2D tex;
 	bool init;

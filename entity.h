@@ -20,25 +20,13 @@ typedef struct FXStatus FXStatus; // Estados: Para aplicar efectos de estados a 
 typedef struct Technique Technique; // Técnicas, estas aplican estados durante el combate
 
 typedef struct Combat Combat; // Contiene toda la información relevante para los combates
-typedef enum EntityType EntityType; // Tipo de entidad, pueden haber jugadores o enemigos, pero esto podría cambiar en el futuro
-typedef enum DamageType DamageType; // Tipo de daño, existe para añadirle más sabor a las armas dentro y fuera del combate
-typedef enum MaterialType MaterialType; // Tipo de material, para reparar armaduras
-typedef enum EnemyType EnemyType; // jiji, diferentes tipos de enemigos para darle más sabor al juego en general u know?
-typedef enum EquipType EquipType;
-typedef enum DiceType DiceType;
-typedef enum TechniqueType TechniqueType;
-typedef enum EffectType EffectType;
-typedef enum AttributeType AttributeType;
-typedef enum EconomyType EconomyType;
-typedef enum StatusType StatusType;
-typedef enum Feature Feature;
 
-enum EntityType {
+typedef enum EntityType { // Tipo de entidad, pueden haber jugadores o enemigos, pero esto podría cambiar en el futuro
 	ENTITY_NONE = 0,
 	ENTITY_PLAYER = 1,
 	ENTITY_ENEMY = 2,
-};
-enum DamageType {
+} EntityType;
+typedef enum DamageType { // Tipo de daño, existe para añadirle más sabor a las armas dentro y fuera del combate
 	DMG_NONE = 0, // Ningún daño, no debería utilizarse, creo que voy a programar las cosas para que si tienen este daño, no hagan nada
 	DMG_SLASHING = 1, // Daño cortante, ideal para espadas, cuchillos y garras
 	DMG_BLUDGEONING = 2, // Daño contundente, ideal para martillos, puñetazos y placajes
@@ -57,24 +45,34 @@ enum DamageType {
 	DMG_HEALLOVE = 15, // Curación amorosa, ideal para orgías, intimidad y vampirismo
 	DMG_HEALREST = 16, // Curación de descanso, ideal para banquetes, acampar de manera exitosa y comida de calidad
 	DMG_TRUE = 17 // Daño real, ignora todas las resistencias
-};
-enum EnemyType {
+} DamageType;
+typedef enum EnemyType { // jiji, diferentes tipos de enemigos para darle más sabor al juego en general u know?
 	ENEMY_NONE = 0, // Ninguno, por si acaso
 	ENEMY_BEAST = 1, // Bestias: Criaturas de la naturaleza que intentan vivir sus vidas en esta nueva normalidad
-	ENEMY_DEMON = 2, // Demonios: 
+	ENEMY_DEMON = 2, // Demonios:
 	ENEMY_DRAGON = 3, // Dragones:
 	ENEMY_FASCIST = 4, // Fascistas:
 	ENEMY_GRUDGE = 5, // Rencor: Espíritu que se niega a descansar y que habita ligado a algún objeto físico inanimado
 	ENEMY_MUTANT = 6, // Mutante: Criaturas cuyos espírirus han sido profanados, mutando más allá de lo natural
 	ENEMY_NIGHTMARE = 7, // Pesadilla:
 	ENEMY_UNDEAD = 8 // No-Muerto:
-};
-enum EquipType {
+} EnemyType;
+typedef enum EquipType {
 	EQUIP_WEAPON = 0,
 	EQUIP_ARMOR = 1,
 	EQUIP_CHARM = 2
-};
-enum DiceType {
+} EquipType;
+typedef enum MaterialType { // Tipo de material, para reparar armaduras
+	MATERIAL_NONE = 0,
+	MATERIAL_LEATHER = 1,
+	MATERIAL_CLOTH = 2,
+	MATERIAL_HIDE = 3,
+	MATERIAL_BRONZE = 4,
+	MATERIAL_IRON = 5,
+	MATERIAL_STEEL = 6,
+	MATERIAL_CHAIN = 7
+} MaterialType;
+typedef enum DiceType {
 	DICE_NONE = 0,
 	DICE_D100 = 7,
 	DICE_D20 = 6,
@@ -90,8 +88,8 @@ enum DiceType {
 	DICE_SAVED8 = 10,
 	DICE_SAVED6 = 9,
 	DICE_SAVED4 = 8
-};
-enum TechniqueType {
+} DiceType;
+typedef enum TechniqueType {
 	TECH_ATTACK = 0,
 	TECH_FEATURE = 1,
 	TECH_CHECK = 2,
@@ -102,15 +100,15 @@ enum TechniqueType {
 	TECH_DEMONHAND = 7, // Resulta que la lengua de señas sí era útil
 	TECH_SUMMON = 8, // Llama a un ser paranormal para que te asista
 	TECH_SORCERY = 9
-};
-enum EffectType { // Diferentes efectos para que las técnicas sean más completas
+} TechniqueType;
+typedef enum EffectType { // Diferentes efectos para que las técnicas sean más completas
 	EFFECT_NONE = 0, // Ninguno, ignorar
 	EFFECT_SET = 1, // Conjunto, para crear técnicas complejas
 	EFFECT_DMG = 2, // Daño, para disminuir o aumentar vitales
 	EFFECT_STATUS = 3, // Estado, para aplicar buffs y debuffs
 	EFFECT_SPAWN = 4, // Engendrar, para crear entidades en el campo de combate
-};
-enum AttributeType {	// ATTR % 6 for index
+} EffectType;
+typedef enum AttributeType {	// ATTR % 6 for index
 	ATTR_PHYSIQUE = 0, // Físico
 	ATTR_ATHLETICS = 1, // Atletismo
 	ATTR_CONSTITUTION = 2, // Constitución
@@ -135,8 +133,8 @@ enum AttributeType {	// ATTR % 6 for index
 	ATTR_DRAMA = 21, // Drama
 	ATTR_KINSHIP = 22, // Afinidad
 	ATTR_PASSION = 23 // Pasión
-};
-enum StatusType {
+} AttributeType;
+typedef enum StatusType {
 	STATUS_NONE = 0, // Sin efecto
 	STATUS_BLEED = 1, // Recibe daño cada vez que una entidad se mueve
 	STATUS_BLINDED = 2, // Debe superar un 12 en reflejos antes de atacar o hacer pruebas
@@ -163,14 +161,14 @@ enum StatusType {
 	STATUS_SCARRED = 23, // Recibe daño cortante adicional
 	STATUS_SLEEPING = 24, // Los ataques le impactan de manera automática, no puede tomar acciones
 	STATUS_SUFFOCATING = 25 // Recibe estrés
-};
-enum EconomyType {
+} StatusType;
+typedef enum EconomyType {
 	ECO_ACTION = 0,
 	ECO_BONUS = 1,
 	ECO_REACTION = 2,
 	ECO_OFF = 3
-};
-enum Feature {
+} EconomyType;
+typedef enum Feature {
 	// Berserker
 	FEAT_SELFSTEEM = 0,
 	FEAT_BEASTHORNS = 1,
@@ -265,7 +263,7 @@ enum Feature {
 	FEAT_HEARTBEAT = 305,
 	FEAT_HEALTHYINSIDES = 306,
 	FEAT_DESPERATESTRIKES = 307
-};
+} Feature;
 struct Effect {
 	EffectType type;
 	int id;

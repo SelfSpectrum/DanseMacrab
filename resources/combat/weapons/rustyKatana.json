@@ -1,0 +1,21 @@
+{
+	"id": 1,
+	"idName": 2000,
+	"idDesc": 2001,
+	"sprite": {
+		"texture": "abilities.png",
+		"x": 0,
+		"y": 0,
+		"width": 16,
+		"height": 16
+	},
+	"unequipable": true,
+	"cost": 1,
+	"idTechAtt": 1,
+	"idTechSpe": 2,
+	"modPhy": 0,
+	"modRef": 0,
+	"modCon": 0,
+	"modCha": 0,
+	"multDmgReceived": 1
+}
